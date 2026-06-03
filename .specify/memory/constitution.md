@@ -27,6 +27,10 @@ All code MUST follow SOLID principles. Class and method names self-documenting; 
 - **Version Control**: Git with feature branches
 - **Documentation**: Markdown, inline comments for complex logic
 
+### VI. JWT-Based Authentication (NON-NEGOTIABLE)
+
+All service endpoints MUST use JWT (JSON Web Token) for user validation and authentication. JWT tokens issued upon login contain user identity and permissions. Token validation MUST occur at the Controller/Middleware level before request reaches Services. Tokens MUST be validated on every request; refresh token rotation required for security. No session-based authentication in services. JWT payload MUST include: `user_id`, `role`, `permissions`, `exp` (expiration), `iat` (issued at). Tokens stored in HTTP-only cookies on frontend; transmission via Authorization Bearer header required.
+
 ## Architecture Guidelines
 
 ### Backend Module Structure
@@ -106,4 +110,4 @@ This Constitution supersedes all other development guides and practices. All con
 
 **Compliance Review**: Constitution review occurs at project milestones or when 3+ new features have been completed. Non-compliance issues logged as technical debt and tracked in sprint planning.
 
-**Version**: 1.0.0 | **Ratified**: 2026-06-02 | **Last Amended**: 2026-06-02
+**Version**: 1.1.0 | **Ratified**: 2026-06-02 | **Last Amended**: 2026-06-02
