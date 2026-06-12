@@ -76,7 +76,6 @@ app/Modules/Registration/
 ├── Contracts/
 │   ├── RegistrationServiceInterface.php
 │   └── EmailVerificationServiceInterface.php
-├── Migrations/
 ├── Notifications/
 │   └── EmailOtpNotification.php
 ├── Resources/

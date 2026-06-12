@@ -14,6 +14,9 @@ All code MUST respect strict layered architecture: Presentation Layer (Controlle
 
 Backend functionality organized by feature/module (e.g., `app/Modules/Sales`, `app/Modules/Inventory`, `app/Modules/Users`). Each module is self-contained with its own Controllers, Services, Models, Repositories, and Tests. Modules communicate via Services and Contracts—NOT direct database access. Shared code centralized in `app/Shared` or `app/Core`.
 
+> [!IMPORTANT]
+> **Services Directory Placement**: All domain and business logic services MUST reside inside their respective module's `Services/` directory (e.g., `app/Modules/[ModuleName]/Services/`). The legacy global `app/Services/` folder is deprecated and must not be used for new services. Existing services in `app/Services/` (such as `InventoryService`, `PurchaseService`, `SaleService`) are to be migrated into their respective modules under the `Services/` folder.
+
 ### IV. Clean Code & Best Practices
 
 All code MUST follow SOLID principles. Class and method names self-documenting; maximum method length 30 lines; cyclomatic complexity <10. Single Responsibility enforced; DRY (Don't Repeat Yourself) mandatory; no hardcoded values outside configuration. Code reviews required before merge; SonarQube or linting enforced.
@@ -42,7 +45,6 @@ app/Modules/[ModuleName]/
 ├── Models/
 ├── Repositories/
 ├── Contracts/Interfaces/
-├── Migrations/
 ├── Requests/
 ├── Resources/
 └── Tests/
@@ -59,7 +61,7 @@ Each module owns its data model and business logic. Modules expose functionality
 
 ### Database Schema
 
-- SQLite as development default; schema versioning via Laravel Migrations
+- SQLite as development default; schema versioning via Laravel Migrations. All migrations MUST reside in the global `database/migrations/` directory.
 - All tables namespaced by module (e.g., `sales_transactions`, `inventory_items`)
 - Foreign key constraints enforced; cascade delete policies explicit
 - Timestamps (`created_at`, `updated_at`) on all tables; soft deletes where applicable
@@ -110,4 +112,4 @@ This Constitution supersedes all other development guides and practices. All con
 
 **Compliance Review**: Constitution review occurs at project milestones or when 3+ new features have been completed. Non-compliance issues logged as technical debt and tracked in sprint planning.
 
-**Version**: 1.1.0 | **Ratified**: 2026-06-02 | **Last Amended**: 2026-06-02
+**Version**: 1.2.0 | **Ratified**: 2026-06-02 | **Last Amended**: 2026-06-06

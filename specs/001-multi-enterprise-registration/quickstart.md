@@ -12,3 +12,22 @@
 10. Validate login behavior to deny access until `email_verified_at` is set.
 11. Ensure responsive wizard behavior across mobile and desktop breakpoints.
 12. Run tests and iterate until all acceptance criteria pass.
+
+## Implementation Details
+
+### Directory Structure
+- **Module Source**: [app/Modules/Registration/](file:///c:/Users/RodrigoVera/Documents/Cursos/FlexDash/FlexDash.Laravel/app/Modules/Registration/)
+  - `Controllers/RegistrationController.php` (Wizard steps & OTP verification orchestrator)
+  - `Services/RegistrationService.php` (DB Transactions & Record Creation)
+  - `Services/EmailVerificationService.php` (OTP Lifecycle Management)
+  - `Requests/` (Step-by-step FormRequests)
+  - `Models/` (Company & EmailVerification models)
+  - `Notifications/EmailOtpNotification.php` (Verification email delivery notification)
+- **Views**: [resources/views/registration/](file:///c:/Users/RodrigoVera/Documents/Cursos/FlexDash/FlexDash.Laravel/resources/views/registration/)
+- **Routes**: [routes/registration.php](file:///c:/Users/RodrigoVera/Documents/Cursos/FlexDash/FlexDash.Laravel/routes/registration.php)
+
+### Running Verification Tests
+Execute the entire test suite locally to verify the registration and email verification flows:
+```bash
+php artisan test
+```
