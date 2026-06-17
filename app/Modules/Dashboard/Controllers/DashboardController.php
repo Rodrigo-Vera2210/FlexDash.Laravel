@@ -1,34 +1,48 @@
 <?php
 
 namespace App\Modules\Dashboard\Controllers;
-use App\Http\Controllers\Controller;
 
+use App\Http\Controllers\Controller;
+use App\Modules\Dashboard\Services\DashboardService;
 use App\Modules\Product\Models\Product;
-use App\Modules\Sale\Models\Sale;
-use App\Modules\Purchase\Models\Purchase;
 use App\Modules\Audit\Models\AuditLog;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function __construct(
+        private readonly DashboardService $service
+    ) {}
+
+    public function index(Request $request): View
     {
-        // KPI 1: Total vendido hoy
-        $totalVentasHoy = Sale::today()
-            ->whereNotIn('status', [Sale::STATUS_CANCELLED])
-            ->sum('total');
+        $month = (int) $request->query('month', now()->month);
+        $year  = (int) $request->query('year', now()->year);
 
-        // KPI 2: Cuentas por cobrar (ventas aprobadas con saldo pendiente)
-        $cuentasPorCobrar = Sale::approved()
-            ->pending()
-            ->sum('pending_balance');
+        // ── KPIs ─────────────────────────────────────────────────
+        $kpis = $this->service->getKpiSummary($month, $year);
 
-        // KPI 3: Cuentas por pagar (compras aprobadas con saldo pendiente)
-        $cuentasPorPagar = Purchase::approved()
-            ->pending()
-            ->sum('pending_balance');
+        // ── Revenue Chart Data ───────────────────────────────────
+        $revenueByDay   = $this->service->getRevenueByDay($month, $year);
+        $revenueByWeek  = $this->service->getRevenueByWeek($month, $year);
+        $revenueByMonth = $this->service->getRevenueByMonth($year);
 
-        // KPI 4: Productos con stock crítico
+        // ── Rankings ─────────────────────────────────────────────
+        $topSoldByQty         = $this->service->getTopSoldProductsByQuantity($month, $year);
+        $topSoldByRevenue     = $this->service->getTopSoldProductsByRevenue($month, $year);
+        $topPurchasedProducts = $this->service->getTopPurchasedProducts($month, $year);
+        $topCategories        = $this->service->getTopSellingCategories($month, $year);
+        $topCustomers         = $this->service->getTopFrequentCustomers($month, $year);
+
+        // ── Financial Summaries ──────────────────────────────────
+        $amountsByClient   = $this->service->getAmountsByClient($month, $year);
+        $amountsBySupplier = $this->service->getAmountsBySupplier($month, $year);
+
+        // ── Recent Data ──────────────────────────────────────────
+        $recentSales = $this->service->getRecentSales();
+
+        // ── Preserved: Low stock & audit log ─────────────────────
         $productosStockCritico = Product::lowStock()
             ->with('category')
             ->orderBy('stock')
@@ -37,59 +51,19 @@ class DashboardController extends Controller
 
         $totalStockCritico = Product::lowStock()->count();
 
-        // KPI 5: Ganancia estimada del mes
-        $gananciaEstimadaMes = DB::table('sale_details as sd')
-            ->join('sales as s', 's.id', '=', 'sd.sale_id')
-            ->join('products as p', 'p.id', '=', 'sd.product_id')
-            ->whereMonth('s.issue_date', now()->month)
-            ->whereYear('s.issue_date', now()->year)
-            ->whereNotIn('s.status', [Sale::STATUS_CANCELLED])
-            ->select(DB::raw('SUM((sd.unit_price - sd.cost_price) * sd.quantity) as ganancia'))
-            ->value('ganancia') ?? 0;
-
-        // KPI 6: Total comprado este mes
-        $totalComprasMes = Purchase::thisMonth()
-            ->whereNotIn('status', [Purchase::STATUS_CANCELLED])
-            ->sum('total');
-
-        // KPI 7: Ventas del mes
-        $totalVentasMes = Sale::thisMonth()
-            ->whereNotIn('status', [Sale::STATUS_CANCELLED])
-            ->sum('total');
-
-        // Últimas 5 ventas
-        $ultimasVentas = Sale::with('partner')
-            ->latest()
-            ->limit(5)
-            ->get();
-
-        // Últimas 5 actividades del audit log
         $ultimasActividades = AuditLog::with('user')
             ->latest()
             ->limit(8)
             ->get();
 
-        // Ventas de los últimos 30 días (para gráfico)
-        $ventasPorDia = Sale::whereNotIn('status', [Sale::STATUS_CANCELLED])
-            ->where('issue_date', '>=', now()->subDays(29)->startOfDay())
-            ->select(DB::raw('date(issue_date) as fecha'), DB::raw('SUM(total) as total'))
-            ->groupBy('fecha')
-            ->orderBy('fecha')
-            ->get()
-            ->keyBy('fecha');
-
         return view('dashboard.index', compact(
-            'totalVentasHoy',
-            'cuentasPorCobrar',
-            'cuentasPorPagar',
-            'productosStockCritico',
-            'totalStockCritico',
-            'gananciaEstimadaMes',
-            'totalComprasMes',
-            'totalVentasMes',
-            'ultimasVentas',
+            'month', 'year', 'kpis',
+            'revenueByDay', 'revenueByWeek', 'revenueByMonth',
+            'topSoldByQty', 'topSoldByRevenue',
+            'topPurchasedProducts', 'topCategories', 'topCustomers',
+            'amountsByClient', 'amountsBySupplier', 'recentSales',
+            'productosStockCritico', 'totalStockCritico',
             'ultimasActividades',
-            'ventasPorDia',
         ));
     }
 }
