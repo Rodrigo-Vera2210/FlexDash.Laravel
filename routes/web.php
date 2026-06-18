@@ -49,12 +49,14 @@ Route::middleware(['auth.jwt'])->group(function () {
     Route::post('sales/{sale}/approve',       [SaleController::class, 'approve'])->name('sales.approve');
     Route::post('sales/{sale}/cancel',        [SaleController::class, 'cancel'])->name('sales.cancel');
     Route::post('sales/{sale}/payments',      [SaleController::class, 'storePayment'])->name('sales.payments.store');
+    Route::get('sales/{sale}/pdf',            [SaleController::class, 'downloadPdf'])->name('sales.pdf');
 
     // Compras
     Route::resource('purchases', PurchaseController::class)->except(['edit', 'update', 'destroy']);
     Route::post('purchases/{purchase}/approve',  [PurchaseController::class, 'approve'])->name('purchases.approve');
     Route::post('purchases/{purchase}/cancel',   [PurchaseController::class, 'cancel'])->name('purchases.cancel');
     Route::post('purchases/{purchase}/payments', [PurchaseController::class, 'storePayment'])->name('purchases.payments.store');
+    Route::get('purchases/{purchase}/pdf',       [PurchaseController::class, 'downloadPdf'])->name('purchases.pdf');
 
     // Auditoría
     Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');
@@ -68,6 +70,7 @@ Route::middleware(['auth.jwt'])->group(function () {
         Route::get('/batch-payment', [App\Modules\CashBox\Controllers\CashBoxController::class, 'batchPaymentForm'])->name('batch-payment');
         Route::get('/pending-docs/{partner}', [App\Modules\CashBox\Controllers\CashBoxController::class, 'getPendingDocuments'])->name('pending-docs');
         Route::post('/batch-payment', [App\Modules\CashBox\Controllers\CashBoxController::class, 'storeBatchPayment'])->name('batch-payment.store');
+        Route::get('/{cashBox}/export', [App\Modules\CashBox\Controllers\CashBoxController::class, 'exportExcel'])->name('export');
     });
 });
 

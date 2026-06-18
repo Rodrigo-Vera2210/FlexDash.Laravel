@@ -179,4 +179,126 @@ class CashBoxController extends Controller
             return redirect()->back()->with('error', $e->getMessage())->withInput();
         }
     }
+
+    /**
+     * Export cash box transactions to a styled Excel sheet.
+     */
+    public function exportExcel(CashBox $cashBox)
+    {
+        $cashBox->load(['transactions.user', 'user']);
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Caja SESION ' . $cashBox->id);
+
+        // Header style (Navy Blue #0054a6, white text, bold, centered)
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+                'size' => 11,
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '0054A6'],
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ];
+
+        // Subheader style for Session metadata
+        $metaHeaderStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => '0054A6'],
+            ],
+        ];
+
+        // Metadata block at the top
+        $sheet->setCellValue('A1', 'REPORTE DE CAJA CHICA');
+        $sheet->mergeCells('A1:E1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('0054A6'));
+
+        $sheet->setCellValue('A3', 'Sesión ID:');
+        $sheet->setCellValue('B3', $cashBox->id);
+        $sheet->setCellValue('A4', 'Responsable:');
+        $sheet->setCellValue('B4', $cashBox->user->name ?? 'Sistema');
+        $sheet->setCellValue('A5', 'Estado:');
+        $sheet->setCellValue('B5', $cashBox->status);
+
+        $sheet->setCellValue('D3', 'Apertura:');
+        $sheet->setCellValue('E3', $cashBox->opened_at ? $cashBox->opened_at->format('d/m/Y H:i') : '—');
+        $sheet->setCellValue('D4', 'Cierre:');
+        $sheet->setCellValue('E4', $cashBox->closed_at ? $cashBox->closed_at->format('d/m/Y H:i') : '—');
+        $sheet->setCellValue('D5', 'Saldo Inicial:');
+        $sheet->setCellValue('E5', $cashBox->opening_balance);
+
+        $sheet->getStyle('A3:A5')->applyFromArray($metaHeaderStyle);
+        $sheet->getStyle('D3:D5')->applyFromArray($metaHeaderStyle);
+        $sheet->getStyle('E5')->getNumberFormat()->setFormatCode('"S/"#,##0.00');
+
+        // Table headers on row 7
+        $headers = ['Fecha/Hora', 'Concepto', 'Usuario', 'Tipo', 'Monto'];
+        foreach ($headers as $colIndex => $headerText) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
+            $sheet->setCellValue($colLetter . '7', $headerText);
+        }
+        $sheet->getStyle('A7:E7')->applyFromArray($headerStyle);
+        $sheet->getRowDimension(7)->setRowHeight(25);
+
+        // Populate transactions
+        $row = 8;
+        foreach ($cashBox->transactions as $tx) {
+            $sheet->setCellValue('A' . $row, $tx->created_at ? $tx->created_at->format('d/m/Y H:i') : '—');
+            $sheet->setCellValue('B' . $row, $tx->concept);
+            $sheet->setCellValue('C' . $row, $tx->user->name ?? 'Usuario');
+            $sheet->setCellValue('D' . $row, strtoupper($tx->type));
+            $sheet->setCellValue('E' . $row, $tx->amount);
+
+            // Styling per type
+            $typeColor = $tx->type === 'ingreso' ? '15803D' : 'B91C1C';
+            $sheet->getStyle('D' . $row)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color($typeColor));
+            $sheet->getStyle('E' . $row)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color($typeColor));
+            $sheet->getStyle('E' . $row)->getNumberFormat()->setFormatCode('"S/"#,##0.00');
+
+            $row++;
+        }
+
+        // Summary totals at the bottom
+        $sheet->setCellValue('D' . $row, 'Saldo Esperado:');
+        $sheet->getStyle('D' . $row)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('0054A6'));
+        $sheet->setCellValue('E' . $row, $cashBox->expected_closing_balance);
+        $sheet->getStyle('E' . $row)->getFont()->setBold(true);
+        $sheet->getStyle('E' . $row)->getNumberFormat()->setFormatCode('"S/"#,##0.00');
+
+        // Border styling for the table
+        $borderStyle = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => 'E2E8F0'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A7:E' . $row)->applyFromArray($borderStyle);
+
+        // Autofit columns
+        foreach (range(1, 5) as $colIndex) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
+            $sheet->getColumnDimension($colLetter)->setAutoSize(true);
+        }
+
+        // Return download stream
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $filename = "reporte-caja-chica-SESION-{$cashBox->id}.xlsx";
+
+        return response()->streamDownload(function() use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
 }

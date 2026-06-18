@@ -6,6 +6,9 @@
 
 @section('header-actions')
     @if ($activeBox)
+        <a href="{{ route('cashbox.export', $activeBox->id) }}" class="btn-secondary" style="color: #16A34A; border-color: rgba(22,163,74,0.15);">
+            <i class="fa-solid fa-file-excel"></i> Exportar Excel
+        </a>
         <a href="{{ route('cashbox.batch-payment') }}" class="btn-secondary">
             <i class="fa-solid fa-receipt"></i> Cobro/Pago Masivo
         </a>

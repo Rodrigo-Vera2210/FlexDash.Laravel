@@ -17,6 +17,10 @@
             </div>
 
             <div class="flex flex-wrap gap-2">
+                <a href="{{ route('purchases.pdf', $purchase) }}" class="btn-secondary">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    Descargar PDF
+                </a>
                 @if ($purchase->status === 'BORRADOR')
                     {{-- Botones para Borrador --}}
                     <form method="POST" action="{{ route('purchases.approve', $purchase) }}" class="inline"

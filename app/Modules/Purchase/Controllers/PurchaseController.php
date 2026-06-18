@@ -109,4 +109,11 @@ class PurchaseController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+
+    public function downloadPdf(Purchase $purchase)
+    {
+        $purchase->load(['partner', 'details.product', 'payments.paymentMethod', 'user', 'tax']);
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('purchases.pdf', compact('purchase'));
+        return $pdf->download("compra-{$purchase->series}-{$purchase->number}.pdf");
+    }
 }

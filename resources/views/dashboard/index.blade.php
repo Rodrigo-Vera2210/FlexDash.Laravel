@@ -397,9 +397,14 @@
                         @foreach($recentSales as $sale)
                         <tr>
                             <td class="table-cell">
-                                <a href="{{ route('sales.show', $sale->id) }}" class="font-bold font-mono text-xs transition-colors" style="color: var(--primary);">
-                                    {{ $sale->series }}-{{ $sale->number }}
-                                </a>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ route('sales.show', $sale->id) }}" class="font-bold font-mono text-xs transition-colors" style="color: var(--primary);">
+                                        {{ $sale->series }}-{{ $sale->number }}
+                                    </a>
+                                    <a href="{{ route('sales.pdf', $sale->id) }}" class="text-slate-400 hover:text-red-500 transition-colors" title="Descargar PDF">
+                                        <i class="fa-solid fa-file-pdf text-xs"></i>
+                                    </a>
+                                </div>
                             </td>
                             <td class="table-cell text-sm" style="color: var(--text-secondary);">{{ $sale->partner->display_name ?? '—' }}</td>
                             <td class="table-cell text-sm" style="color: var(--text-tertiary);">{{ $sale->details->count() }} items</td>

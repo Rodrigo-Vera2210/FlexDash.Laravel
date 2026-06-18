@@ -119,4 +119,11 @@ class SaleController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+
+    public function downloadPdf(Sale $sale)
+    {
+        $sale->load(['partner', 'details.product', 'payments.paymentMethod', 'user', 'tax']);
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('sales.pdf', compact('sale'));
+        return $pdf->download("factura-{$sale->series}-{$sale->number}.pdf");
+    }
 }

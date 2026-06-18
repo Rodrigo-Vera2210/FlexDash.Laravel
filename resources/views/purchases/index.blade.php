@@ -118,12 +118,19 @@
                                     @endswitch
                                 </td>
                                 <td class="table-cell text-center">
-                                    <a href="{{ route('purchases.show', $purchase) }}"
-                                        class="btn-outline py-1 px-3 justify-center gap-1.5 text-xs font-bold"
-                                        style="color: var(--primary);">
-                                        <i class="fa-solid fa-gear"></i>
-                                        Gestionar
-                                    </a>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <a href="{{ route('purchases.show', $purchase) }}"
+                                            class="btn-outline py-1 px-3 justify-center gap-1.5 text-xs font-bold"
+                                            style="color: var(--primary);">
+                                            <i class="fa-solid fa-gear"></i>
+                                            Gestionar
+                                        </a>
+                                        <a href="{{ route('purchases.pdf', $purchase) }}"
+                                            class="btn-primary py-1 px-3 justify-center text-xs font-bold"
+                                            title="Descargar PDF" style="background-color: var(--primary);">
+                                            <i class="fa-solid fa-file-pdf"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
