@@ -1,0 +1,274 @@
+@import "tailwindcss";
+
+/* ============================================================
+   FLEXDASH — Sistema de Diseño Visual (Spec 004)
+   Fuente: Plus Jakarta Sans + JetBrains Mono
+   Paleta: Teal #0A7EA5 | Naranja #E35205 | Azul Noche #0D1E36
+   ============================================================ */
+
+/* ----- Variables de Tema Claro (:root) ----- */
+:root {
+  --primary:          #0A7EA5;
+  --primary-dark:     #075f7d;
+  --primary-light:    rgba(10, 126, 165, 0.09);
+  --cta:              #E35205;
+  --cta-dark:         #b83f04;
+  --cta-light:        rgba(227, 82, 5, 0.10);
+  --accent-gold:      #F2A900;
+  --accent-gold-light:rgba(242, 169, 0, 0.12);
+  --accent-magenta:   #A41D6A;
+  --accent-magenta-light: rgba(164, 29, 106, 0.10);
+
+  --bg:               #F8F9FA;
+  --surface:          #FFFFFF;
+
+  --text-main:        #0D1E36;
+  --text-secondary:   #374151;
+  --text-tertiary:    #6B7280;
+
+  --border:           #E5E7EB;
+  --border-light:     #F3F4F6;
+
+  --success:          #16A34A;
+  --success-light:    rgba(22, 163, 74, 0.10);
+  --danger:           #DC2626;
+  --danger-light:     rgba(220, 38, 38, 0.10);
+  --warning:          #D97706;
+  --warning-light:    rgba(217, 119, 6, 0.12);
+  --info:             #0891B2;
+  --info-light:       rgba(8, 145, 178, 0.10);
+
+  --shadow-sm:  0 2px 4px rgba(13,30,54,0.04), 0 4px 12px rgba(13,30,54,0.06);
+  --shadow-md:  0 4px 12px rgba(13,30,54,0.08), 0 12px 24px rgba(13,30,54,0.12);
+}
+
+/* ----- Variables de Tema Oscuro (.dark) ----- */
+html.dark {
+  --primary:          #1aa3d4;
+  --primary-dark:     #0A7EA5;
+  --primary-light:    rgba(26, 163, 212, 0.13);
+  --cta:              #f06030;
+  --cta-dark:         #E35205;
+  --cta-light:        rgba(240, 96, 48, 0.13);
+
+  --bg:               #0D1E36;
+  --surface:          #162538;
+
+  --text-main:        #F9FAFB;
+  --text-secondary:   #D1D5DB;
+  --text-tertiary:    #9CA3AF;
+
+  --border:           #1e3352;
+  --border-light:     #172944;
+
+  --success:          #22C55E;
+  --success-light:    rgba(34, 197, 94, 0.13);
+  --danger:           #F87171;
+  --danger-light:     rgba(248, 113, 113, 0.13);
+  --warning:          #FBBF24;
+  --warning-light:    rgba(251, 191, 36, 0.13);
+  --info:             #22D3EE;
+  --info-light:       rgba(34, 211, 238, 0.13);
+
+  --shadow-sm:  0 4px 6px rgba(0,0,0,0.4);
+  --shadow-md:  0 10px 20px rgba(0,0,0,0.5);
+}
+
+/* ----- Base Body ----- */
+body {
+  background-color: var(--bg);
+  color: var(--text-secondary);
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ----- Tarjetas y Paneles ----- */
+.card-panel {
+  background-color: var(--surface);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  transition: box-shadow 0.3s ease;
+}
+.card-panel:hover { box-shadow: var(--shadow-md); }
+
+.stat-card {
+  background-color: var(--surface);
+  border-left: 4px solid var(--primary);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border-right: 1px solid var(--border-light);
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+/* ----- Botones ----- */
+.btn-primary {
+  background-color: var(--cta);
+  color: #FFFFFF;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover { background-color: var(--cta-dark); transform: translateY(-1px); }
+
+.btn-outline {
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  background: var(--surface);
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+.btn-outline:hover { background-color: var(--bg); border-color: var(--primary); color: var(--primary); }
+
+.btn-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+  color: var(--text-tertiary);
+  background: transparent;
+  cursor: pointer;
+  border: none;
+}
+.btn-icon:hover { background-color: var(--primary-light); color: var(--primary); }
+
+/* ----- Badges ----- */
+.badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.badge-success  { background-color: var(--success-light);  color: var(--success); }
+.badge-warning  { background-color: var(--warning-light);  color: var(--warning); }
+.badge-danger   { background-color: var(--danger-light);   color: var(--danger); }
+.badge-info     { background-color: var(--info-light);     color: var(--info); }
+.badge-gold     { background-color: var(--accent-gold-light); color: var(--accent-gold); }
+.badge-magenta  { background-color: var(--accent-magenta-light); color: var(--accent-magenta); }
+
+/* ----- Formularios ----- */
+.input-solid {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  border-radius: 6px;
+  padding: 8px 12px;
+  width: 100%;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+.input-solid:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+.input-solid::placeholder { color: var(--text-tertiary); }
+
+select.input-solid {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='none' stroke='%236B7280' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'></path></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 36px;
+}
+html.dark select.input-solid {
+  background-image: url("data:image/svg+xml;utf8,<svg fill='none' stroke='%239CA3AF' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'></path></svg>");
+}
+
+.input-icon-wrapper {
+  position: relative;
+  width: 100%;
+}
+.input-icon-wrapper i, .input-icon-wrapper svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+  font-size: 1rem;
+}
+.input-icon-wrapper .input-solid {
+  padding-left: 36px;
+}
+
+/* ----- Tablas ----- */
+.table-custom { width: 100%; border-collapse: separate; border-spacing: 0; }
+.table-custom th {
+  background-color: var(--bg);
+  color: var(--text-tertiary);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.table-custom td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  vertical-align: middle;
+  transition: background-color 0.2s;
+}
+.table-custom tbody tr:hover td { background-color: var(--primary-light); }
+.table-custom tbody tr:last-child td { border-bottom: none; }
+
+/* ----- Nav Items (sidebar) ----- */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 2px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+}
+.nav-item:hover { background-color: rgba(255,255,255,0.08); color: #fff; }
+.nav-item.active { background-color: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(10,126,165,0.3); }
+
+/* ----- Scrollbar ----- */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* ----- Transiciones de página ----- */
+.page-fade { animation: fadeInUp 0.35s ease forwards; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
