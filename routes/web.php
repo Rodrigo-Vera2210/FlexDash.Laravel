@@ -22,7 +22,12 @@ require __DIR__.'/registration.php';
 Route::get('/', fn() => redirect()->route('dashboard'));
 
 // ── Rutas autenticadas ────────────────────────────────────────────────
-Route::middleware(['auth.jwt'])->group(function () {
+Route::middleware(['auth.jwt', 'auth.admin_only'])->group(function () {
+
+    // Subscription suspended warning
+    Route::get('/subscription-suspended', function () {
+        return view('subscription.suspended');
+    })->name('subscription.suspended');
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -72,6 +77,10 @@ Route::middleware(['auth.jwt'])->group(function () {
         Route::post('/batch-payment', [App\Modules\CashBox\Controllers\CashBoxController::class, 'storeBatchPayment'])->name('batch-payment.store');
         Route::get('/{cashBox}/export', [App\Modules\CashBox\Controllers\CashBoxController::class, 'exportExcel'])->name('export');
     });
+
+    // Seller Management
+    Route::resource('sellers', \App\Modules\Seller\Controllers\SellerController::class)->only(['index', 'create', 'store']);
+    Route::post('sellers/{seller}/toggle', [\App\Modules\Seller\Controllers\SellerController::class, 'toggleStatus'])->name('sellers.toggle');
 });
 
 require __DIR__ . '/auth.php';
@@ -79,4 +88,16 @@ require __DIR__ . '/settings.php';
 
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ── Rutas de Superadministrador ───────────────────────────────────────
+Route::middleware(['auth.jwt', 'auth.superadmin'])
+    ->prefix('superadmin')
+    ->name('superadmin.')
+    ->group(function () {
+        Route::get('/dashboard', [\App\Modules\SuperAdmin\Controllers\SuperAdminController::class, 'dashboard'])->name('dashboard');
+        Route::post('/companies/{company}/approve', [\App\Modules\SuperAdmin\Controllers\SuperAdminController::class, 'approveCompany'])->name('companies.approve');
+        Route::post('/companies/{company}/reject', [\App\Modules\SuperAdmin\Controllers\SuperAdminController::class, 'rejectCompany'])->name('companies.reject');
+        Route::post('/companies/{company}/toggle-status', [\App\Modules\SuperAdmin\Controllers\SuperAdminController::class, 'toggleStatus'])->name('companies.toggle-status');
+        Route::post('/companies/{company}/change-plan', [\App\Modules\SuperAdmin\Controllers\SuperAdminController::class, 'changePlan'])->name('companies.change-plan');
+    });
 

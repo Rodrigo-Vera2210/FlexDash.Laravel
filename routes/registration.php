@@ -37,7 +37,11 @@ Route::controller(RegistrationController::class)
         Route::get('entity', 'showEntity')->name('entity.show');
         Route::post('entity', 'postEntity')->name('entity');
 
-        // Step 4 — Review & submit (creates Company + User in DB)
+        // Step 4 — Planes y Pago
+        Route::get('billing', 'showBilling')->name('billing.show');
+        Route::post('billing', 'postBilling')->name('billing');
+
+        // Step 5 — Review & submit (creates Company + User in DB)
         Route::get('review', 'showReview')->name('review.show');
         Route::post('review', 'postReview')->name('review');
 

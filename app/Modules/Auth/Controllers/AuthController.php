@@ -37,6 +37,15 @@ class AuthController extends Controller
                 ->with('status', 'Por favor, verifica tu correo electrónico con el código OTP enviado.');
         }
 
+        if ($user->company_id && $user->status !== 'active' && $user->role !== 'superadmin') {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'account_inactive'], 403);
+            }
+            return redirect()->back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Su cuenta está inactiva o pendiente de activación.']);
+        }
+
         // Issue a simple HS256 JWT (header.payload.signature) using APP_KEY.
         $header = json_encode(['alg' => 'HS256', 'typ' => 'JWT']);
 

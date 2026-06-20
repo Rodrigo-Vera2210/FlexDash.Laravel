@@ -8,14 +8,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Modules\Sale\Models\Sale;
 use App\Modules\Purchase\Models\Purchase;
 
+use App\Traits\BelongsToCompany;
+
 class Partner extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, BelongsToCompany;
 
     protected $fillable = [
         'type', 'business_name', 'trade_name', 'document_type',
         'document_number', 'email', 'phone', 'address', 'city',
-        'country', 'credit_limit', 'is_active', 'notes',
+        'country', 'credit_limit', 'is_active', 'notes', 'company_id',
     ];
 
     protected $casts = [

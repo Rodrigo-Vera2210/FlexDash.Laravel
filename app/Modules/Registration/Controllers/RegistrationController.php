@@ -10,6 +10,7 @@ use App\Modules\Registration\Requests\RegistrationEntityRequest;
 use App\Modules\Registration\Requests\ReviewRegistrationRequest;
 use App\Modules\Registration\Requests\SelectCompanyTypeRequest;
 use App\Modules\Registration\Requests\VerifyOtpRequest;
+use App\Modules\Registration\Requests\RegistrationBillingRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -96,11 +97,42 @@ class RegistrationController extends Controller
             array_merge($request->session()->get('wizard_data', []), $request->validated()),
         );
 
+        return redirect()->route('registration.billing.show');
+    }
+
+    // ---------------------------------------------------------------
+    // Step 4 — Planes y Pago
+    // ---------------------------------------------------------------
+
+    /** GET /register/billing */
+    public function showBilling(Request $request): RedirectResponse|View
+    {
+        if (! $request->session()->has('wizard_data.email')) {
+            return redirect()->route('registration.account.show');
+        }
+
+        return view('registration::wizard', ['step' => 'billing']);
+    }
+
+    /** POST /register/billing */
+    public function postBilling(RegistrationBillingRequest $request): RedirectResponse
+    {
+        $path = $request->file('payment_receipt')->store('receipts', 'public');
+
+        $data = $request->validated();
+        $data['payment_receipt_path'] = $path;
+        unset($data['payment_receipt']);
+
+        $request->session()->put(
+            'wizard_data',
+            array_merge($request->session()->get('wizard_data', []), $data),
+        );
+
         return redirect()->route('registration.review.show');
     }
 
     // ---------------------------------------------------------------
-    // Step 4 — Review & Submit
+    // Step 5 — Review & Submit
     // ---------------------------------------------------------------
 
     /** GET /register/review */
@@ -109,6 +141,10 @@ class RegistrationController extends Controller
         if (! $request->session()->has('wizard_data.company_name') &&
             ! $request->session()->has('wizard_data.full_name')) {
             return redirect()->route('registration.entity.show');
+        }
+
+        if (! $request->session()->has('wizard_data.subscription_plan')) {
+            return redirect()->route('registration.billing.show');
         }
 
         return view('registration::wizard', [

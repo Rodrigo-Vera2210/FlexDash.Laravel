@@ -66,6 +66,20 @@
             </span>
         </div>
 
+        {{-- Subscription details --}}
+        <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-gray-500">Plan Seleccionado</span>
+            <span class="font-medium text-gray-800">{{ ucfirst($data['subscription_plan'] ?? 'basic') }}</span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-gray-500">Banco de Origen</span>
+            <span class="font-medium text-gray-800">{{ $data['bank_origin'] ?? '—' }}</span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-gray-500">Cuenta de Destino</span>
+            <span class="font-medium text-gray-800 text-right max-w-xs">{{ $data['account_destination'] ?? '—' }}</span>
+        </div>
+
     </div>
 
     {{-- Consent --}}
@@ -88,7 +102,7 @@
 
     {{-- Actions --}}
     <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
-        <a href="{{ route('registration.entity.show') }}" class="text-brand-teal hover:underline text-sm font-medium">
+        <a href="{{ route('registration.billing.show') }}" class="text-brand-teal hover:underline text-sm font-medium">
             ← Editar Detalles
         </a>
         <button

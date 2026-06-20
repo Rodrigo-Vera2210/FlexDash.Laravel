@@ -66,7 +66,7 @@ class EmailVerificationService implements EmailVerificationServiceInterface
         }
 
         $user->email_verified_at = now();
-        $user->status = 'active';
+        $user->status = $user->company_id ? 'pending_activation' : 'active';
         $user->save();
 
         $this->emailVerificationRepository->deleteByUserId($user->id);

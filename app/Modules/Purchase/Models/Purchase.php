@@ -13,9 +13,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use App\Traits\BelongsToCompany;
+
 class Purchase extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, BelongsToCompany;
 
     const STATUS_DRAFT    = 'BORRADOR';
     const STATUS_APPROVED = 'APROBADO';
@@ -27,7 +29,7 @@ class Purchase extends Model
         'supplier_invoice', 'issue_date', 'due_date', 'status',
         'currency', 'subtotal', 'tax_amount', 'discount', 'total',
         'paid_amount', 'pending_balance', 'notes',
-        'approved_at', 'cancelled_at',
+        'approved_at', 'cancelled_at', 'company_id',
     ];
 
     protected $casts = [

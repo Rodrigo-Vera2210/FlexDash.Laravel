@@ -22,12 +22,16 @@ class Company extends Model
         'country',
         'legal_entity_flag',
         'natural_entity_flag',
+        'subscription_plan',
+        'subscription_status',
+        'subscription_expires_at',
     ];
 
     protected $casts = [
         'company_type'       => 'string',
         'legal_entity_flag'  => 'boolean',
         'natural_entity_flag' => 'boolean',
+        'subscription_expires_at' => 'datetime',
     ];
 
     public function users(): HasMany

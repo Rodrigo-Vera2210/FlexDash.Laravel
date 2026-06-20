@@ -91,6 +91,28 @@ class EnsureJwtAuthenticated
         $request->setUserResolver(fn() => $user);
         Auth::login($user);
 
+        // Check subscription status and user status for non-superadmins with a company
+        if ($user->role !== 'superadmin' && $user->company_id) {
+            $company = $user->company;
+            $isSuspended = !$company || in_array($company->subscription_status, ['pending_approval', 'inactive', 'rejected', 'suspended']);
+            if (!$isSuspended && !empty($company->subscription_expires_at) && now()->greaterThan($company->subscription_expires_at)) {
+                $isSuspended = true;
+            }
+            if ($user->status !== 'active') {
+                $isSuspended = true;
+            }
+
+            if ($isSuspended) {
+                // Allow logout or suspension view to load without redirection loop
+                if (!$request->routeIs('logout') && !$request->is('logout') && !$request->routeIs('subscription.suspended') && !$request->is('subscription-suspended')) {
+                    if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
+                        return response()->json(['error' => 'subscription_inactive'], 403);
+                    }
+                    return redirect()->route('subscription.suspended');
+                }
+            }
+        }
+
         return $next($request);
     }
 

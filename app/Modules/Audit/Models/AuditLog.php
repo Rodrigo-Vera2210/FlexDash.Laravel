@@ -7,13 +7,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use App\Models\User;
 
+use App\Traits\BelongsToCompany;
+
 class AuditLog extends Model
 {
+    use BelongsToCompany;
+
     public $timestamps = false;
 
     protected $fillable = [
         'user_id', 'event', 'auditable_type', 'auditable_id',
-        'old_values', 'new_values', 'ip_address', 'user_agent',
+        'old_values', 'new_values', 'ip_address', 'user_agent', 'company_id',
     ];
 
     protected $casts = [

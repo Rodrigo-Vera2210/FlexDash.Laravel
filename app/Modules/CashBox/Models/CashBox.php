@@ -7,14 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use App\Traits\BelongsToCompany;
+
 class CashBox extends Model
 {
+    use BelongsToCompany;
+
     protected $table = 'cash_boxes';
 
     protected $fillable = [
         'user_id', 'status', 'opening_balance',
         'expected_closing_balance', 'actual_closing_balance',
-        'difference', 'opened_at', 'closed_at', 'notes',
+        'difference', 'opened_at', 'closed_at', 'notes', 'company_id',
     ];
 
     protected $casts = [

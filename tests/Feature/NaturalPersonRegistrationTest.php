@@ -42,13 +42,13 @@ class NaturalPersonRegistrationTest extends TestCase
         return array_merge($this->validAccountData(), $this->validEntityData());
     }
 
-    public function test_it_stores_natural_person_entity_data_in_session_and_redirects_to_review(): void
+    public function test_it_stores_natural_person_entity_data_in_session_and_redirects_to_billing(): void
     {
         $response = $this
             ->withSession(['wizard_data' => $this->validAccountData()])
             ->post('/register/entity', $this->validEntityData());
 
-        $response->assertRedirect('/register/review');
+        $response->assertRedirect('/register/billing');
         $response->assertSessionHas('wizard_data');
     }
 

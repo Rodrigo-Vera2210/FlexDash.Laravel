@@ -45,6 +45,17 @@ class RegistrationService implements RegistrationServiceInterface
                 $this->buildUserData($data, $company->id)
             );
 
+            // Create subscription payment log
+            \App\Models\SubscriptionPayment::create([
+                'company_id'          => $company->id,
+                'plan'                => $data['subscription_plan'] ?? 'basic',
+                'bank_origin'         => $data['bank_origin'] ?? '',
+                'account_destination' => $data['account_destination'] ?? '',
+                'receipt_path'        => $data['payment_receipt_path'] ?? '',
+                'status'              => 'pending',
+                'type'                => 'signup',
+            ]);
+
             $this->emailVerificationService->generateOtp($user);
 
             Log::info("Pending registration created: User ID {$user->id} ({$user->email}), Company ID {$company->id} ({$company->name})");
@@ -64,17 +75,20 @@ class RegistrationService implements RegistrationServiceInterface
         $isLegal = $data['company_type'] === 'legal_entity';
 
         return [
-            'company_type'       => $data['company_type'],
-            'name'               => $isLegal ? $data['company_name'] : $data['full_name'],
-            'tax_id'             => $data['tax_id'] ?? null,
-            'legal_address'      => $data['legal_address'] ?? null,
-            'address'            => $data['address'] ?? null,
-            'city'               => $data['city'],
-            'state_province'     => $data['state_province'],
-            'postal_code'        => $data['postal_code'],
-            'country'            => $data['country'],
-            'legal_entity_flag'  => $isLegal,
-            'natural_entity_flag' => ! $isLegal,
+            'company_type'            => $data['company_type'],
+            'name'                    => $isLegal ? $data['company_name'] : $data['full_name'],
+            'tax_id'                  => $data['tax_id'] ?? null,
+            'legal_address'           => $data['legal_address'] ?? null,
+            'address'                 => $data['address'] ?? null,
+            'city'                    => $data['city'],
+            'state_province'          => $data['state_province'],
+            'postal_code'             => $data['postal_code'],
+            'country'                 => $data['country'],
+            'legal_entity_flag'       => $isLegal,
+            'natural_entity_flag'     => ! $isLegal,
+            'subscription_plan'       => $data['subscription_plan'] ?? 'basic',
+            'subscription_status'     => 'pending_approval',
+            'subscription_expires_at' => null,
         ];
     }
 

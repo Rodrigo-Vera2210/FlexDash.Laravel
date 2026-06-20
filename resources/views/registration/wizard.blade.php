@@ -145,16 +145,17 @@
 
 @php
     /* Map $step (string) → numeric position for sidebar highlights */
-    $stepMap   = ['type' => 1, 'account' => 2, 'entity' => 3, 'review' => 4, 'verify' => 5];
+    $stepMap   = ['type' => 1, 'account' => 2, 'entity' => 3, 'billing' => 4, 'review' => 5, 'verify' => 6];
     $stepNames = [
         1 => 'Tipo de Empresa',
         2 => 'Datos de Cuenta',
         3 => 'Datos de Entidad',
-        4 => 'Revisar y Confirmar',
-        5 => 'Verificación OTP',
+        4 => 'Planes y Pago',
+        5 => 'Revisar y Confirmar',
+        6 => 'Verificación OTP',
     ];
     $currentStep = $stepMap[$step ?? 'type'] ?? 1;
-    $totalSteps  = 5;
+    $totalSteps  = 6;
 @endphp
 
 <div class="w-full max-w-5xl flex flex-col md:flex-row overflow-hidden rounded-2xl"
@@ -217,7 +218,7 @@
         @if(session('status'))
             <div class="mb-4 p-4 rounded-xl text-sm font-medium"
                  style="background-color: rgba(10,126,165,0.08); border: 1px solid rgba(10,126,165,0.25); color: var(--primary);">
-                {{ session('status') }}
+                 {{ session('status') }}
             </div>
         @endif
 
@@ -245,7 +246,8 @@
                         2 => 'registration.type',
                         3 => 'registration.account.show',
                         4 => 'registration.entity.show',
-                        5 => 'registration.review.show',
+                        5 => 'registration.billing.show',
+                        6 => 'registration.review.show',
                     ];
                 @endphp
                 <a href="{{ route($backRoutes[$currentStep] ?? 'registration.type') }}"

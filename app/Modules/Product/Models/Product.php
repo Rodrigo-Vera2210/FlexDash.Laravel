@@ -11,14 +11,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use App\Traits\BelongsToCompany;
+
 class Product extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, BelongsToCompany;
 
     protected $fillable = [
         'category_id', 'tax_id', 'code', 'name', 'description',
         'unit', 'cost', 'price', 'stock', 'minimum_stock',
-        'image_path', 'is_active',
+        'image_path', 'is_active', 'company_id',
     ];
 
     protected $casts = [

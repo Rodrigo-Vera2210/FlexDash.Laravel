@@ -13,6 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'auth.jwt' => \App\Http\Middleware\EnsureJwtAuthenticated::class,
+            'auth.superadmin' => \App\Http\Middleware\EnsureSuperAdmin::class,
+            'auth.admin_only' => \App\Http\Middleware\RestrictSellerAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

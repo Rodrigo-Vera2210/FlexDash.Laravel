@@ -8,9 +8,13 @@ use App\Modules\Product\Models\Product;
 use App\Modules\Sale\Models\Sale;
 use App\Modules\Purchase\Models\Purchase;
 
+use App\Traits\BelongsToCompany;
+
 class Tax extends Model
 {
-    protected $fillable = ['name', 'code', 'rate', 'is_active'];
+    use BelongsToCompany;
+
+    protected $fillable = ['name', 'code', 'rate', 'is_active', 'company_id'];
 
     protected $casts = [
         'rate' => 'decimal:2',

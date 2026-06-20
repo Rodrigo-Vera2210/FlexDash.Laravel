@@ -121,14 +121,14 @@ class LegalEntityRegistrationTest extends TestCase
      *
      * Validates: FR-002 (legal entity form fields accepted)
      */
-    public function test_it_stores_entity_data_in_session_and_redirects_to_review_step(): void
+    public function test_it_stores_entity_data_in_session_and_redirects_to_billing_step(): void
     {
         // Pre-populate session as if account step already completed
         $response = $this
             ->withSession(['wizard_data' => $this->validAccountData()])
             ->post('/register/entity', $this->validEntityData());
 
-        $response->assertRedirect('/register/review');
+        $response->assertRedirect('/register/billing');
         $response->assertSessionHas('wizard_data');
     }
 
