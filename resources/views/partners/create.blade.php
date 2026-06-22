@@ -50,8 +50,8 @@
                                 <i class="fa-solid fa-address-card"></i>
                                 <select name="document_type" id="document_type" class="input-solid" required>
                                     <option value="RUC" {{ old('document_type') === 'RUC' ? 'selected' : '' }}>RUC</option>
-                                    <option value="DNI" {{ old('document_type') === 'DNI' ? 'selected' : '' }}>DNI</option>
-                                    <option value="CE" {{ old('document_type') === 'CE' ? 'selected' : '' }}>C.E.</option>
+                                    <option value="CI" {{ old('document_type') === 'CI' ? 'selected' : '' }}>Cédula (CI)</option>
+                                    <option value="Pasaporte" {{ old('document_type') === 'Pasaporte' ? 'selected' : '' }}>Pasaporte</option>
                                 </select>
                             </div>
                         </div>

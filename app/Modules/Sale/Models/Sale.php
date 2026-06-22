@@ -78,4 +78,9 @@ class Sale extends Model
     {
         return $this->morphMany(Payment::class, 'payable');
     }
+
+    public function electronicInvoice(): \Illuminate\Database\Eloquent\Relations\MorphOne
+    {
+        return $this->morphOne(\App\Modules\Billing\Models\ElectronicInvoice::class, 'invoicable');
+    }
 }

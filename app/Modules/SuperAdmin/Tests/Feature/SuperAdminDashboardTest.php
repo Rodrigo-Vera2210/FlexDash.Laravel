@@ -120,6 +120,14 @@ class SuperAdminDashboardTest extends TestCase
             'type'                => 'signup',
         ]);
 
+        $this->mock(\App\Modules\Billing\Services\ElectronicInvoicingService::class, function ($mock) use ($payment) {
+            $mock->shouldReceive('process')
+                ->with(\Mockery::on(function ($arg) use ($payment) {
+                    return $arg->id === $payment->id;
+                }))
+                ->andReturn(new \App\Modules\Billing\Models\ElectronicInvoice());
+        });
+
         $response = $this->from('/superadmin/dashboard')
             ->withCookie('token', $token)
             ->post("/superadmin/companies/{$company->id}/approve", [

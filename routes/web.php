@@ -89,6 +89,12 @@ Route::middleware(['auth.jwt', 'auth.admin_only'])->group(function () {
         Route::resource('sellers', \App\Modules\Seller\Controllers\SellerController::class)->only(['index', 'create', 'store']);
         Route::post('sellers/{seller}/toggle', [\App\Modules\Seller\Controllers\SellerController::class, 'toggleStatus'])->name('sellers.toggle');
     });
+
+    // Facturación Electrónica (Tenants)
+    Route::get('/billing/invoices', [\App\Modules\Billing\Controllers\InvoiceController::class, 'index'])->name('billing.invoices.index');
+    Route::post('/billing/invoices', [\App\Modules\Billing\Controllers\InvoiceController::class, 'store'])->name('billing.invoices.store');
+    Route::get('/billing/invoices/{id}/xml', [\App\Modules\Billing\Controllers\InvoiceController::class, 'downloadXml'])->name('billing.invoices.xml');
+    Route::get('/billing/invoices/{id}/pdf', [\App\Modules\Billing\Controllers\InvoiceController::class, 'downloadPdf'])->name('billing.invoices.pdf');
 });
 
 require __DIR__ . '/auth.php';
@@ -121,4 +127,11 @@ Route::middleware(['auth.jwt', 'auth.superadmin'])
 
         // Company Override Custom Limits
         Route::post('/companies/{company}/custom-limits', [\App\Modules\SuperAdmin\Controllers\SuperAdminController::class, 'updateCustomLimits'])->name('companies.custom-limits');
+
+        // Superadmin Electronic Billing Configuration
+        Route::get('/billing', [\App\Modules\Billing\Controllers\SuperAdminBillingController::class, 'index'])->name('billing.index');
+        Route::post('/billing', [\App\Modules\Billing\Controllers\SuperAdminBillingController::class, 'store'])->name('billing.store');
+        Route::post('/billing/certificates/{certificate}/default', [\App\Modules\Billing\Controllers\SuperAdminBillingController::class, 'setDefault'])->name('billing.certificates.default');
+        Route::delete('/billing/certificates/{certificate}', [\App\Modules\Billing\Controllers\SuperAdminBillingController::class, 'destroyCertificate'])->name('billing.certificates.destroy');
+        Route::post('/payments/{payment}/invoice', [\App\Modules\Billing\Controllers\SuperAdminBillingController::class, 'invoicePayment'])->name('payments.invoice');
     });

@@ -21,6 +21,47 @@
                     <i class="fa-solid fa-file-pdf"></i>
                     Descargar PDF
                 </a>
+                
+                @if (auth()->user()->company?->has_electronic_billing)
+                    @if ($sale->status === 'PAGADO')
+                        @if (!$sale->electronicInvoice || $sale->electronicInvoice->status !== 'authorized')
+                            @php
+                                $companyCerts = auth()->user()->company->companyCertificates;
+                            @endphp
+                            <form method="POST" action="{{ route('billing.invoices.store') }}" class="inline-flex items-center gap-2" onsubmit="return confirm('¿Deseas emitir y autorizar la factura electrónica ante el SRI?')">
+                                @csrf
+                                <input type="hidden" name="sale_id" value="{{ $sale->id }}">
+                                
+                                @if ($companyCerts->count() > 1)
+                                    <div class="inline-block" style="margin-right: 8px;">
+                                        <select name="certificate_id" class="input-solid" style="padding: 6px 12px; font-size: 13px; line-height: 1.5; width: auto; max-width: 250px;">
+                                            @foreach ($companyCerts as $cert)
+                                                <option value="{{ $cert->id }}" {{ $cert->is_default ? 'selected' : '' }}>
+                                                    {{ $cert->owner_name }} ({{ $cert->ruc ?: $cert->cedula }}) {{ $cert->is_default ? '[Predeterminada]' : '' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @endif
+
+                                <button type="submit" class="btn-primary" style="background-color: var(--primary);">
+                                    <i class="fa-solid fa-file-signature"></i>
+                                    Emitir Factura Electrónica
+                                </button>
+                            </form>
+                        @else
+                            <a href="{{ route('billing.invoices.xml', $sale->electronicInvoice->id) }}" class="btn-secondary" title="Descargar XML Autorizado">
+                                <i class="fa-solid fa-file-code text-teal-600"></i>
+                                XML SRI
+                            </a>
+                            <a href="{{ route('billing.invoices.pdf', $sale->electronicInvoice->id) }}" class="btn-secondary" title="Descargar PDF RIDE">
+                                <i class="fa-solid fa-file-pdf text-rose-600"></i>
+                                PDF RIDE
+                            </a>
+                        @endif
+                    @endif
+                @endif
+
                 @if ($sale->status === 'BORRADOR')
                     {{-- Botones para Borrador --}}
                     <form method="POST" action="{{ route('sales.approve', $sale) }}" class="inline"

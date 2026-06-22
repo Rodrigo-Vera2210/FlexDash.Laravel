@@ -15,6 +15,9 @@ class Plan extends Model
         'max_monthly_transactions',
         'modules',
         'is_active',
+        'has_electronic_billing',
+        'monthly_invoice_limit',
+        'max_certificates',
     ];
 
     protected $casts = [
@@ -24,5 +27,8 @@ class Plan extends Model
         'max_monthly_transactions' => 'integer',
         'modules' => 'array',
         'is_active' => 'boolean',
+        'has_electronic_billing' => 'boolean',
+        'monthly_invoice_limit' => 'integer',
+        'max_certificates' => 'integer',
     ];
 }

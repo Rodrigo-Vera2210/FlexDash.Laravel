@@ -115,6 +115,17 @@ class SuperAdminService
                 ['status' => 'approved']
             );
 
+            // Trigger platform billing for subscription automatically
+            try {
+                $invoicingService = app(\App\Modules\Billing\Services\ElectronicInvoicingService::class);
+                $invoicingService->process($payment);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning("No se pudo auto-generar la factura de suscripción para el pago #{$payment->id}: " . $e->getMessage());
+                if (app()->environment('testing')) {
+                    throw $e;
+                }
+            }
+
             // Audit company activation
             \App\Modules\Audit\Models\AuditLog::record(
                 'subscription.activate_company',

@@ -86,26 +86,26 @@
                     </div>
 
                     {{-- Actions for pending payments --}}
-                    <template x-if="payment.status === 'pending'">
+                    <div x-show="payment && payment.status === 'pending'">
                         <div class="flex items-center gap-3 w-full bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                            <form :action="payment.approve_url" method="POST" class="flex-1">
-                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                <input type="hidden" name="payment_id" :value="payment.id">
+                            <form :action="payment ? payment.approve_url : ''" method="POST" class="flex-1">
+                                @csrf
+                                <input type="hidden" name="payment_id" :value="payment ? payment.id : ''">
                                 <button type="submit" class="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs transition-colors">
                                     <i class="fa-solid fa-check mr-1"></i> Aprobar Pago
                                 </button>
                             </form>
-                            <form :action="payment.reject_url" method="POST" class="flex-1"
+                            <form :action="payment ? payment.reject_url : ''" method="POST" class="flex-1"
                                   onsubmit="const reason = prompt('Motivo de rechazo del pago:'); if (reason === null || reason.trim() === '') return false; this.reason.value = reason;">
-                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                <input type="hidden" name="payment_id" :value="payment.id">
+                                @csrf
+                                <input type="hidden" name="payment_id" :value="payment ? payment.id : ''">
                                 <input type="hidden" name="reason" value="">
                                 <button type="submit" class="w-full py-2.5 px-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg text-xs transition-colors">
                                     <i class="fa-solid fa-xmark mr-1"></i> Rechazar
                                 </button>
                             </form>
                         </div>
-                    </template>
+                    </div>
                 </div>
 
                 {{-- Right: Receipt Image --}}

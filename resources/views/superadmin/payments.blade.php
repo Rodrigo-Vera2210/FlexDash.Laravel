@@ -182,6 +182,24 @@
                                             </button>
                                         </form>
                                     </div>
+                                @elseif($payment->status === 'approved')
+                                    @if($payment->electronicInvoice && $payment->electronicInvoice->status === 'authorized')
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            <a href="{{ route('billing.invoices.xml', $payment->electronicInvoice->id) }}" class="btn-secondary !p-1.5 text-xs" title="Descargar XML SRI">
+                                                <i class="fa-solid fa-file-code text-teal-600"></i>
+                                            </a>
+                                            <a href="{{ route('billing.invoices.pdf', $payment->electronicInvoice->id) }}" class="btn-secondary !p-1.5 text-xs" title="Descargar PDF RIDE">
+                                                <i class="fa-solid fa-file-pdf text-rose-600"></i>
+                                            </a>
+                                        </div>
+                                    @else
+                                        <form action="{{ route('superadmin.payments.invoice', $payment->id) }}" method="POST" class="inline" onsubmit="return confirm('¿Deseas emitir la factura electrónica para esta suscripción?')">
+                                            @csrf
+                                            <button type="submit" class="btn-primary text-xs py-1 px-3" style="background-color: var(--primary);">
+                                                Emitir Factura
+                                            </button>
+                                        </form>
+                                    @endif
                                 @else
                                     <span class="text-xs text-slate-400">—</span>
                                 @endif

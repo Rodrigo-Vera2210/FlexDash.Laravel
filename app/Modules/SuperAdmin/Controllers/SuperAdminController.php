@@ -112,7 +112,7 @@ class SuperAdminController extends Controller
         $status = $request->query('status');
         $plan = $request->query('plan');
 
-        $query = \App\Models\SubscriptionPayment::with('company')->latest();
+        $query = \App\Models\SubscriptionPayment::with(['company', 'electronicInvoice'])->latest();
 
         if ($status) {
             $query->where('status', $status);

@@ -30,6 +30,8 @@ class Company extends Model
         'max_monthly_transactions',
         'max_admins',
         'max_sellers',
+        'has_electronic_billing',
+        'monthly_invoice_limit',
     ];
 
     protected $casts = [
@@ -90,5 +92,36 @@ class Company extends Model
     public function getMaxMonthlyTransactionsAttribute($value)
     {
         return $value ?? ($this->plan ? $this->plan->max_monthly_transactions : 100);
+    }
+
+    public function getHasElectronicBillingAttribute($value)
+    {
+        if (is_null($value)) {
+            return $this->plan ? (bool)$this->plan->has_electronic_billing : false;
+        }
+        return (bool)$value;
+    }
+
+    public function getMonthlyInvoiceLimitAttribute($value)
+    {
+        if (is_null($value)) {
+            return $this->plan ? (int)$this->plan->monthly_invoice_limit : 0;
+        }
+        return (int)$value;
+    }
+
+    public function companyCertificates(): HasMany
+    {
+        return $this->hasMany(\App\Modules\Billing\Models\CompanyCertificate::class, 'company_id');
+    }
+
+    public function getMaxCertificatesAttribute($value)
+    {
+        return $value ?? ($this->plan ? $this->plan->max_certificates : 1);
+    }
+
+    public function canUploadCertificate(): bool
+    {
+        return $this->companyCertificates()->count() < $this->max_certificates;
     }
 }

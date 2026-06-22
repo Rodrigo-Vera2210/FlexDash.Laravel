@@ -25,4 +25,9 @@ class SubscriptionPayment extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    public function electronicInvoice(): \Illuminate\Database\Eloquent\Relations\MorphOne
+    {
+        return $this->morphOne(\App\Modules\Billing\Models\ElectronicInvoice::class, 'invoicable');
+    }
 }

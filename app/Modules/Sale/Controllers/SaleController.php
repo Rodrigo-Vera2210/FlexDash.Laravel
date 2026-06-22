@@ -95,7 +95,7 @@ class SaleController extends Controller
 
     public function show(Sale $sale)
     {
-        $sale->load(['partner', 'details.product', 'payments.paymentMethod', 'user', 'tax']);
+        $sale->load(['partner', 'details.product', 'payments.paymentMethod', 'user', 'tax', 'electronicInvoice']);
         $paymentMethods = PaymentMethod::where('is_active', true)->get();
         return view('sales.show', compact('sale', 'paymentMethods'));
     }

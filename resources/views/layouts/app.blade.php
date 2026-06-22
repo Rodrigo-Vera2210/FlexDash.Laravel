@@ -417,6 +417,12 @@
                     <span>Administración de Planes</span>
                 </a>
 
+                <a href="{{ route('superadmin.billing.index') }}"
+                   class="nav-item {{ request()->routeIs('superadmin.billing.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-rose-400"></i>
+                    <span>Firma de Plataforma</span>
+                </a>
+
                 <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Sistema</p>
 
                 <a href="{{ auth()->user()->role === 'superadmin' ? route('superadmin.audits') : route('audit.index') }}"
@@ -433,6 +439,14 @@
                        class="nav-item {{ request()->routeIs('sales.*') ? 'active' : '' }}">
                         <i class="fa-solid fa-receipt w-5 text-center"></i>
                         <span>Ventas</span>
+                    </a>
+                @endif
+
+                @if(auth()->user()->company?->has_electronic_billing)
+                    <a href="{{ route('billing.invoices.index') }}"
+                       class="nav-item {{ request()->routeIs('billing.invoices.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-file-invoice w-5 text-center text-cyan-400"></i>
+                        <span>Comprobantes SRI</span>
                     </a>
                 @endif
 
@@ -470,6 +484,14 @@
                        class="nav-item {{ request()->routeIs('sales.*') ? 'active' : '' }}">
                         <i class="fa-solid fa-receipt w-5 text-center"></i>
                         <span>Ventas</span>
+                    </a>
+                @endif
+
+                @if(auth()->user()->company?->has_electronic_billing)
+                    <a href="{{ route('billing.invoices.index') }}"
+                       class="nav-item {{ request()->routeIs('billing.invoices.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-file-invoice w-5 text-center text-cyan-400"></i>
+                        <span>Comprobantes SRI</span>
                     </a>
                 @endif
 
@@ -549,6 +571,14 @@
                         <i class="fa-solid fa-gears w-5 text-center"></i>
                         <span>Configuración</span>
                     </a>
+
+                    @if(auth()->user()->company?->has_electronic_billing)
+                        <a href="{{ route('billing.settings.index') }}"
+                           class="nav-item {{ request()->routeIs('billing.settings.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-shield w-5 text-center text-cyan-500"></i>
+                            <span>Firma Electrónica</span>
+                        </a>
+                    @endif
                 @endif
             @endif
         </nav>
