@@ -14,22 +14,12 @@ class SellerService
      */
     public function checkLimitReached(Company $company): bool
     {
-        $plan = $company->subscription_plan;
-        
         $activeSellersCount = User::where('company_id', $company->id)
             ->where('role', 'vendedor')
             ->where('status', 'active')
             ->count();
 
-        if ($plan === 'basic' && $activeSellersCount >= 2) {
-            return true;
-        }
-
-        if ($plan === 'standard' && $activeSellersCount >= 10) {
-            return true;
-        }
-
-        return false;
+        return $activeSellersCount >= $company->max_sellers;
     }
 
     /**

@@ -136,7 +136,7 @@ class SubscriptionEnforcementTest extends TestCase
         $token = $this->generateJwtForUser($superadmin);
 
         $response = $this->withCookie('token', $token)->get('/dashboard');
-        $response->assertStatus(200);
+        $response->assertRedirect('/superadmin/dashboard');
     }
 
     public function test_vendedor_role_is_restricted_from_dashboard_and_redirects_to_sales()
@@ -192,5 +192,163 @@ class SubscriptionEnforcementTest extends TestCase
         // Accessing specific supplier show
         $response = $this->withCookie('token', $token)->get("/partners/{$supplier->id}");
         $response->assertRedirect('/sales');
+    }
+
+    public function test_suspended_user_can_view_suspended_page_with_payment_form()
+    {
+        [$company, $user] = $this->createCompanyAndUser('suspended');
+        $token = $this->generateJwtForUser($user);
+
+        $response = $this->withCookie('token', $token)->get('/subscription-suspended');
+
+        $response->assertStatus(200);
+        $response->assertSee('Reactivar Servicio');
+        $response->assertSee('Plan Basic');
+        $response->assertSee('Plan Standard');
+        $response->assertSee('Banco de Origen');
+    }
+
+    public function test_suspended_user_can_submit_payment_to_reactivate()
+    {
+        [$company, $user] = $this->createCompanyAndUser('suspended');
+        $token = $this->generateJwtForUser($user);
+
+        $file = \Illuminate\Http\UploadedFile::fake()->image('receipt.png');
+
+        $response = $this->withCookie('token', $token)->post('/subscription-suspended/payment', [
+            'plan'                => 'basic',
+            'bank_origin'         => 'Banco Austro',
+            'account_destination' => 'Banco Pichincha - Corriente #987654321',
+            'payment_receipt'     => $file,
+        ]);
+
+        $response->assertRedirect('/subscription-suspended');
+        $response->assertSessionHas('status');
+
+        $this->assertEquals('pending_approval', $company->fresh()->subscription_status);
+        $this->assertDatabaseHas('subscription_payments', [
+            'company_id'          => $company->id,
+            'plan'                => 'basic',
+            'bank_origin'         => 'Banco Austro',
+            'account_destination' => 'Banco Pichincha - Corriente #987654321',
+            'status'              => 'pending',
+            'type'                => 'renewal', // auto determined as renewal since it matches company current plan 'basic'
+        ]);
+    }
+
+    public function test_authenticated_superadmin_can_retrieve_any_payment_receipt()
+    {
+        [$company, $user] = $this->createCompanyAndUser('active');
+        
+        $payment = \App\Models\SubscriptionPayment::create([
+            'company_id'          => $company->id,
+            'plan'                => 'basic',
+            'bank_origin'         => 'Banco Austro',
+            'account_destination' => 'Banco Pichincha - Corriente #987654321',
+            'receipt_path'        => 'receipts/test_superadmin.png',
+            'status'              => 'pending',
+            'type'                => 'renewal',
+        ]);
+
+        \Illuminate\Support\Facades\Storage::disk('public')->put('receipts/test_superadmin.png', 'fake image content');
+
+        $superadmin = User::create([
+            'name'              => 'Super Admin Test secure',
+            'email'             => 'superadmin_sec@flexdash.com',
+            'password'          => Hash::make('password'),
+            'role'              => 'superadmin',
+            'status'            => 'active',
+            'company_id'        => null,
+        ]);
+        $superadmin->email_verified_at = now();
+        $superadmin->save();
+
+        $token = $this->generateJwtForUser($superadmin);
+
+        $response = $this->withCookie('token', $token)->get('/receipts/test_superadmin.png');
+
+        $response->assertStatus(200);
+        $this->assertEquals('fake image content', $response->getContent());
+
+        // clean up
+        \Illuminate\Support\Facades\Storage::disk('public')->delete('receipts/test_superadmin.png');
+    }
+
+    public function test_authenticated_owner_can_retrieve_own_company_receipt()
+    {
+        [$company, $user] = $this->createCompanyAndUser('active');
+        
+        $payment = \App\Models\SubscriptionPayment::create([
+            'company_id'          => $company->id,
+            'plan'                => 'basic',
+            'bank_origin'         => 'Banco Austro',
+            'account_destination' => 'Banco Pichincha - Corriente #987654321',
+            'receipt_path'        => 'receipts/test_owner.png',
+            'status'              => 'pending',
+            'type'                => 'renewal',
+        ]);
+
+        \Illuminate\Support\Facades\Storage::disk('public')->put('receipts/test_owner.png', 'owner image content');
+
+        $token = $this->generateJwtForUser($user);
+
+        $response = $this->withCookie('token', $token)->get('/receipts/test_owner.png');
+
+        $response->assertStatus(200);
+        $this->assertEquals('owner image content', $response->getContent());
+
+        // clean up
+        \Illuminate\Support\Facades\Storage::disk('public')->delete('receipts/test_owner.png');
+    }
+
+    public function test_authenticated_owner_cannot_retrieve_other_company_receipt()
+    {
+        [$companyA, $userA] = $this->createCompanyAndUser('active');
+        
+        $payment = \App\Models\SubscriptionPayment::create([
+            'company_id'          => $companyA->id,
+            'plan'                => 'basic',
+            'bank_origin'         => 'Banco Austro',
+            'account_destination' => 'Banco Pichincha - Corriente #987654321',
+            'receipt_path'        => 'receipts/test_other.png',
+            'status'              => 'pending',
+            'type'                => 'renewal',
+        ]);
+
+        \Illuminate\Support\Facades\Storage::disk('public')->put('receipts/test_other.png', 'other image content');
+
+        // Create user from different company B
+        $companyB = Company::create([
+            'company_type'            => 'legal_entity',
+            'name'                    => 'Other Company',
+            'legal_entity_flag'       => true,
+            'natural_entity_flag'     => false,
+            'subscription_plan'       => 'basic',
+            'subscription_status'     => 'active',
+            'city'                    => 'Quito',
+            'state_province'          => 'Pichincha',
+            'postal_code'             => '170150',
+            'country'                 => 'Ecuador',
+        ]);
+
+        $userB = User::create([
+            'name'              => 'Other User',
+            'email'             => 'other@company.com',
+            'password'          => Hash::make('password'),
+            'company_id'        => $companyB->id,
+            'role'              => 'owner',
+            'status'            => 'active',
+        ]);
+        $userB->email_verified_at = now();
+        $userB->save();
+
+        $token = $this->generateJwtForUser($userB);
+
+        $response = $this->withCookie('token', $token)->get('/receipts/test_other.png');
+
+        $response->assertStatus(403);
+
+        // clean up
+        \Illuminate\Support\Facades\Storage::disk('public')->delete('receipts/test_other.png');
     }
 }

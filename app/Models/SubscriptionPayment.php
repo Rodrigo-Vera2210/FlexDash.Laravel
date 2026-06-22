@@ -17,6 +17,7 @@ class SubscriptionPayment extends Model
         'account_destination',
         'receipt_path',
         'status',
+        'rejection_reason',
         'type',
     ];
 

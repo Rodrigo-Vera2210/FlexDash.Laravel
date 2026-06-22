@@ -82,9 +82,15 @@
                                     @elseif($log->event === 'updated')
                                         <span class="badge badge-info"><i class="fa-solid fa-pen-to-square"></i>
                                             Modificado</span>
-                                    @else
+                                    @elseif($log->event === 'deleted')
                                         <span class="badge badge-danger"><i class="fa-solid fa-trash-can"></i>
                                             Eliminado</span>
+                                    @elseif(str_starts_with($log->event, 'subscription.'))
+                                        <span class="badge badge-warning" style="background-color: rgba(245, 158, 11, 0.1); color: rgb(245, 158, 11); border: 1px solid rgba(245, 158, 11, 0.2); padding: 0.125rem 0.5rem; font-weight: 600; border-radius: 0.25rem; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                            <i class="fa-solid fa-crown text-[10px]"></i> Suscripción
+                                        </span>
+                                    @else
+                                        <span class="badge badge-secondary">{{ $log->event }}</span>
                                     @endif
                                 </td>
                                 <td class="table-cell">

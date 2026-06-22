@@ -62,6 +62,26 @@ class SaleController extends Controller
             'items.*.unit_price' => 'required|numeric|min:0',
         ]);
 
+        // Enforce monthly transaction limits
+        $company = auth()->user()->company;
+        if ($company) {
+            $limit = $company->max_monthly_transactions;
+            $salesCount = \App\Modules\Sale\Models\Sale::where('company_id', $company->id)
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count();
+            $purchasesCount = \App\Modules\Purchase\Models\Purchase::where('company_id', $company->id)
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count();
+
+            if (($salesCount + $purchasesCount) >= $limit) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'limit' => "El límite de transacciones mensuales para su suscripción ({$limit}) ha sido alcanzado."
+                ]);
+            }
+        }
+
         $header = $request->only(['partner_id', 'tax_id', 'issue_date', 'due_date', 'notes', 'discount']);
         $header['user_id'] = auth()->id();
         $header['number']  = SaleService::nextNumber();

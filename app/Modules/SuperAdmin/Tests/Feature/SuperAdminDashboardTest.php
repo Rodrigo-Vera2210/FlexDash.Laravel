@@ -120,9 +120,11 @@ class SuperAdminDashboardTest extends TestCase
             'type'                => 'signup',
         ]);
 
-        $response = $this->withCookie('token', $token)->post("/superadmin/companies/{$company->id}/approve", [
-            'payment_id' => $payment->id,
-        ]);
+        $response = $this->from('/superadmin/dashboard')
+            ->withCookie('token', $token)
+            ->post("/superadmin/companies/{$company->id}/approve", [
+                'payment_id' => $payment->id,
+            ]);
 
         $response->assertRedirect('/superadmin/dashboard');
 
@@ -155,20 +157,39 @@ class SuperAdminDashboardTest extends TestCase
             'type'                => 'signup',
         ]);
 
-        $response = $this->withCookie('token', $token)->post("/superadmin/companies/{$company->id}/reject", [
-            'payment_id' => $payment->id,
-        ]);
+        $response = $this->from('/superadmin/dashboard')
+            ->withCookie('token', $token)
+            ->post("/superadmin/companies/{$company->id}/reject", [
+                'payment_id' => $payment->id,
+                'reason'     => 'Comprobante no válido o ilegible',
+            ]);
 
         $response->assertRedirect('/superadmin/dashboard');
 
-        // Assert Company is rejected
+        // Assert Company is rejected and suspension reason is set
         $this->assertEquals('rejected', $company->fresh()->subscription_status);
+        $this->assertEquals('Comprobante no válido o ilegible', $company->fresh()->suspension_reason);
 
         // Assert user status remains pending_activation
         $this->assertEquals('pending_activation', $admin->fresh()->status);
 
-        // Assert Payment status is rejected
+        // Assert Payment status is rejected and reason is set
         $this->assertEquals('rejected', $payment->fresh()->status);
+        $this->assertEquals('Comprobante no válido o ilegible', $payment->fresh()->rejection_reason);
+
+        // Assert Audit Logs were recorded
+        $this->assertDatabaseHas('audit_logs', [
+            'user_id'        => $superadmin->id,
+            'event'          => 'subscription.reject_payment',
+            'auditable_id'   => $payment->id,
+            'auditable_type' => get_class($payment),
+        ]);
+        $this->assertDatabaseHas('audit_logs', [
+            'user_id'        => $superadmin->id,
+            'event'          => 'subscription.reject_company',
+            'auditable_id'   => $company->id,
+            'auditable_type' => get_class($company),
+        ]);
     }
 
     public function test_superadmin_can_toggle_subscription_status()
@@ -178,13 +199,42 @@ class SuperAdminDashboardTest extends TestCase
 
         [$company, $admin] = $this->createCompanyAndAdmin('active');
 
-        $response = $this->withCookie('token', $token)->post("/superadmin/companies/{$company->id}/toggle-status");
+        // Create an approved payment to allow re-activation
+        SubscriptionPayment::create([
+            'company_id'          => $company->id,
+            'plan'                => 'basic',
+            'bank_origin'         => 'Bank A',
+            'account_destination' => 'Account B',
+            'receipt_path'        => 'receipts/test.png',
+            'status'              => 'approved',
+            'type'                => 'signup',
+        ]);
+
+        $response = $this->from('/superadmin/dashboard')
+            ->withCookie('token', $token)
+            ->post("/superadmin/companies/{$company->id}/toggle-status", [
+                'reason' => 'Falta de pago del mes actual',
+            ]);
 
         $response->assertRedirect('/superadmin/dashboard');
         $this->assertEquals('inactive', $company->fresh()->subscription_status);
+        $this->assertEquals('Falta de pago del mes actual', $company->fresh()->suspension_reason);
 
-        $response = $this->withCookie('token', $token)->post("/superadmin/companies/{$company->id}/toggle-status");
+        // Assert Audit Logs were recorded
+        $this->assertDatabaseHas('audit_logs', [
+            'user_id'        => $superadmin->id,
+            'event'          => 'subscription.toggle_status',
+            'auditable_id'   => $company->id,
+            'auditable_type' => get_class($company),
+        ]);
+
+        $response = $this->from('/superadmin/dashboard')
+            ->withCookie('token', $token)
+            ->post("/superadmin/companies/{$company->id}/toggle-status");
+
+        $response->assertRedirect('/superadmin/dashboard');
         $this->assertEquals('active', $company->fresh()->subscription_status);
+        $this->assertNull($company->fresh()->suspension_reason);
     }
 
     public function test_superadmin_can_change_company_plan()
@@ -200,5 +250,134 @@ class SuperAdminDashboardTest extends TestCase
 
         $response->assertRedirect('/superadmin/dashboard');
         $this->assertEquals('standard', $company->fresh()->subscription_plan);
+    }
+
+    public function test_superadmin_redirected_from_tenant_dashboard()
+    {
+        $superadmin = $this->createSuperAdmin();
+        $token = $this->generateJwtForUser($superadmin);
+
+        $response = $this->withCookie('token', $token)->get('/dashboard');
+
+        $response->assertRedirect('/superadmin/dashboard');
+    }
+
+    public function test_superadmin_can_access_company_detail()
+    {
+        $superadmin = $this->createSuperAdmin();
+        $token = $this->generateJwtForUser($superadmin);
+
+        [$company, $admin] = $this->createCompanyAndAdmin('active', 'active');
+
+        // Add a mock seller user to verify sellers section
+        $seller = User::create([
+            'name'       => 'Seller User',
+            'email'      => 'seller@tenant.com',
+            'password'   => Hash::make('password'),
+            'company_id' => $company->id,
+            'role'       => 'vendedor',
+            'status'     => 'active',
+        ]);
+
+        // Add a payment
+        $payment = SubscriptionPayment::create([
+            'company_id'          => $company->id,
+            'plan'                => 'basic',
+            'bank_origin'         => 'Pichincha',
+            'account_destination' => 'Produbanco',
+            'receipt_path'        => 'receipts/test.png',
+            'status'              => 'approved',
+            'type'                => 'signup',
+        ]);
+
+        $response = $this->withCookie('token', $token)->get("/superadmin/companies/{$company->id}");
+
+        $response->assertStatus(200);
+        $response->assertViewIs('superadmin.company-detail');
+        $response->assertSee($company->name);
+        $response->assertSee('Tenant Admin'); // Active Admin
+        $response->assertSee('Seller User'); // Active Seller
+        $response->assertSee('Pichincha'); // Origin bank from payment list
+    }
+
+    public function test_superadmin_cannot_activate_subscription_without_approved_payment()
+    {
+        $superadmin = $this->createSuperAdmin();
+        $token = $this->generateJwtForUser($superadmin);
+
+        [$company, $admin] = $this->createCompanyAndAdmin('inactive');
+
+        // Attempt toggle-status to activate
+        $response = $this->from('/superadmin/dashboard')
+            ->withCookie('token', $token)
+            ->post("/superadmin/companies/{$company->id}/toggle-status");
+
+        $response->assertRedirect('/superadmin/dashboard');
+        $response->assertSessionHas('error', 'No se puede activar la suscripción de la empresa sin verificar y aprobar al menos un pago primero.');
+        $this->assertEquals('inactive', $company->fresh()->subscription_status);
+    }
+
+    public function test_superadmin_can_activate_subscription_with_approved_payment()
+    {
+        $superadmin = $this->createSuperAdmin();
+        $token = $this->generateJwtForUser($superadmin);
+
+        [$company, $admin] = $this->createCompanyAndAdmin('inactive');
+
+        // Create an approved payment first
+        SubscriptionPayment::create([
+            'company_id'          => $company->id,
+            'plan'                => 'basic',
+            'bank_origin'         => 'Pichincha',
+            'account_destination' => 'Produbanco',
+            'receipt_path'        => 'receipts/test.png',
+            'status'              => 'approved',
+            'type'                => 'signup',
+        ]);
+
+        $response = $this->from('/superadmin/dashboard')
+            ->withCookie('token', $token)
+            ->post("/superadmin/companies/{$company->id}/toggle-status");
+
+        $response->assertRedirect('/superadmin/dashboard');
+        $response->assertSessionHas('success');
+        $this->assertEquals('active', $company->fresh()->subscription_status);
+    }
+
+    public function test_superadmin_can_access_payments_index()
+    {
+        $superadmin = $this->createSuperAdmin();
+        $token = $this->generateJwtForUser($superadmin);
+
+        [$company, $admin] = $this->createCompanyAndAdmin('active');
+
+        // Create approved and pending payments
+        SubscriptionPayment::create([
+            'company_id'          => $company->id,
+            'plan'                => 'basic',
+            'bank_origin'         => 'Banco Austro',
+            'account_destination' => 'Produbanco',
+            'receipt_path'        => 'receipts/test1.png',
+            'status'              => 'approved',
+            'type'                => 'signup',
+        ]);
+
+        SubscriptionPayment::create([
+            'company_id'          => $company->id,
+            'plan'                => 'standard',
+            'bank_origin'         => 'Banco Guayaquil',
+            'account_destination' => 'Pichincha',
+            'receipt_path'        => 'receipts/test2.png',
+            'status'              => 'pending',
+            'type'                => 'renewal',
+        ]);
+
+        $response = $this->withCookie('token', $token)->get('/superadmin/payments');
+
+        $response->assertStatus(200);
+        $response->assertViewIs('superadmin.payments');
+        $response->assertSee('Banco Austro');
+        $response->assertSee('Banco Guayaquil');
+        $response->assertSee('$29.00'); // Estimated revenue for 1 basic approved payment
     }
 }

@@ -11,6 +11,11 @@
             {{ session('success') }}
         </div>
     @endif
+    @if (session('error'))
+        <div class="mb-4 p-4 rounded-xl text-sm font-medium border border-rose-500/20 bg-rose-500/10 text-rose-500">
+            {{ session('error') }}
+        </div>
+    @endif
 
     {{-- Metrics Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
@@ -64,10 +69,25 @@
                             <td class="px-6 py-4 text-xs text-slate-500">{{ $payment->account_destination }}</td>
                             <td class="px-6 py-4">
                                 @if($payment->receipt_path)
-                                    <a href="{{ asset('storage/' . $payment->receipt_path) }}" target="_blank"
-                                       class="text-brand-blue dark:text-primary font-semibold hover:underline inline-flex items-center gap-1">
-                                        <i class="fa-solid fa-image"></i> Ver Comprobante
-                                    </a>
+                                    <button type="button"
+                                            onclick="Alpine.store('paymentModal').open({
+                                                id: {{ $payment->id }},
+                                                company_name: '{{ addslashes(e($payment->company->name)) }}',
+                                                plan: '{{ $payment->plan }}',
+                                                type: '{{ $payment->type }}',
+                                                bank_origin: '{{ addslashes(e($payment->bank_origin)) }}',
+                                                account_destination: '{{ addslashes(e($payment->account_destination)) }}',
+                                                status: '{{ $payment->status }}',
+                                                rejection_reason: '{{ addslashes(e($payment->rejection_reason)) }}',
+                                                formatted_date: '{{ $payment->created_at->format('d/m/Y H:i') }}',
+                                                receipt_url: '{{ route('receipts.show', basename($payment->receipt_path)) }}',
+                                                approve_url: '{{ route('superadmin.companies.approve', $payment->company_id) }}',
+                                                reject_url: '{{ route('superadmin.companies.reject', $payment->company_id) }}'
+                                            })"
+                                            class="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline focus:outline-none"
+                                            style="color: var(--primary);">
+                                        <i class="fa-solid fa-receipt text-xs"></i> Ver Detalle
+                                    </button>
                                 @else
                                     <span class="text-slate-400">Sin archivo</span>
                                 @endif
@@ -80,13 +100,15 @@
                                         Aprobar
                                     </button>
                                 </form>
-                                <form action="{{ route('superadmin.companies.reject', $payment->company_id) }}" method="POST" class="inline">
-                                    @csrf
-                                    <input type="hidden" name="payment_id" value="{{ $payment->id }}">
-                                    <button type="submit" class="btn-danger text-xs py-1 px-3">
-                                        Rechazar
-                                    </button>
-                                </form>
+                                <form action="{{ route('superadmin.companies.reject', $payment->company_id) }}" method="POST" class="inline"
+                                       onsubmit="const reason = prompt('Motivo de rechazo del pago:'); if (reason === null || reason.trim() === '') return false; this.reason.value = reason;">
+                                     @csrf
+                                     <input type="hidden" name="payment_id" value="{{ $payment->id }}">
+                                     <input type="hidden" name="reason" value="">
+                                     <button type="submit" class="btn-danger text-xs py-1 px-3">
+                                         Rechazar
+                                     </button>
+                                 </form>
                             </td>
                         </tr>
                     @empty
@@ -125,13 +147,17 @@
                     @forelse($companies as $company)
                         <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
                             <td class="px-6 py-4 font-semibold text-slate-800 dark:text-slate-100">
-                                {{ $company->name }}
+                                <a href="{{ route('superadmin.companies.show', $company) }}"
+                                   class="hover:underline font-bold" style="color: var(--primary);">
+                                    {{ $company->name }}
+                                </a>
                             </td>
                             <td class="px-6 py-4 capitalize text-slate-500">{{ str_replace('_', ' ', $company->company_type) }}</td>
                             <td class="px-6 py-4">
                                 <form action="{{ route('superadmin.companies.change-plan', $company) }}" method="POST" class="flex items-center gap-1.5">
                                     @csrf
-                                    <select name="plan" onchange="this.form.submit()" class="text-xs px-2 py-1 rounded border border-slate-350 dark:border-slate-700 bg-transparent text-slate-800 dark:text-slate-100 focus:outline-none">
+                                    <select name="plan" onchange="this.form.submit()"
+                                            class="text-xs px-2 py-1 rounded border border-slate-350 dark:border-slate-700 bg-transparent text-slate-800 dark:text-slate-100 focus:outline-none">
                                         <option value="basic" {{ $company->subscription_plan === 'basic' ? 'selected' : '' }}>Basic</option>
                                         <option value="standard" {{ $company->subscription_plan === 'standard' ? 'selected' : '' }}>Standard</option>
                                     </select>
@@ -152,7 +178,7 @@
                                         Pendiente
                                     </span>
                                 @elseif($company->subscription_status === 'rejected')
-                                    <span class="px-2 py-0.5 rounded text-xs font-semibold bg-rose-150 text-rose-800 dark:bg-rose-900/30 dark:text-rose-350">
+                                    <span class="px-2 py-0.5 rounded text-xs font-semibold bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300">
                                         Rechazada
                                     </span>
                                 @else
@@ -162,12 +188,22 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <form action="{{ route('superadmin.companies.toggle-status', $company) }}" method="POST" class="inline">
-                                    @csrf
-                                    <button type="submit" class="btn-secondary text-xs py-1.5 px-3">
-                                        {{ $company->subscription_status === 'active' ? 'Desactivar' : 'Activar' }}
-                                    </button>
-                                </form>
+                                <div class="flex items-center justify-center gap-2">
+                                    <a href="{{ route('superadmin.companies.show', $company) }}"
+                                       class="btn-secondary text-xs py-1.5 px-3 inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-eye"></i> Detalle
+                                    </a>
+                                    <form action="{{ route('superadmin.companies.toggle-status', $company) }}" method="POST" class="inline"
+                                           @if($company->subscription_status === 'active')
+                                               onsubmit="const reason = prompt('Motivo de desactivación:'); if (reason === null) return false; this.reason.value = reason;"
+                                           @endif>
+                                         @csrf
+                                         <input type="hidden" name="reason" value="">
+                                         <button type="submit" class="btn-secondary text-xs py-1.5 px-3">
+                                             {{ $company->subscription_status === 'active' ? 'Desactivar' : 'Activar' }}
+                                         </button>
+                                     </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -182,3 +218,7 @@
         </div>
     </div>
 @endsection
+
+@push('modals')
+    @include('superadmin.partials.payment-modal')
+@endpush

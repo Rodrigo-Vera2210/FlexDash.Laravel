@@ -8,6 +8,20 @@
             $daysRemaining = now()->diffInDays($expiresAt, false);
             if ($daysRemaining >= 0 && $daysRemaining <= 5) {
                 $showExpiryBanner = true;
+
+                // Dispatch expiry warning email once per day per company
+                $company = $user->company;
+                $cacheKey = 'subscription_expiry_email_sent_' . $company->id;
+                if (!\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+                    $owner = $company->owner;
+                    if ($owner) {
+                        $owner->notify(new \App\Modules\Registration\Notifications\SubscriptionExpiryNotification(
+                            $daysRemaining,
+                            $expiresAt->format('d/m/Y')
+                        ));
+                    }
+                    \Illuminate\Support\Facades\Cache::put($cacheKey, true, now()->endOfDay());
+                }
             }
         }
     }
@@ -46,6 +60,7 @@
 
     {{-- AlpineJS --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>[x-cloak] { display: none !important; }</style>
 
     <style>
         /* =========================================================
@@ -390,10 +405,22 @@
                     <span>Portal Superadmin</span>
                 </a>
 
+                <a href="{{ route('superadmin.payments.index') }}"
+                   class="nav-item {{ request()->routeIs('superadmin.payments.index') ? 'active' : '' }}">
+                    <i class="fa-solid fa-cash-register w-5 text-center text-teal-400"></i>
+                    <span>Caja de Suscripciones</span>
+                </a>
+
+                <a href="{{ route('superadmin.plans.index') }}"
+                   class="nav-item {{ request()->routeIs('superadmin.plans.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-gears w-5 text-center text-indigo-400"></i>
+                    <span>Administración de Planes</span>
+                </a>
+
                 <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Sistema</p>
 
-                <a href="{{ route('audit.index') }}"
-                   class="nav-item {{ request()->routeIs('audit.*') ? 'active' : '' }}">
+                <a href="{{ auth()->user()->role === 'superadmin' ? route('superadmin.audits') : route('audit.index') }}"
+                   class="nav-item {{ request()->routeIs('superadmin.audits') || request()->routeIs('audit.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-file-shield w-5 text-center"></i>
                     <span>Auditoría</span>
                 </a>
@@ -401,25 +428,31 @@
             @elseif(auth()->user()->role === 'vendedor')
                 <p class="px-3 pb-2 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Comercial</p>
 
-                <a href="{{ route('sales.index') }}"
-                   class="nav-item {{ request()->routeIs('sales.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-receipt w-5 text-center"></i>
-                    <span>Ventas</span>
-                </a>
+                @if(auth()->user()->company?->hasModuleAccess('ventas'))
+                    <a href="{{ route('sales.index') }}"
+                       class="nav-item {{ request()->routeIs('sales.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-receipt w-5 text-center"></i>
+                        <span>Ventas</span>
+                    </a>
+                @endif
 
-                <a href="{{ route('partners.index') }}?type=cliente"
-                   class="nav-item {{ request()->routeIs('partners.*') && request('type') !== 'proveedor' ? 'active' : '' }}">
-                    <i class="fa-solid fa-users w-5 text-center"></i>
-                    <span>Clientes</span>
-                </a>
+                @if(auth()->user()->company?->hasModuleAccess('clientes'))
+                    <a href="{{ route('partners.index') }}?type=cliente"
+                       class="nav-item {{ request()->routeIs('partners.*') && request('type') !== 'proveedor' ? 'active' : '' }}">
+                        <i class="fa-solid fa-users w-5 text-center"></i>
+                        <span>Clientes</span>
+                    </a>
+                @endif
 
-                <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Inventario</p>
+                @if(auth()->user()->company?->hasModuleAccess('kardex'))
+                    <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Inventario</p>
 
-                <a href="{{ route('inventory.index') }}"
-                   class="nav-item {{ request()->routeIs('inventory.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-warehouse w-5 text-center"></i>
-                    <span>Kardex</span>
-                </a>
+                    <a href="{{ route('inventory.index') }}"
+                       class="nav-item {{ request()->routeIs('inventory.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-warehouse w-5 text-center"></i>
+                        <span>Kardex</span>
+                    </a>
+                @endif
 
             @else
                 <p class="px-3 pb-2 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Principal</p>
@@ -432,77 +465,91 @@
 
                 <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Comercial</p>
 
-                <a href="{{ route('sales.index') }}"
-                   class="nav-item {{ request()->routeIs('sales.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-receipt w-5 text-center"></i>
-                    <span>Ventas</span>
-                </a>
+                @if(auth()->user()->company?->hasModuleAccess('ventas'))
+                    <a href="{{ route('sales.index') }}"
+                       class="nav-item {{ request()->routeIs('sales.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-receipt w-5 text-center"></i>
+                        <span>Ventas</span>
+                    </a>
+                @endif
 
-                <a href="{{ route('purchases.index') }}"
-                   class="nav-item {{ request()->routeIs('purchases.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-cart-shopping w-5 text-center"></i>
-                    <span>Compras</span>
-                </a>
+                @if(auth()->user()->company?->hasModuleAccess('compras'))
+                    <a href="{{ route('purchases.index') }}"
+                       class="nav-item {{ request()->routeIs('purchases.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-cart-shopping w-5 text-center"></i>
+                        <span>Compras</span>
+                    </a>
+                @endif
 
-                <a href="{{ route('partners.index') }}?type=cliente"
-                   class="nav-item {{ request()->routeIs('partners.*') && request('type') !== 'proveedor' ? 'active' : '' }}">
-                    <i class="fa-solid fa-users w-5 text-center"></i>
-                    <span>Clientes</span>
-                </a>
+                @if(auth()->user()->company?->hasModuleAccess('clientes'))
+                    <a href="{{ route('partners.index') }}?type=cliente"
+                       class="nav-item {{ request()->routeIs('partners.*') && request('type') !== 'proveedor' ? 'active' : '' }}">
+                        <i class="fa-solid fa-users w-5 text-center"></i>
+                        <span>Clientes</span>
+                    </a>
+                @endif
 
-                <a href="{{ route('partners.index') }}?type=proveedor"
-                   class="nav-item {{ request()->routeIs('partners.*') && request('type') === 'proveedor' ? 'active' : '' }}">
-                    <i class="fa-solid fa-building w-5 text-center"></i>
-                    <span>Proveedores</span>
-                </a>
+                @if(auth()->user()->company?->hasModuleAccess('proveedores'))
+                    <a href="{{ route('partners.index') }}?type=proveedor"
+                       class="nav-item {{ request()->routeIs('partners.*') && request('type') === 'proveedor' ? 'active' : '' }}">
+                        <i class="fa-solid fa-building w-5 text-center"></i>
+                        <span>Proveedores</span>
+                    </a>
+                @endif
 
-                <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Inventario</p>
+                @if(auth()->user()->company?->hasModuleAccess('kardex'))
+                    <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Inventario</p>
 
-                <a href="{{ route('products.index') }}"
-                   class="nav-item {{ request()->routeIs('products.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-boxes-stacked w-5 text-center"></i>
-                    <span>Productos</span>
-                </a>
+                    <a href="{{ route('products.index') }}"
+                       class="nav-item {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-boxes-stacked w-5 text-center"></i>
+                        <span>Productos</span>
+                    </a>
 
-                <a href="{{ route('inventory.index') }}"
-                   class="nav-item {{ request()->routeIs('inventory.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-warehouse w-5 text-center"></i>
-                    <span>Kardex</span>
-                </a>
+                    <a href="{{ route('inventory.index') }}"
+                       class="nav-item {{ request()->routeIs('inventory.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-warehouse w-5 text-center"></i>
+                        <span>Kardex</span>
+                    </a>
+                @endif
 
-                <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Finanzas</p>
+                @if(auth()->user()->company?->hasModuleAccess('caja_chica'))
+                    <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Finanzas</p>
 
-                <a href="{{ route('cashbox.index') }}"
-                   class="nav-item {{ request()->routeIs('cashbox.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-cash-register w-5 text-center"></i>
-                    <span>Caja Chica</span>
-                </a>
+                    <a href="{{ route('cashbox.index') }}"
+                       class="nav-item {{ request()->routeIs('cashbox.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-cash-register w-5 text-center"></i>
+                        <span>Caja Chica</span>
+                    </a>
+                @endif
 
-                <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Sistema</p>
+                @if(auth()->user()->company?->hasModuleAccess('settings'))
+                    <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Sistema</p>
 
-                <a href="{{ route('sellers.index') }}"
-                   class="nav-item {{ request()->routeIs('sellers.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-users-gear w-5 text-center"></i>
-                    <span>Vendedores</span>
-                </a>
+                    <a href="{{ route('sellers.index') }}"
+                       class="nav-item {{ request()->routeIs('sellers.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-users-gear w-5 text-center"></i>
+                        <span>Vendedores</span>
+                    </a>
 
-                <a href="{{ route('settings.subscription.index') }}"
-                   class="nav-item {{ request()->routeIs('settings.subscription.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-credit-card w-5 text-center"></i>
-                    <span>Suscripción</span>
-                </a>
+                    <a href="{{ route('settings.subscription.index') }}"
+                       class="nav-item {{ request()->routeIs('settings.subscription.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-credit-card w-5 text-center"></i>
+                        <span>Suscripción</span>
+                    </a>
 
-                <a href="{{ route('audit.index') }}"
-                   class="nav-item {{ request()->routeIs('audit.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-file-shield w-5 text-center"></i>
-                    <span>Auditoría</span>
-                </a>
+                    <a href="{{ auth()->user()->role === 'superadmin' ? route('superadmin.audits') : route('audit.index') }}"
+                       class="nav-item {{ request()->routeIs('superadmin.audits') || request()->routeIs('audit.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-file-shield w-5 text-center"></i>
+                        <span>Auditoría</span>
+                    </a>
 
-                <a href="{{ route('settings.catalogs.index') }}"
-                   class="nav-item {{ request()->routeIs('settings.catalogs.index') ? 'active' : '' }}">
-                    <i class="fa-solid fa-gears w-5 text-center"></i>
-                    <span>Configuración</span>
-                </a>
+                    <a href="{{ route('settings.catalogs.index') }}"
+                       class="nav-item {{ request()->routeIs('settings.catalogs.index') ? 'active' : '' }}">
+                        <i class="fa-solid fa-gears w-5 text-center"></i>
+                        <span>Configuración</span>
+                    </a>
+                @endif
             @endif
         </nav>
 
@@ -616,6 +663,18 @@
         });
     </script>
 
+    {{-- Alpine Store: Payment Modal --}}
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('paymentModal', {
+                payment: null,
+                open(data) { this.payment = data; },
+                close() { this.payment = null; }
+            });
+        });
+    </script>
+
+    @stack('modals')
     @stack('scripts')
 </body>
 

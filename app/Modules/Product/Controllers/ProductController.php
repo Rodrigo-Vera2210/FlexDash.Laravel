@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Product\Models\Category;
 use App\Modules\Product\Models\Product;
 use App\Models\Tax;
+use App\Rules\UniqueForCompany;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -41,7 +42,7 @@ class ProductController extends Controller
         $data = $request->validate([
             'category_id'   => 'required|exists:categories,id',
             'tax_id'        => 'required|exists:taxes,id',
-            'code'          => 'required|string|max:50|unique:products',
+            'code'          => ['required', 'string', 'max:50', new UniqueForCompany('products', 'code')],
             'name'          => 'required|string|max:200',
             'description'   => 'nullable|string',
             'unit'          => 'required|string|max:20',
@@ -80,6 +81,7 @@ class ProductController extends Controller
         $data = $request->validate([
             'category_id'   => 'required|exists:categories,id',
             'tax_id'        => 'required|exists:taxes,id',
+            'code'          => ['required', 'string', 'max:50', new UniqueForCompany('products', 'code', $product->id)],
             'name'          => 'required|string|max:200',
             'description'   => 'nullable|string',
             'unit'          => 'required|string|max:20',

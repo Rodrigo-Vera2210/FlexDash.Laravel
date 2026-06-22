@@ -170,6 +170,14 @@ body {
 .badge-magenta  { background-color: var(--accent-magenta-light); color: var(--accent-magenta); }
 
 /* ----- Formularios ----- */
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
 .input-solid {
   background-color: var(--surface);
   border: 1px solid var(--border);

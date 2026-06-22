@@ -8,55 +8,55 @@
 <form action="{{ route('registration.review') }}" method="POST" novalidate>
     @csrf
 
-    <h2 class="text-xl font-bold text-gray-800 mb-1">Revisa tu información</h2>
-    <p class="text-sm text-gray-500 mb-6">Por favor confirma tus datos antes de enviarlos.</p>
+    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-1">Revisa tu información</h2>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Por favor confirma tus datos antes de enviarlos.</p>
 
     {{-- Summary card --}}
-    <div class="rounded-xl border border-gray-200 divide-y divide-gray-100 mb-6 text-sm">
+    <div class="rounded-xl border border-gray-200 dark:border-slate-700 divide-y divide-gray-100 dark:divide-slate-800 mb-6 text-sm">
 
         {{-- Company Type --}}
         <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-gray-500">Tipo de Registro</span>
-            <span class="font-medium text-gray-800">{{ $companyLabel }}</span>
+            <span class="text-gray-500 dark:text-gray-400">Tipo de Registro</span>
+            <span class="font-medium text-gray-800 dark:text-gray-100">{{ $companyLabel }}</span>
         </div>
 
         {{-- Account info --}}
         <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-gray-500">Nombre</span>
-            <span class="font-medium text-gray-800">{{ $data['name'] ?? '—' }}</span>
+            <span class="text-gray-500 dark:text-gray-400">Nombre</span>
+            <span class="font-medium text-gray-800 dark:text-gray-100">{{ $data['name'] ?? '—' }}</span>
         </div>
         <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-gray-500">Correo electrónico</span>
-            <span class="font-medium text-gray-800">{{ $data['email'] ?? '—' }}</span>
+            <span class="text-gray-500 dark:text-gray-400">Correo electrónico</span>
+            <span class="font-medium text-gray-800 dark:text-gray-100">{{ $data['email'] ?? '—' }}</span>
         </div>
 
         @if ($isLegal)
             <div class="flex items-center justify-between px-4 py-3">
-                <span class="text-gray-500">Nombre de la Empresa</span>
-                <span class="font-medium text-gray-800">{{ $data['company_name'] ?? '—' }}</span>
+                <span class="text-gray-500 dark:text-gray-400">Nombre de la Empresa</span>
+                <span class="font-medium text-gray-800 dark:text-gray-100">{{ $data['company_name'] ?? '—' }}</span>
             </div>
             <div class="flex items-center justify-between px-4 py-3">
-                <span class="text-gray-500">RUC / NIT / RFC</span>
-                <span class="font-medium text-gray-800">{{ $data['tax_id'] ?? '—' }}</span>
+                <span class="text-gray-500 dark:text-gray-400">RUC / NIT / RFC</span>
+                <span class="font-medium text-gray-800 dark:text-gray-100">{{ $data['tax_id'] ?? '—' }}</span>
             </div>
             <div class="flex items-center justify-between px-4 py-3">
-                <span class="text-gray-500">Dirección Legal</span>
-                <span class="font-medium text-gray-800 text-right max-w-xs">{{ $data['legal_address'] ?? '—' }}</span>
+                <span class="text-gray-500 dark:text-gray-400">Dirección Legal</span>
+                <span class="font-medium text-gray-800 dark:text-gray-100 text-right max-w-xs">{{ $data['legal_address'] ?? '—' }}</span>
             </div>
         @else
             <div class="flex items-center justify-between px-4 py-3">
-                <span class="text-gray-500">Número de Identificación</span>
-                <span class="font-medium text-gray-800">{{ $data['id_number'] ?? '—' }}</span>
+                <span class="text-gray-500 dark:text-gray-400">Número de Identificación</span>
+                <span class="font-medium text-gray-800 dark:text-gray-100">{{ $data['id_number'] ?? '—' }}</span>
             </div>
             <div class="flex items-center justify-between px-4 py-3">
-                <span class="text-gray-500">Dirección</span>
-                <span class="font-medium text-gray-800 text-right max-w-xs">{{ $data['address'] ?? '—' }}</span>
+                <span class="text-gray-500 dark:text-gray-400">Dirección</span>
+                <span class="font-medium text-gray-800 dark:text-gray-100 text-right max-w-xs">{{ $data['address'] ?? '—' }}</span>
             </div>
         @endif
 
         <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-gray-500">Ubicación</span>
-            <span class="font-medium text-gray-800">
+            <span class="text-gray-500 dark:text-gray-400">Ubicación</span>
+            <span class="font-medium text-gray-800 dark:text-gray-100">
                 {{ implode(', ', array_filter([
                     $data['city'] ?? null,
                     $data['state_province'] ?? null,
@@ -68,16 +68,16 @@
 
         {{-- Subscription details --}}
         <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-gray-500">Plan Seleccionado</span>
-            <span class="font-medium text-gray-800">{{ ucfirst($data['subscription_plan'] ?? 'basic') }}</span>
+            <span class="text-gray-500 dark:text-gray-400">Plan Seleccionado</span>
+            <span class="font-medium text-gray-800 dark:text-gray-100">{{ ucfirst($data['subscription_plan'] ?? 'basic') }}</span>
         </div>
         <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-gray-500">Banco de Origen</span>
-            <span class="font-medium text-gray-800">{{ $data['bank_origin'] ?? '—' }}</span>
+            <span class="text-gray-500 dark:text-gray-400">Banco de Origen</span>
+            <span class="font-medium text-gray-800 dark:text-gray-100">{{ $data['bank_origin'] ?? '—' }}</span>
         </div>
         <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-gray-500">Cuenta de Destino</span>
-            <span class="font-medium text-gray-800 text-right max-w-xs">{{ $data['account_destination'] ?? '—' }}</span>
+            <span class="text-gray-500 dark:text-gray-400">Cuenta de Destino</span>
+            <span class="font-medium text-gray-800 dark:text-gray-100 text-right max-w-xs">{{ $data['account_destination'] ?? '—' }}</span>
         </div>
 
     </div>
@@ -92,7 +92,7 @@
             required
             class="mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-blue focus:ring-brand-teal"
         >
-        <label for="consent" class="text-sm text-gray-600">
+        <label for="consent" class="text-sm text-gray-600 dark:text-gray-400">
             Confirmo que la información anterior es precisa y acepto los
             <a href="#" class="text-brand-teal hover:underline">Términos de Servicio</a>
             y la

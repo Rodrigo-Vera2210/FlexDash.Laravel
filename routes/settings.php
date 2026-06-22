@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Modules\Settings\Controllers\CatalogController;
 
-Route::middleware(['auth.jwt'])->group(function () {
+Route::middleware(['auth.jwt', 'auth.module:settings'])->group(function () {
     Route::get('/settings/catalogs', [CatalogController::class, 'index'])->name('settings.catalogs.index');
     
     // Subscription Settings

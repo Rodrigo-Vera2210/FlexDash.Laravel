@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="e6NoG7dFBKxCJ3WbChwcq4YM6VijfSN7ByrhG7No">
+    <title>Detalle de Suscripción — Panel de Control</title>
+    <meta name="description" content="FlexDash — Sistema de gestión empresarial POS">
+    <link rel="icon" type="image/jpeg" href="http://localhost/build/assets/FlexDash.jpg">
+
+    
+    <script>
+        (function() {
+            var theme = localStorage.getItem('theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        /* =========================================================
+           FLEXDASH — Variables de tema (duplicadas aquí para CDN)
+           ========================================================= */
+        :root {
+            --primary:           #0A7EA5;
+            --primary-dark:      #075f7d;
+            --primary-light:     rgba(10,126,165,0.09);
+            --cta:               #E35205;
+            --cta-dark:          #b83f04;
+            --accent-gold:       #F2A900;
+            --accent-magenta:    #A41D6A;
+            --bg:                #F8F9FA;
+            --surface:           #FFFFFF;
+            --text-main:         #0D1E36;
+            --text-secondary:    #374151;
+            --text-tertiary:     #6B7280;
+            --border:            #E5E7EB;
+            --border-light:      #F3F4F6;
+            --success:           #16A34A;
+            --success-light:     rgba(22,163,74,0.10);
+            --danger:            #DC2626;
+            --danger-light:      rgba(220,38,38,0.10);
+            --warning:           #D97706;
+            --warning-light:     rgba(217,119,6,0.12);
+            --shadow-sm: 0 2px 4px rgba(13,30,54,0.04), 0 4px 12px rgba(13,30,54,0.06);
+            --shadow-md: 0 4px 12px rgba(13,30,54,0.08), 0 12px 24px rgba(13,30,54,0.12);
+        }
+        html.dark {
+            --primary:           #1aa3d4;
+            --primary-dark:      #0A7EA5;
+            --primary-light:     rgba(26,163,212,0.13);
+            --cta:               #f06030;
+            --cta-dark:          #E35205;
+            --bg:                #0D1E36;
+            --surface:           #162538;
+            --text-main:         #F9FAFB;
+            --text-secondary:    #D1D5DB;
+            --text-tertiary:     #9CA3AF;
+            --border:            #1e3352;
+            --border-light:      #172944;
+            --success:           #22C55E;
+            --success-light:     rgba(34,197,94,0.13);
+            --danger:            #F87171;
+            --danger-light:      rgba(248,113,113,0.13);
+            --warning:           #FBBF24;
+            --warning-light:     rgba(251,191,36,0.13);
+            --shadow-sm: 0 4px 6px rgba(0,0,0,0.4);
+            --shadow-md: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        * { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-secondary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Sidebar */
+        #main-sidebar {
+            background-color: #0D1E36;
+            transition: background-color 0.3s;
+        }
+        html.dark #main-sidebar { background-color: #091525; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 14px; border-radius: 10px; margin-bottom: 2px;
+            font-weight: 600; font-size: 0.9rem;
+            transition: all 0.2s; cursor: pointer;
+            color: rgba(255,255,255,0.60); text-decoration: none;
+        }
+        .nav-item:hover { background-color: rgba(255,255,255,0.08); color: #fff; }
+        .nav-item.active {
+            background-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(10,126,165,0.35);
+        }
+
+        /* Cards */
+        .card-panel {
+            background-color: var(--surface);
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            transition: box-shadow 0.3s;
+        }
+
+        /* Topbar */
+        #main-topbar {
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--cta) !important;
+            color: #fff !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 0.875rem !important;
+            border: none !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            transition: all 0.2s ease !important;
+        }
+        .btn-primary:hover {
+            background-color: var(--cta-dark) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        .btn-secondary {
+            background-color: var(--surface) !important;
+            color: var(--text-main) !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 0.875rem !important;
+            border: 1px solid var(--border) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            transition: all 0.2s ease !important;
+        }
+        .btn-secondary:hover {
+            border-color: var(--primary) !important;
+            color: var(--primary) !important;
+            background-color: var(--primary-light) !important;
+        }
+
+        .btn-outline {
+            background-color: var(--surface) !important;
+            color: var(--text-main) !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 0.875rem !important;
+            border: 1px solid var(--border) !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            transition: all 0.2s ease !important;
+        }
+        .btn-outline:hover {
+            background-color: var(--bg) !important;
+            border-color: var(--primary) !important;
+            color: var(--primary) !important;
+        }
+
+        .btn-danger {
+            background-color: var(--danger) !important;
+            color: #fff !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 0.875rem !important;
+            border: none !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            transition: all 0.2s ease !important;
+        }
+        .btn-danger:hover {
+            background-color: var(--danger-light) !important;
+            color: var(--danger) !important;
+            border: 1px solid var(--danger) !important;
+        }
+
+        .btn-success {
+            background-color: var(--success) !important;
+            color: #fff !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 0.875rem !important;
+            border: none !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            transition: all 0.2s ease !important;
+        }
+        .btn-success:hover {
+            background-color: var(--success-light) !important;
+            color: var(--success) !important;
+            border: 1px solid var(--success) !important;
+        }
+
+        .btn-icon {
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 8px !important;
+            display: inline-flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            transition: all 0.2s ease !important;
+            color: var(--text-tertiary) !important;
+            background: transparent !important;
+            border: none !important;
+            cursor: pointer !important;
+        }
+        .btn-icon:hover {
+            background-color: var(--primary-light) !important;
+            color: var(--primary) !important;
+        }
+
+        /* Badges */
+        .badge { padding: 3px 9px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+        .badge-success  { background-color: var(--success-light);  color: var(--success); }
+        .badge-danger   { background-color: var(--danger-light);   color: var(--danger); }
+        .badge-warning  { background-color: var(--warning-light);  color: var(--warning); }
+        .badge-draft    { background-color: var(--border-light);   color: var(--text-tertiary); }
+        .badge-approved { background-color: rgba(10,126,165,0.10); color: var(--primary); }
+        .badge-paid     { background-color: var(--success-light);  color: var(--success); }
+        .badge-cancelled{ background-color: var(--danger-light);   color: var(--danger); }
+        .badge-info     { background-color: var(--info-light, rgba(8,145,178,0.10)); color: var(--info, #0891B2); }
+
+        /* Page animation */
+        .page-fade { animation: pageIn 0.3s ease forwards; }
+        @keyframes pageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Forms */
+        .form-label { display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
+        .form-input {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+            border-radius: 8px; font-size: 0.875rem; font-weight: 500;
+            background-color: var(--bg); color: var(--text-main); outline: none; transition: all 0.2s;
+        }
+        .form-input:focus { border-color: var(--primary); background-color: var(--surface); box-shadow: 0 0 0 3px var(--primary-light); }
+        .form-input::placeholder { color: var(--text-tertiary); }
+
+        /* Forms Redesign */
+        .input-solid {
+            background-color: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text-main) !important;
+            border-radius: 6px !important;
+            padding: 8px 12px !important;
+            width: 100% !important;
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            transition: all 0.2s ease !important;
+            outline: none !important;
+            box-shadow: var(--shadow-sm) !important;
+        }
+        .input-solid:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 2px var(--primary-light) !important;
+        }
+        .input-solid::placeholder { color: var(--text-tertiary) !important; }
+
+        select.input-solid {
+            appearance: none !important;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='none' stroke='%236B7280' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'></path></svg>") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 12px center !important;
+            background-size: 16px !important;
+            padding-right: 36px !important;
+        }
+        html.dark select.input-solid {
+            background-image: url("data:image/svg+xml;utf8,<svg fill='none' stroke='%239CA3AF' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'></path></svg>") !important;
+        }
+
+        .input-icon-wrapper {
+            position: relative !important;
+            width: 100% !important;
+            display: block !important;
+        }
+        .input-icon-wrapper i, .input-icon-wrapper svg {
+            position: absolute !important;
+            top: 50% !important;
+            left: 12px !important;
+            transform: translateY(-50%) !important;
+            color: var(--text-tertiary) !important;
+            pointer-events: none !important;
+            font-size: 1rem !important;
+            z-index: 10 !important;
+        }
+        .input-icon-wrapper .input-solid {
+            padding-left: 36px !important;
+        }
+
+        /* Tables */
+        .table-header { padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-tertiary); background-color: var(--bg); border-bottom: 1px solid var(--border); }
+        .table-cell   { padding: 14px 16px; font-size: 0.875rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+
+        /* Alerts */
+        .alert-success { background-color: var(--success-light); border: 1px solid var(--success); color: var(--success); padding: 12px 16px; border-radius: 10px; font-size: 0.875rem; font-weight: 500; }
+        .alert-danger  { background-color: var(--danger-light);  border: 1px solid var(--danger);  color: var(--danger);  padding: 12px 16px; border-radius: 10px; font-size: 0.875rem; font-weight: 500; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+        /* Legacy compat — card/kpi-card aliases */
+        .card { background-color: var(--surface); border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); }
+        .kpi-card { background-color: var(--surface); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); transition: box-shadow 0.3s; }
+        .kpi-card:hover { box-shadow: var(--shadow-md); }
+    </style>
+
+    </head>
+
+<body class="h-screen flex overflow-hidden" style="background-color: var(--bg);">
+
+    
+    <aside id="main-sidebar"
+           class="w-64 flex-shrink-0 flex flex-col h-full z-30"
+           style="background-color: #0D1E36; min-height: 100vh;">
+
+        
+        <div class="flex items-center gap-3 px-5 py-5 border-b" style="border-color: rgba(255,255,255,0.08);">
+            <div class="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 bg-white p-0.5">
+                <img src="http://localhost/build/assets/FlexDash.jpg" class="w-full h-full object-cover rounded-lg" alt="FlexDash">
+            </div>
+            <div>
+                <p class="text-white font-bold text-sm leading-none tracking-wide">FlexDash</p>
+                <p class="text-xs mt-0.5" style="color: rgba(255,255,255,0.40);">Sistema POS v2.0</p>
+            </div>
+        </div>
+
+        
+        <nav class="flex-1 py-5 px-3 overflow-y-auto space-y-0.5">
+                            <p class="px-3 pb-2 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Administración</p>
+
+                <a href="http://localhost/superadmin/dashboard"
+                   class="nav-item ">
+                    <i class="fa-solid fa-crown w-5 text-center text-amber-500"></i>
+                    <span>Portal Superadmin</span>
+                </a>
+
+                <a href="http://localhost/superadmin/payments"
+                   class="nav-item ">
+                    <i class="fa-solid fa-cash-register w-5 text-center text-teal-400"></i>
+                    <span>Caja de Suscripciones</span>
+                </a>
+
+                <a href="http://localhost/superadmin/plans"
+                   class="nav-item ">
+                    <i class="fa-solid fa-gears w-5 text-center text-indigo-400"></i>
+                    <span>Administración de Planes</span>
+                </a>
+
+                <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.30);">Sistema</p>
+
+                <a href="http://localhost/superadmin/audits"
+                   class="nav-item ">
+                    <i class="fa-solid fa-file-shield w-5 text-center"></i>
+                    <span>Auditoría</span>
+                </a>
+
+                    </nav>
+
+        
+        <div class="p-3 m-3 rounded-xl" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
+                     style="background-color: var(--primary-light); color: var(--primary); border: 2px solid rgba(26,163,212,0.3);">
+                    SU
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-white text-sm font-bold truncate">Super Admin</p>
+                    <p class="text-xs truncate" style="color: rgba(255,255,255,0.40);">superadmin</p>
+                </div>
+                <form method="POST" action="http://localhost/logout">
+                    <input type="hidden" name="_token" value="e6NoG7dFBKxCJ3WbChwcq4YM6VijfSN7ByrhG7No" autocomplete="off">                    <button type="submit" class="btn-icon" style="color: rgba(255,255,255,0.40);" title="Cerrar sesión">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    
+    <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+
+        
+        <header id="main-topbar" class="h-16 flex items-center justify-between px-6 flex-shrink-0 z-10">
+            <div>
+                <h1 class="text-base font-bold leading-none" style="color: var(--text-main);">    <a href="http://localhost/superadmin/dashboard" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors mr-2">
+        <i class="fa-solid fa-arrow-left text-base"></i>
+    </a>
+    Detalle de Empresa: Lisrod
+</h1>
+                <p class="text-xs mt-0.5" style="color: var(--text-tertiary);">Monitoreo de usuarios activos, plan y registro histórico de pagos</p>
+            </div>
+            <div class="flex items-center gap-3">
+                                <span class="text-xs hidden sm:block font-medium" style="color: var(--text-tertiary);">21/06/2026 17:15</span>
+
+                
+                <button id="theme-toggle" class="btn-icon rounded-full"
+                        style="background-color: var(--bg); border: 1px solid var(--border);"
+                        title="Cambiar tema" onclick="toggleTheme()">
+                    <i id="theme-icon" class="fa-solid fa-moon text-sm" style="color: var(--text-tertiary);"></i>
+                </button>
+            </div>
+        </header>
+
+        
+        <div class="px-6 pt-4 flex-shrink-0">
+                                            </div>
+
+        
+        <main class="flex-1 overflow-y-auto px-6 pb-8 pt-2">
+                            
+        
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        
+        <div class="card-panel p-6 lg:col-span-2">
+            <h3 class="font-bold text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-3 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-credit-card text-brand-blue dark:text-primary"></i> Información de Suscripción
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 text-sm">
+                <div>
+                    <span class="text-slate-400 block font-semibold text-xs uppercase tracking-wider mb-1">Plan Actual</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-lg font-bold text-slate-800 dark:text-slate-100 capitalize">
+                            Plan basic
+                        </span>
+                        <form action="http://localhost/superadmin/companies/1/change-plan" method="POST" class="inline">
+                            <input type="hidden" name="_token" value="e6NoG7dFBKxCJ3WbChwcq4YM6VijfSN7ByrhG7No" autocomplete="off">                            <select name="plan" onchange="this.form.submit()" class="text-xs px-2 py-1 rounded border border-slate-350 dark:border-slate-700 bg-transparent text-slate-800 dark:text-slate-100 focus:outline-none">
+                                <option value="basic" selected>Basic</option>
+                                <option value="standard" >Standard</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="text-slate-400 block font-semibold text-xs uppercase tracking-wider mb-1">Estado de Suscripción</span>
+                    <div>
+                                                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                                Pendiente de Aprobación
+                            </span>
+                                            </div>
+                </div>
+
+                <div>
+                    <span class="text-slate-400 block font-semibold text-xs uppercase tracking-wider mb-1">Fecha de Inicio</span>
+                    <span class="text-slate-800 dark:text-slate-200 font-semibold">
+                        05/06/2026 22:27
+                    </span>
+                </div>
+
+                <div>
+                    <span class="text-slate-400 block font-semibold text-xs uppercase tracking-wider mb-1">Fecha de Fin (Vencimiento)</span>
+                    <span class="text-slate-800 dark:text-slate-200 font-semibold flex items-center gap-1.5">
+                        <i class="fa-regular fa-calendar-check text-slate-400"></i>
+                        Sin límite
+                        
+                                            </span>
+                </div>
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+                <form action="http://localhost/superadmin/companies/1/toggle-status" method="POST" class="inline"
+                      >
+                    <input type="hidden" name="_token" value="e6NoG7dFBKxCJ3WbChwcq4YM6VijfSN7ByrhG7No" autocomplete="off">                    <input type="hidden" name="reason" value="">
+                    <button type="submit" class="btn-secondary text-sm py-2 px-4 inline-flex items-center gap-2">
+                        <i class="fa-solid fa-power-off text-xs"></i>
+                        Activar Suscripción
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        
+        <div class="card-panel p-6">
+            <h3 class="font-bold text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-3 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-building text-brand-blue dark:text-primary"></i> Datos de la Empresa
+            </h3>
+            <div class="space-y-3.5 text-sm">
+                <div>
+                    <span class="text-slate-400 block font-semibold text-xs uppercase tracking-wider">Razón Social</span>
+                    <span class="font-semibold text-slate-800 dark:text-slate-150">Lisrod</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block font-semibold text-xs uppercase tracking-wider">Tipo de Contribuyente</span>
+                    <span class="capitalize text-slate-700 dark:text-slate-300">legal entity</span>
+                </div>
+                                    <div>
+                        <span class="text-slate-400 block font-semibold text-xs uppercase tracking-wider">Identificación Tributaria (RUC/NIT)</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">0803592435001</span>
+                    </div>
+                                <div>
+                    <span class="text-slate-400 block font-semibold text-xs uppercase tracking-wider">Dirección</span>
+                    <span class="text-slate-700 dark:text-slate-300">
+                        Quito, Quito, Ecuador
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="card-panel p-6 mb-6">
+        <h3 class="font-bold text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-3 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-brand-blue dark:text-primary"></i> Personalización de Suscripción (Overrides)
+        </h3>
+        <form action="http://localhost/superadmin/companies/1/custom-limits" method="POST">
+            <input type="hidden" name="_token" value="e6NoG7dFBKxCJ3WbChwcq4YM6VijfSN7ByrhG7No" autocomplete="off">            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <label class="flex items-center gap-2 font-semibold text-sm text-slate-700 dark:text-slate-200 mb-2 cursor-pointer">
+                        <input type="checkbox" name="override_admins" value="1" 
+                               onchange="document.getElementById('max_admins_input').disabled = !this.checked; if(!this.checked) document.getElementById('max_admins_input').value = '1';"
+                               class="rounded border-slate-350 dark:border-slate-700 text-brand-blue">
+                        <span>Personalizar Límite de Admins</span>
+                    </label>
+                    <input type="number" name="max_admins" id="max_admins_input" 
+                           value="1"
+                           disabled
+                           class="input-solid text-xs py-1.5" min="1">
+                    <span class="text-[10px] text-slate-400 block mt-1">Por defecto del plan: 1</span>
+                </div>
+
+                
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <label class="flex items-center gap-2 font-semibold text-sm text-slate-700 dark:text-slate-200 mb-2 cursor-pointer">
+                        <input type="checkbox" name="override_sellers" value="1" 
+                               onchange="document.getElementById('max_sellers_input').disabled = !this.checked; if(!this.checked) document.getElementById('max_sellers_input').value = '2';"
+                               class="rounded border-slate-350 dark:border-slate-700 text-brand-blue">
+                        <span>Personalizar Límite de Vendedores</span>
+                    </label>
+                    <input type="number" name="max_sellers" id="max_sellers_input" 
+                           value="2"
+                           disabled
+                           class="input-solid text-xs py-1.5" min="0">
+                    <span class="text-[10px] text-slate-400 block mt-1">Por defecto del plan: 2</span>
+                </div>
+
+                
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <label class="flex items-center gap-2 font-semibold text-sm text-slate-700 dark:text-slate-200 mb-2 cursor-pointer">
+                        <input type="checkbox" name="override_transactions" value="1" 
+                               onchange="document.getElementById('max_transactions_input').disabled = !this.checked; if(!this.checked) document.getElementById('max_transactions_input').value = '100';"
+                               class="rounded border-slate-350 dark:border-slate-700 text-brand-blue">
+                        <span>Personalizar Transacciones/mes</span>
+                    </label>
+                    <input type="number" name="max_monthly_transactions" id="max_transactions_input" 
+                           value="100"
+                           disabled
+                           class="input-solid text-xs py-1.5" min="1">
+                    <span class="text-[10px] text-slate-400 block mt-1">Por defecto del plan: 100</span>
+                </div>
+            </div>
+
+            
+            <div class="p-5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 mb-6">
+                <label class="flex items-center gap-2 font-bold text-sm text-slate-700 dark:text-slate-200 mb-4 cursor-pointer">
+                    <input type="checkbox" name="override_modules" value="1" id="override_modules_checkbox"
+                           
+                           onchange="const inputs = document.querySelectorAll('.module-checkbox'); inputs.forEach(el => el.disabled = !this.checked);"
+                           class="rounded border-slate-350 dark:border-slate-700 text-brand-blue">
+                    <span>Personalizar Módulos Habilitados (Ignorar por defecto del plan)</span>
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                                <label class="flex items-center gap-2 text-xs font-semibold cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" name="active_modules[]" value="ventas" 
+                                   checked
+                                   disabled
+                                   class="module-checkbox rounded border-slate-300 dark:border-slate-700 text-brand-blue">
+                            <span>Ventas (Facturación)</span>
+                        </label>
+                                            <label class="flex items-center gap-2 text-xs font-semibold cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" name="active_modules[]" value="clientes" 
+                                   checked
+                                   disabled
+                                   class="module-checkbox rounded border-slate-300 dark:border-slate-700 text-brand-blue">
+                            <span>Clientes (Directorio)</span>
+                        </label>
+                                            <label class="flex items-center gap-2 text-xs font-semibold cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" name="active_modules[]" value="caja_chica" 
+                                   checked
+                                   disabled
+                                   class="module-checkbox rounded border-slate-300 dark:border-slate-700 text-brand-blue">
+                            <span>Caja Chica</span>
+                        </label>
+                                            <label class="flex items-center gap-2 text-xs font-semibold cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" name="active_modules[]" value="settings" 
+                                   checked
+                                   disabled
+                                   class="module-checkbox rounded border-slate-300 dark:border-slate-700 text-brand-blue">
+                            <span>Configuración/Vendedores</span>
+                        </label>
+                                            <label class="flex items-center gap-2 text-xs font-semibold cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" name="active_modules[]" value="kardex" 
+                                   checked
+                                   disabled
+                                   class="module-checkbox rounded border-slate-300 dark:border-slate-700 text-brand-blue">
+                            <span>Kardex (Inventario)</span>
+                        </label>
+                                            <label class="flex items-center gap-2 text-xs font-semibold cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" name="active_modules[]" value="compras" 
+                                   
+                                   disabled
+                                   class="module-checkbox rounded border-slate-300 dark:border-slate-700 text-brand-blue">
+                            <span>Compras</span>
+                        </label>
+                                            <label class="flex items-center gap-2 text-xs font-semibold cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" name="active_modules[]" value="proveedores" 
+                                   
+                                   disabled
+                                   class="module-checkbox rounded border-slate-300 dark:border-slate-700 text-brand-blue">
+                            <span>Proveedores</span>
+                        </label>
+                                    </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="btn-primary text-sm py-2 px-5">
+                    <i class="fa-solid fa-floppy-disk mr-1"></i> Guardar Personalización
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        
+        <div class="card-panel overflow-hidden">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                <h3 class="font-bold text-slate-800 dark:text-slate-100 flex items-center justify-between">
+                    <span><i class="fa-solid fa-user-shield text-indigo-500 mr-2"></i> Administradores Activos</span>
+                    <span class="px-2 py-0.5 rounded text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-bold">
+                        1
+                    </span>
+                </h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold text-xs uppercase">
+                            <th class="px-6 py-3">Nombre</th>
+                            <th class="px-6 py-3">Correo</th>
+                            <th class="px-6 py-3">Rol</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
+                                <td class="px-6 py-3 font-semibold text-slate-800 dark:text-slate-250">Rodrigo Vera</td>
+                                <td class="px-6 py-3 text-slate-500">donra2210@gmail.com</td>
+                                <td class="px-6 py-3 capitalize text-xs font-semibold text-indigo-500">company representative</td>
+                            </tr>
+                                            </tbody>
+                </table>
+            </div>
+        </div>
+
+        
+        <div class="card-panel overflow-hidden">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                <h3 class="font-bold text-slate-800 dark:text-slate-100 flex items-center justify-between">
+                    <span><i class="fa-solid fa-user-tag text-teal-500 mr-2"></i> Vendedores Activos</span>
+                    <span class="px-2 py-0.5 rounded text-xs bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 font-bold">
+                        0
+                    </span>
+                </h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold text-xs uppercase">
+                            <th class="px-6 py-3">Nombre</th>
+                            <th class="px-6 py-3">Correo</th>
+                            <th class="px-6 py-3">Rol</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                                                    <tr>
+                                <td colspan="3" class="px-6 py-6 text-center text-slate-400">
+                                    No hay vendedores activos.
+                                </td>
+                            </tr>
+                                            </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="card-panel overflow-hidden" x-data="{ selectedPayment: null }">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+            <h3 class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-receipt text-amber-500"></i> Registro Histórico de Pagos
+            </h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold text-xs uppercase">
+                        <th class="px-6 py-4">ID</th>
+                        <th class="px-6 py-4">Transacción</th>
+                        <th class="px-6 py-4">Plan</th>
+                        <th class="px-6 py-4">Fecha Solicitud</th>
+                        <th class="px-6 py-4">Banco Origen</th>
+                        <th class="px-6 py-4">Cuenta Destino</th>
+                        <th class="px-6 py-4">Comprobante</th>
+                        <th class="px-6 py-4">Estado</th>
+                        <th class="px-6 py-4 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
+                            <td class="px-6 py-4 font-mono text-xs text-slate-400">#1</td>
+                            <td class="px-6 py-4">
+                                                                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-500">Renovación</span>
+                                                            </td>
+                            <td class="px-6 py-4 capitalize text-slate-700 dark:text-slate-300 font-semibold">basic</td>
+                            <td class="px-6 py-4 text-slate-500">21/06/2026 04:15</td>
+                            <td class="px-6 py-4 text-slate-500">Banco Pichincha</td>
+                            <td class="px-6 py-4 text-xs text-slate-500">Banco Guayaquil - Ahorros #123456789</td>
+                            <td class="px-6 py-4">
+                                                                    <button @click="selectedPayment = {
+                                                id: 1,
+                                                company_name: 'Lisrod',
+                                                plan: 'basic',
+                                                type: 'renewal',
+                                                bank_origin: 'Banco Pichincha',
+                                                account_destination: 'Banco Guayaquil - Ahorros #123456789',
+                                                status: 'pending',
+                                                rejection_reason: '',
+                                                formatted_date: '21/06/2026 04:15',
+                                                receipt_url: 'http://localhost/receipts/jf9g9MxUSor5lgK80y3lu7Li9OqdxL7YyIE9uuAz.png',
+                                                approve_url: 'http://localhost/superadmin/companies/1/approve',
+                                                reject_url: 'http://localhost/superadmin/companies/1/reject'
+                                            }"
+                                            class="text-brand-blue dark:text-primary font-semibold hover:underline inline-flex items-center gap-1 focus:outline-none">
+                                        <i class="fa-solid fa-receipt text-xs"></i> Ver Detalle
+                                    </button>
+                                                            </td>
+                            <td class="px-6 py-4">
+                                                                    <span class="px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                                        Pendiente
+                                    </span>
+                                                            </td>
+                            <td class="px-6 py-4 text-center">
+                                                                    <div class="flex items-center justify-center gap-2">
+                                        <form action="http://localhost/superadmin/companies/1/approve" method="POST" class="inline">
+                                            <input type="hidden" name="_token" value="e6NoG7dFBKxCJ3WbChwcq4YM6VijfSN7ByrhG7No" autocomplete="off">                                            <input type="hidden" name="payment_id" value="1">
+                                            <button type="submit" class="btn-success text-xs py-1 px-3">
+                                                Aprobar
+                                            </button>
+                                        </form>
+                                        <form action="http://localhost/superadmin/companies/1/reject" method="POST" class="inline"
+                                               onsubmit="const reason = prompt('Motivo de rechazo del pago:'); if (reason === null) return false; this.reason.value = reason;">
+                                             <input type="hidden" name="_token" value="e6NoG7dFBKxCJ3WbChwcq4YM6VijfSN7ByrhG7No" autocomplete="off">                                             <input type="hidden" name="payment_id" value="1">
+                                             <input type="hidden" name="reason" value="">
+                                             <button type="submit" class="btn-danger text-xs py-1 px-3">
+                                                 Rechazar
+                                             </button>
+                                         </form>
+                                    </div>
+                                                            </td>
+                        </tr>
+                                    </tbody>
+            </table>
+        </div>
+
+        
+        <template x-if="selectedPayment">
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm"
+                 @click.away="selectedPayment = null"
+                 @keydown.escape.window="selectedPayment = null">
+                <div class="relative max-w-4xl w-full bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-2xl p-6 flex flex-col">
+                    
+                    <div class="flex justify-between items-center pb-4 border-b border-slate-200 dark:border-slate-700 mb-6">
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info text-brand-blue"></i> Detalle de Pago y Comprobante
+                        </h3>
+                        <button @click="selectedPayment = null" 
+                                class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold transition-colors">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start justify-start text-left">
+                        
+                        <div class="md:col-span-5 space-y-6">
+                            <div class="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-xl border border-slate-200 dark:border-slate-755 space-y-4">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Empresa</span>
+                                    <span class="text-sm font-semibold text-slate-800 dark:text-slate-100" x-text="selectedPayment.company_name"></span>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Plan</span>
+                                        <span class="text-xs font-semibold capitalize text-slate-800 dark:text-slate-200" x-text="selectedPayment.plan"></span>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Tipo</span>
+                                        <span class="text-xs font-bold uppercase text-slate-500" x-text="selectedPayment.type"></span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Fecha de Envío</span>
+                                    <span class="text-xs text-slate-600 dark:text-slate-400" x-text="selectedPayment.formatted_date"></span>
+                                </div>
+
+                                <div class="border-t border-slate-200 dark:border-slate-800 pt-3">
+                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Banco de Origen</span>
+                                    <span class="text-xs text-slate-700 dark:text-slate-300 font-semibold" x-text="selectedPayment.bank_origin"></span>
+                                </div>
+
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Cuenta de Destino</span>
+                                    <span class="text-[11px] text-slate-600 dark:text-slate-400" x-text="selectedPayment.account_destination"></span>
+                                </div>
+
+                                <div class="border-t border-slate-200 dark:border-slate-800 pt-3 flex items-center justify-between">
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Estado</span>
+                                    <div>
+                                        <template x-if="selectedPayment.status === 'approved'">
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-500/20">Aprobado</span>
+                                        </template>
+                                        <template x-if="selectedPayment.status === 'rejected'">
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 dark:bg-rose-955/30 dark:text-rose-400 border border-rose-500/20">Rechazado</span>
+                                        </template>
+                                        <template x-if="selectedPayment.status === 'pending'">
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-955/30 dark:text-amber-400 border border-amber-500/20">Pendiente</span>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <template x-if="selectedPayment.status === 'rejected' && selectedPayment.rejection_reason">
+                                    <div class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-xs text-rose-600 dark:text-rose-400">
+                                        <span class="font-bold block uppercase tracking-wider text-[9px] text-rose-500 mb-1">Motivo de Rechazo:</span>
+                                        <span x-text="selectedPayment.rejection_reason"></span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            
+                            <template x-if="selectedPayment.status === 'pending'">
+                                <div class="flex items-center gap-3 w-full bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                                    <form :action="selectedPayment.approve_url" method="POST" class="flex-1">
+                                        <input type="hidden" name="_token" value="e6NoG7dFBKxCJ3WbChwcq4YM6VijfSN7ByrhG7No">
+                                        <input type="hidden" name="payment_id" :value="selectedPayment.id">
+                                        <button type="submit" class="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs transition-colors">
+                                            Aprobar Pago
+                                        </button>
+                                    </form>
+                                    <form :action="selectedPayment.reject_url" method="POST" class="flex-1"
+                                          onsubmit="const reason = prompt('Motivo de rechazo del pago:'); if (reason === null) return false; this.reason.value = reason;">
+                                        <input type="hidden" name="_token" value="e6NoG7dFBKxCJ3WbChwcq4YM6VijfSN7ByrhG7No">
+                                        <input type="hidden" name="payment_id" :value="selectedPayment.id">
+                                        <input type="hidden" name="reason" value="">
+                                        <button type="submit" class="w-full py-2.5 px-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg text-xs transition-colors">
+                                            Rechazar
+                                        </button>
+                                    </form>
+                                </div>
+                            </template>
+                        </div>
+
+                        
+                        <div class="md:col-span-7 flex flex-col items-center w-full">
+                            <div class="w-full border border-slate-200 dark:border-slate-700/80 rounded-xl overflow-hidden bg-slate-900/40 p-2 flex items-center justify-center">
+                                <template x-if="selectedPayment.receipt_url">
+                                    <a :href="selectedPayment.receipt_url" target="_blank" title="Ver en tamaño completo" class="relative group block w-full text-center">
+                                        <img :src="selectedPayment.receipt_url" alt="Comprobante de Pago" class="max-h-[50vh] rounded-lg object-contain shadow-md hover:opacity-95 transition-opacity inline-block">
+                                        <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-lg">
+                                            <span class="text-xs text-white bg-slate-900/80 px-3 py-1.5 rounded-full font-semibold border border-white/20">
+                                                <i class="fa-solid fa-magnifying-glass-plus mr-1"></i> Expandir Imagen
+                                            </span>
+                                        </div>
+                                    </a>
+                                </template>
+                                <template x-if="!selectedPayment.receipt_url">
+                                    <div class="h-40 flex items-center justify-center text-slate-400 text-sm">
+                                        <i class="fa-solid fa-circle-question text-xl mr-2"></i> Sin imagen disponible
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+        </main>
+    </div>
+
+    
+    <script>
+        function toggleTheme() {
+            var html = document.documentElement;
+            var isDark = html.classList.contains('dark');
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('theme-icon').className = 'fa-solid fa-moon text-sm';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('theme-icon').className = 'fa-solid fa-sun text-sm';
+            }
+        }
+
+        // Set icon on load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.documentElement.classList.contains('dark')) {
+                var icon = document.getElementById('theme-icon');
+                if (icon) icon.className = 'fa-solid fa-sun text-sm';
+            }
+        });
+    </script>
+
+    </body>
+
+</html>

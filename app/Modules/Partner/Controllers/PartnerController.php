@@ -4,6 +4,7 @@ namespace App\Modules\Partner\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Partner\Models\Partner;
+use App\Rules\UniqueForCompany;
 use Illuminate\Http\Request;
 
 class PartnerController extends Controller
@@ -37,7 +38,7 @@ class PartnerController extends Controller
             'business_name'   => 'required|string|max:200',
             'trade_name'      => 'nullable|string|max:200',
             'document_type'   => 'required|in:RUC,DNI,CE',
-            'document_number' => 'required|string|max:20|unique:partners',
+            'document_number' => ['required', 'string', 'max:20', new UniqueForCompany('partners', 'document_number')],
             'email'           => 'nullable|email|max:255',
             'phone'           => 'nullable|string|max:20',
             'address'         => 'nullable|string|max:255',
@@ -67,6 +68,8 @@ class PartnerController extends Controller
     {
         $data = $request->validate([
             'type'          => 'required|in:cliente,proveedor,ambos',
+            'document_type'   => 'sometimes|required|in:RUC,DNI,CE',
+            'document_number' => ['sometimes', 'required', 'string', 'max:20', new UniqueForCompany('partners', 'document_number', $partner->id)],
             'business_name' => 'required|string|max:200',
             'trade_name'    => 'nullable|string|max:200',
             'email'         => 'nullable|email|max:255',

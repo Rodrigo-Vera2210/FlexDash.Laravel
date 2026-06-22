@@ -34,6 +34,19 @@ All code MUST follow SOLID principles. Class and method names self-documenting; 
 
 All service endpoints MUST use JWT (JSON Web Token) for user validation and authentication. JWT tokens issued upon login contain user identity and permissions. Token validation MUST occur at the Controller/Middleware level before request reaches Services. Tokens MUST be validated on every request; refresh token rotation required for security. No session-based authentication in services. JWT payload MUST include: `user_id`, `role`, `permissions`, `exp` (expiration), `iat` (issued at). Tokens stored in HTTP-only cookies on frontend; transmission via Authorization Bearer header required.
 
+### VII. Localization & Regional Focus: Ecuador (SRI) (NON-NEGOTIABLE)
+
+The application is localized exclusively for Ecuador and must adhere to all local administrative and tax regulations set by the Servicio de Rentas Internas (SRI):
+- **Placeholders & Labels**: All interface inputs, placeholders, tables, and dropdowns for person/entity identification must use Ecuadorian terms: Cédula de Identidad (CI), Registro Único de Contribuyentes (RUC), and Pasaporte.
+- **Taxation**: Calculation models must support standard Impuesto al Valor Agregado (IVA) rates and withholding scenarios.
+- **Electronic Invoicing Flow**: Invoicing workflows must strictly implement the offline authorization model of the SRI:
+  1. Generate XML according to SRI XSD schemas.
+  2. Sign XML via XAdES-BES using a PKCS#12 (.p12) digital certificate.
+  3. Send to SRI SOAP Web Service (Reception) and check for RECIBIDA / DEVUELTA.
+  4. Query SRI SOAP Web Service (Authorization) and check for AUTORIZADO / NO AUTORIZADO.
+  5. Generate the RIDE (Representación Impresa del Documento Electrónico) in PDF format.
+  6. Email client with both the authorized XML and the RIDE PDF attached.
+
 ## Architecture Guidelines
 
 ### Backend Module Structure
@@ -112,4 +125,4 @@ This Constitution supersedes all other development guides and practices. All con
 
 **Compliance Review**: Constitution review occurs at project milestones or when 3+ new features have been completed. Non-compliance issues logged as technical debt and tracked in sprint planning.
 
-**Version**: 1.2.0 | **Ratified**: 2026-06-02 | **Last Amended**: 2026-06-06
+**Version**: 1.3.0 | **Ratified**: 2026-06-02 | **Last Amended**: 2026-06-22

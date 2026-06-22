@@ -91,6 +91,17 @@ class EnsureJwtAuthenticated
         $request->setUserResolver(fn() => $user);
         Auth::login($user);
 
+        if ($user->role === 'superadmin') {
+            if (!$request->routeIs('superadmin.*') && !$request->is('superadmin*') 
+                && !$request->routeIs('logout') && !$request->is('logout')
+                && !$request->routeIs('receipts.show') && !str_starts_with($request->getPathInfo(), '/receipts/')) {
+                if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
+                    return response()->json(['error' => 'unauthorized'], 403);
+                }
+                return redirect()->route('superadmin.dashboard');
+            }
+        }
+
         // Check subscription status and user status for non-superadmins with a company
         if ($user->role !== 'superadmin' && $user->company_id) {
             $company = $user->company;
@@ -103,8 +114,11 @@ class EnsureJwtAuthenticated
             }
 
             if ($isSuspended) {
-                // Allow logout or suspension view to load without redirection loop
-                if (!$request->routeIs('logout') && !$request->is('logout') && !$request->routeIs('subscription.suspended') && !$request->is('subscription-suspended')) {
+                // Allow logout, suspension view, payment submission, or receipt viewing while suspended to load without redirection loop
+                if (!$request->routeIs('logout') && !$request->is('logout') 
+                    && !$request->routeIs('subscription.suspended') && !$request->is('subscription-suspended')
+                    && !$request->routeIs('subscription.suspended.payment') && !$request->is('subscription-suspended/payment')
+                    && !$request->routeIs('receipts.show') && !str_starts_with($request->getPathInfo(), '/receipts/')) {
                     if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
                         return response()->json(['error' => 'subscription_inactive'], 403);
                     }

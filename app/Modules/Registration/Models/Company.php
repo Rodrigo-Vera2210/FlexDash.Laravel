@@ -25,6 +25,11 @@ class Company extends Model
         'subscription_plan',
         'subscription_status',
         'subscription_expires_at',
+        'suspension_reason',
+        'active_modules',
+        'max_monthly_transactions',
+        'max_admins',
+        'max_sellers',
     ];
 
     protected $casts = [
@@ -32,10 +37,58 @@ class Company extends Model
         'legal_entity_flag'  => 'boolean',
         'natural_entity_flag' => 'boolean',
         'subscription_expires_at' => 'datetime',
+        'active_modules'     => 'array',
     ];
 
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    public function subscriptionPayments(): HasMany
+    {
+        return $this->hasMany(\App\Models\SubscriptionPayment::class);
+    }
+
+    // ── Accessors & Helpers ──────────────────────────────────────────
+
+    public function getOwnerAttribute()
+    {
+        return $this->users()->where('role', 'owner')->first()
+            ?? $this->users()->where('role', 'company_representative')->first()
+            ?? $this->users()->first();
+    }
+
+    public function getPlanAttribute()
+    {
+        return \App\Models\Plan::where('code', $this->subscription_plan)->first();
+    }
+
+    public function getActiveModulesAttribute($value)
+    {
+        if (!is_null($value)) {
+            return is_string($value) ? json_decode($value, true) : $value;
+        }
+        return $this->plan ? $this->plan->modules : [];
+    }
+
+    public function hasModuleAccess(string $module): bool
+    {
+        return in_array($module, $this->active_modules);
+    }
+
+    public function getMaxAdminsAttribute($value)
+    {
+        return $value ?? ($this->plan ? $this->plan->max_admins : 1);
+    }
+
+    public function getMaxSellersAttribute($value)
+    {
+        return $value ?? ($this->plan ? $this->plan->max_sellers : 2);
+    }
+
+    public function getMaxMonthlyTransactionsAttribute($value)
+    {
+        return $value ?? ($this->plan ? $this->plan->max_monthly_transactions : 100);
     }
 }

@@ -39,6 +39,8 @@ class AuditLog extends Model
     // ── Factory helper ────────────────────────────────────────────────
     public static function record(string $event, Model $model, ?array $old = null, ?array $new = null): void
     {
+        $companyId = $model->company_id ?? ($model instanceof \App\Modules\Registration\Models\Company ? $model->id : null);
+
         static::create([
             'user_id'        => auth()->id(),
             'event'          => $event,
@@ -48,6 +50,7 @@ class AuditLog extends Model
             'new_values'     => $new,
             'ip_address'     => request()->ip(),
             'user_agent'     => request()->userAgent(),
+            'company_id'     => $companyId,
         ]);
     }
 }

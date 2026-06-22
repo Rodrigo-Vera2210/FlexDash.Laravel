@@ -27,15 +27,15 @@ class EmailOtpNotification extends Notification
     {
         $expiresInHours = $this->expiresInMinutes / 60;
         $expiryLabel = $expiresInHours >= 1
-            ? round($expiresInHours) . ' hour(s)'
-            : $this->expiresInMinutes . ' minute(s)';
+            ? round($expiresInHours) . ' ' . (round($expiresInHours) == 1 ? 'hora' : 'horas')
+            : $this->expiresInMinutes . ' ' . ($this->expiresInMinutes == 1 ? 'minuto' : 'minutos');
 
         return (new MailMessage)
-            ->subject('Verify your FlexDash account')
-            ->greeting("Hello, {$notifiable->name}!")
-            ->line('To complete your registration, please enter the following verification code:')
-            ->line("**{$this->otpCode}**")
-            ->line("This code expires in {$expiryLabel}.")
-            ->line('If you did not request this, you can safely ignore this email.');
+            ->subject('Verifica tu cuenta en FlexDash')
+            ->view('emails.otp-verification', [
+                'otpCode'    => $this->otpCode,
+                'userName'   => $notifiable->name,
+                'expiresIn'  => $expiryLabel,
+            ]);
     }
 }

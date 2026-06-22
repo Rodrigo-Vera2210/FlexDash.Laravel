@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.jwt' => \App\Http\Middleware\EnsureJwtAuthenticated::class,
             'auth.superadmin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'auth.admin_only' => \App\Http\Middleware\RestrictSellerAccess::class,
+            'auth.module' => \App\Http\Middleware\EnsureModuleAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

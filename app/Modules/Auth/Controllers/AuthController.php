@@ -79,6 +79,11 @@ class AuthController extends Controller
                 ->cookie('token', $jwt, 1440, null, null, false, true);
         }
 
+        if ($user->role === 'superadmin') {
+            return redirect()->route('superadmin.dashboard')
+                ->cookie('token', $jwt, 1440, null, null, false, true);
+        }
+
         return redirect()->route('dashboard')
             ->cookie('token', $jwt, 1440, null, null, false, true);
     }

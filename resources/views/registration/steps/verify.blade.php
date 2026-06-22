@@ -18,13 +18,13 @@
         </span>
     </div>
 
-    <h2 class="text-xl font-bold text-gray-800 mb-2">Revisa tu correo electrónico</h2>
+    <h2 class="text-xl font-bold mb-2" style="color: var(--text-main);">Revisa tu correo electrónico</h2>
 
     @if ($userEmail)
-        <p class="text-sm text-gray-500 mb-1">Enviamos un código de verificación de 6 dígitos a:</p>
-        <p class="text-sm font-semibold text-gray-800 mb-6">{{ $userEmail }}</p>
+        <p class="text-sm mb-1" style="color: var(--text-secondary);">Enviamos un código de verificación de 6 dígitos a:</p>
+        <p class="text-sm font-semibold mb-6" style="color: var(--text-main);">{{ $userEmail }}</p>
     @else
-        <p class="text-sm text-gray-500 mb-6">Enviamos un código de verificación de 6 dígitos a tu dirección de correo electrónico.</p>
+        <p class="text-sm mb-6" style="color: var(--text-secondary);">Enviamos un código de verificación de 6 dígitos a tu dirección de correo electrónico.</p>
     @endif
 
     {{-- OTP form --}}
@@ -38,7 +38,7 @@
         @enderror
 
         <div class="mb-6">
-            <label for="otp_code" class="block text-sm font-medium text-gray-700 mb-2 text-center">
+            <label for="otp_code" class="form-label text-center">
                 Ingresa el código de verificación
             </label>
             <input
@@ -50,7 +50,7 @@
                 maxlength="6"
                 autocomplete="one-time-code"
                 placeholder="000000"
-                class="w-full text-center text-2xl font-bold tracking-[0.5em] border rounded-lg px-3 py-3 outline-none transition
+                class="input-solid text-center text-2xl font-bold tracking-[0.5em] px-3 py-3
                        {{ $errors->has('otp_code') ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-brand-teal focus:ring-1 focus:ring-brand-teal' }}"
             >
         </div>
@@ -65,8 +65,8 @@
     </form>
 
     {{-- Resend --}}
-    <div class="border-t border-gray-100 pt-4 mt-2">
-        <p class="text-sm text-gray-500 mb-2">¿No lo recibiste?</p>
+    <div class="border-t pt-4 mt-2" style="border-color: var(--border-light);">
+        <p class="text-sm mb-2" style="color: var(--text-secondary);">¿No lo recibiste?</p>
         <form action="{{ route('registration.resend-otp') }}" method="POST" class="inline">
             @csrf
             <button type="submit" class="text-sm text-brand-teal hover:underline font-medium">

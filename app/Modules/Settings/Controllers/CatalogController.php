@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Tax;
 use App\Modules\Product\Models\Category;
 use App\Models\PaymentMethod;
+use App\Rules\UniqueForCompany;
 use Illuminate\Http\Request;
 
 class CatalogController extends Controller
@@ -23,7 +24,7 @@ class CatalogController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:50',
-            'code' => 'required|string|max:10|unique:taxes,code',
+            'code' => ['required', 'string', 'max:10', new UniqueForCompany('taxes', 'code')],
             'rate' => 'required|numeric|min:0|max:100',
         ]);
 
@@ -41,7 +42,7 @@ class CatalogController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:50',
-            'code' => 'required|string|max:10|unique:taxes,code,' . $tax->id,
+            'code' => ['required', 'string', 'max:10', new UniqueForCompany('taxes', 'code', $tax->id)],
             'rate' => 'required|numeric|min:0|max:100',
         ]);
 
@@ -53,7 +54,7 @@ class CatalogController extends Controller
     public function storeCategory(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:100|unique:categories,name',
+            'name' => ['required', 'string', 'max:100', new UniqueForCompany('categories', 'name')],
             'description' => 'nullable|string|max:255',
         ]);
 
@@ -70,7 +71,7 @@ class CatalogController extends Controller
     public function updateCategory(Request $request, Category $category)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:100|unique:categories,name,' . $category->id,
+            'name' => ['required', 'string', 'max:100', new UniqueForCompany('categories', 'name', $category->id)],
             'description' => 'nullable|string|max:255',
         ]);
 
@@ -82,7 +83,7 @@ class CatalogController extends Controller
     public function storePaymentMethod(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:50|unique:payment_methods,name',
+            'name' => ['required', 'string', 'max:50', new UniqueForCompany('payment_methods', 'name')],
             'description' => 'nullable|string|max:255',
         ]);
 
@@ -99,7 +100,7 @@ class CatalogController extends Controller
     public function updatePaymentMethod(Request $request, PaymentMethod $paymentMethod)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:50|unique:payment_methods,name,' . $paymentMethod->id,
+            'name' => ['required', 'string', 'max:50', new UniqueForCompany('payment_methods', 'name', $paymentMethod->id)],
             'description' => 'nullable|string|max:255',
         ]);
 
