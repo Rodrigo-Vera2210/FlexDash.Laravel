@@ -33,7 +33,7 @@ class CashBoxService
                 'user_id'                  => auth()->id() ?? 1, // fallback to user ID 1 for testing if needed
                 'status'                   => 'OPEN',
                 'opening_balance'          => $openingBalance,
-                'expected_closing_balance' => $openingBalance,
+                'expected_closing_balance' => 0,
                 'opened_at'                => now(),
                 'notes'                    => $notes,
             ]);

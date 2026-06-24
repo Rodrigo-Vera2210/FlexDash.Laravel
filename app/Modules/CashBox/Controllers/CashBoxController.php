@@ -108,6 +108,50 @@ class CashBoxController extends Controller
     }
 
     /**
+     * Display a list of closed cash box sessions (history).
+     */
+    public function history(Request $request)
+    {
+        $query = CashBox::where('status', 'CLOSED')->with('user');
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('opened_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('opened_at', '<=', $request->date_to);
+        }
+
+        $sessions = $query->latest('opened_at')->paginate(15);
+
+        return view('cashbox.history', compact('sessions'));
+    }
+
+    /**
+     * Display details of a closed cash box session.
+     */
+    public function historyShow(CashBox $cashBox)
+    {
+        abort_if($cashBox->status !== 'CLOSED', 404);
+
+        $cashBox->load(['user', 'transactions.user']);
+        
+        $openingBalance = $cashBox->opening_balance;
+        $inflows = $cashBox->transactions()->where('type', 'ingreso')->where('concept', '!=', 'Saldo inicial / Apertura de caja')->sum('amount');
+        $outflows = $cashBox->transactions()->where('type', 'egreso')->sum('amount');
+        $expectedBalance = $cashBox->expected_closing_balance;
+        $actualBalance = $cashBox->actual_closing_balance;
+        $difference = $cashBox->difference;
+
+        $transactions = $cashBox->transactions()->latest()->paginate(15);
+
+        return view('cashbox.history-show', compact(
+            'cashBox', 'openingBalance', 'inflows', 'outflows', 
+            'expectedBalance', 'actualBalance', 'difference', 'transactions'
+        ));
+    }
+
+    /**
      * Render the single-partner batch payment screen.
      */
     public function batchPaymentForm()
@@ -272,6 +316,22 @@ class CashBoxController extends Controller
         $sheet->setCellValue('E' . $row, $cashBox->expected_closing_balance);
         $sheet->getStyle('E' . $row)->getFont()->setBold(true);
         $sheet->getStyle('E' . $row)->getNumberFormat()->setFormatCode('"S/"#,##0.00');
+
+        if ($cashBox->status === 'CLOSED') {
+            $row++;
+            $sheet->setCellValue('D' . $row, 'Saldo Real:');
+            $sheet->getStyle('D' . $row)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('0054A6'));
+            $sheet->setCellValue('E' . $row, $cashBox->actual_closing_balance);
+            $sheet->getStyle('E' . $row)->getFont()->setBold(true);
+            $sheet->getStyle('E' . $row)->getNumberFormat()->setFormatCode('"S/"#,##0.00');
+
+            $row++;
+            $sheet->setCellValue('D' . $row, 'Diferencia:');
+            $sheet->getStyle('D' . $row)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('0054A6'));
+            $sheet->setCellValue('E' . $row, $cashBox->difference);
+            $sheet->getStyle('E' . $row)->getFont()->setBold(true);
+            $sheet->getStyle('E' . $row)->getNumberFormat()->setFormatCode('"S/"#,##0.00');
+        }
 
         // Border styling for the table
         $borderStyle = [

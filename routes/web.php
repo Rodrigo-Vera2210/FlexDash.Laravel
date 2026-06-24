@@ -86,6 +86,8 @@ Route::middleware(['auth.jwt', 'auth.admin_only'])->group(function () {
         Route::get('/batch-payment', [App\Modules\CashBox\Controllers\CashBoxController::class, 'batchPaymentForm'])->name('batch-payment');
         Route::get('/pending-docs/{partner}', [App\Modules\CashBox\Controllers\CashBoxController::class, 'getPendingDocuments'])->name('pending-docs');
         Route::post('/batch-payment', [App\Modules\CashBox\Controllers\CashBoxController::class, 'storeBatchPayment'])->name('batch-payment.store');
+        Route::get('/history', [App\Modules\CashBox\Controllers\CashBoxController::class, 'history'])->name('history');
+        Route::get('/history/{cashBox}', [App\Modules\CashBox\Controllers\CashBoxController::class, 'historyShow'])->name('history.show');
         Route::get('/{cashBox}/export', [App\Modules\CashBox\Controllers\CashBoxController::class, 'exportExcel'])->name('export');
     });
 
