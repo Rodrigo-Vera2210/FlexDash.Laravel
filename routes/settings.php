@@ -18,6 +18,10 @@ Route::middleware(['auth.jwt', 'auth.module:settings'])->group(function () {
     Route::post('/settings/catalogs/categories', [CatalogController::class, 'storeCategory'])->name('settings.catalogs.categories.store');
     Route::put('/settings/catalogs/categories/{category}', [CatalogController::class, 'updateCategory'])->name('settings.catalogs.categories.update');
 
+    // Service Categories CRUD
+    Route::post('/settings/catalogs/service-categories', [CatalogController::class, 'storeServiceCategory'])->name('settings.catalogs.service-categories.store');
+    Route::put('/settings/catalogs/service-categories/{id}', [CatalogController::class, 'updateServiceCategory'])->name('settings.catalogs.service-categories.update');
+
     // Payment Methods CRUD
     Route::post('/settings/catalogs/payment-methods', [CatalogController::class, 'storePaymentMethod'])->name('settings.catalogs.payment-methods.store');
     Route::put('/settings/catalogs/payment-methods/{paymentMethod}', [CatalogController::class, 'updatePaymentMethod'])->name('settings.catalogs.payment-methods.update');

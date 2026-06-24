@@ -209,9 +209,12 @@
             @foreach($sale->details as $index => $detail)
                 <tr style="background-color: {{ $index % 2 === 0 ? '#ffffff' : '#F7FAFC' }};">
                     <td style="font-weight: bold; color: #718096;">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</td>
-                    <td style="font-family: monospace; color: #718096;">{{ $detail->product->code }}</td>
+                    <td style="font-family: monospace; color: #718096;">{{ $detail->item_code }}</td>
                     <td>
-                        <strong>{{ $detail->product->name }}</strong>
+                        <strong>{{ $detail->item_name }}</strong>
+                        @if($detail->isService())
+                            <span style="background-color: #E6FFFA; color: #319795; font-size: 8px; padding: 1px 4px; border-radius: 3px; margin-left: 4px;">Servicio</span>
+                        @endif
                         @if($detail->notes)
                             <br><span style="font-size: 8px; color: #718096;">{{ $detail->notes }}</span>
                         @endif

@@ -139,6 +139,7 @@ class XmlGeneratorService
             $items = $sale->saleDetails ?? $sale->details ?? [];
             foreach ($items as $item) {
                 $product = $item->product;
+                $service = $item->service;
                 $qty = (float)$item->quantity;
                 $priceUnit = (float)($item->unit_price ?? $item->price ?? 0);
                 
@@ -149,7 +150,7 @@ class XmlGeneratorService
                 $taxCode = '2';
                 $taxPercentageCode = '2';
 
-                $taxModel = $item->tax ?? ($product ? $product->tax : null);
+                $taxModel = $item->tax ?? ($product ? $product->tax : ($service ? $service->tax : null));
                 if ($taxModel) {
                     $taxRate = (float)$taxModel->rate;
                     if ($taxRate == 0) {
@@ -179,9 +180,20 @@ class XmlGeneratorService
                 $impuestosMap[$key]['baseImponible'] += $subtotalItem;
                 $impuestosMap[$key]['valor'] += $taxVal;
 
+                $code = 'SERV';
+                $name = 'SERVICIO';
+                if ($product) {
+                    $code = $product->code;
+                    $name = $product->name;
+                } elseif ($service) {
+                    $code = $service->code;
+                    $name = $service->name;
+                }
+
                 $xmlDetails[] = [
-                    'codigoPrincipal' => $product ? $product->code : 'SERV',
-                    'descripcion' => substr(strtoupper($product ? $product->name : ($item->description ?? 'SERVICIO')), 0, 300),
+                    'codigoPrincipal' => $code,
+                    'descripcion' => substr(strtoupper($name), 0, 300),
+                    'quantity' => $qty, // wait, let's keep consistency or map correct keys
                     'cantidad' => number_format($qty, 4, '.', ''),
                     'precioUnitario' => number_format($priceUnit, 4, '.', ''),
                     'descuento' => '0.0000',

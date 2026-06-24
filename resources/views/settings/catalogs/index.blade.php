@@ -26,6 +26,14 @@
             <i class="fa-solid fa-tags mr-2"></i> Categorías de Producto
         </button>
         <button 
+            @click="activeTab = 'service-categories'"
+            :class="activeTab === 'service-categories' ? 'border-b-2 text-primary font-bold' : 'text-gray-500 hover:text-gray-700'"
+            class="px-6 py-3 text-sm focus:outline-none transition-colors border-transparent"
+            :style="activeTab === 'service-categories' ? 'border-color: var(--primary); color: var(--primary);' : ''"
+        >
+            <i class="fa-solid fa-screwdriver-wrench mr-2"></i> Categorías de Servicio
+        </button>
+        <button 
             @click="activeTab = 'payment-methods'"
             :class="activeTab === 'payment-methods' ? 'border-b-2 text-primary font-bold' : 'text-gray-500 hover:text-gray-700'"
             class="px-6 py-3 text-sm focus:outline-none transition-colors border-transparent"
@@ -149,6 +157,66 @@
                         @empty
                             <tr>
                                 <td colspan="4" class="py-10 text-center text-gray-500">No hay categorías registradas.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── PESTAÑA: CATEGORÍAS DE SERVICIO ── --}}
+    <div x-show="activeTab === 'service-categories'" class="space-y-4" style="display: none;">
+        <div class="flex justify-between items-center">
+            <h3 class="text-base font-bold" style="color: var(--text-main);">Listado de Categorías de Servicio</h3>
+            <button @click="openServiceCategoryModal('create')" class="btn-primary">
+                <i class="fa-solid fa-plus"></i> Nueva Categoría
+            </button>
+        </div>
+
+        <div class="card-panel overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="table-custom w-full">
+                    <thead>
+                        <tr>
+                            <th class="table-header">Nombre</th>
+                            <th class="table-header">Descripción</th>
+                            <th class="table-header text-center">Estado</th>
+                            <th class="table-header text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($serviceCategories as $scat)
+                            <tr id="service-category-row-{{ $scat->id }}">
+                                <td class="table-cell font-bold" style="color: var(--text-main);">{{ $scat->name }}</td>
+                                <td class="table-cell text-sm">{{ $scat->description ?? '—' }}</td>
+                                <td class="table-cell text-center">
+                                    <button 
+                                        @click="toggleStatus('service_category', {{ $scat->id }}, $event)"
+                                        class="badge cursor-pointer transition-all hover:scale-105"
+                                        :class="isActive('service_category', {{ $scat->id }}, {{ $scat->is_active ? 'true' : 'false' }}) ? 'badge-success' : 'badge-danger'"
+                                    >
+                                        <span x-text="isActive('service_category', {{ $scat->id }}, {{ $scat->is_active ? 'true' : 'false' }}) ? 'Activo' : 'Inactivo'"></span>
+                                    </button>
+                                </td>
+                                <td class="table-cell text-center">
+                                    <div class="inline-flex gap-2 justify-center">
+                                        <button @click="openServiceCategoryModal('edit', {{ json_encode($scat) }})" class="btn-icon text-blue-500 hover:text-blue-700" title="Editar">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <form method="POST" action="{{ route('settings.catalogs.destroy', ['type' => 'service-categories', 'id' => $scat->id]) }}" class="inline" onsubmit="return confirm('¿Estás seguro de eliminar esta categoría de servicio?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn-icon text-red-500 hover:text-red-700" title="Eliminar">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="py-10 text-center text-gray-500">No hay categorías de servicio registradas.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -317,6 +385,48 @@
         </div>
     </div>
 
+    {{-- MODAL: CATEGORÍAS DE SERVICIO --}}
+    <div 
+        x-show="showServiceCategoryModal" 
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        style="display: none;"
+    >
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 overflow-hidden transform transition-all page-fade">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold" style="color: var(--text-main);" x-text="serviceCategoryEditMode ? 'Editar Categoría' : 'Crear Categoría'"></h3>
+                <button @click="showServiceCategoryModal = false" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form :action="serviceCategoryEditMode ? '{{ url('/settings/catalogs/service-categories') }}/' + serviceCategoryData.id : '{{ route('settings.catalogs.service-categories.store') }}'" method="POST">
+                @csrf
+                <template x-if="serviceCategoryEditMode">
+                    <input type="hidden" name="_method" value="PUT">
+                </template>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="form-label">Nombre de Categoría <span class="text-red-500">*</span></label>
+                        <div class="input-icon-wrapper">
+                            <i class="fa-solid fa-tag"></i>
+                            <input type="text" name="name" x-model="serviceCategoryData.name" required class="input-solid" placeholder="Ej: Instalaciones, Soporte, Mantenimiento">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Descripción</label>
+                        <textarea name="description" x-model="serviceCategoryData.description" class="input-solid" rows="3" placeholder="Detalle o notas de la categoría..."></textarea>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 mt-6 pt-4 border-t" style="border-color: var(--border-light);">
+                    <button type="button" @click="showServiceCategoryModal = false" class="btn-outline">Cancelar</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- MODAL: MÉTODOS DE PAGO --}}
     <div 
         x-show="showMethodModal" 
@@ -377,6 +487,10 @@
             categoryEditMode: false,
             categoryData: { id: '', name: '', description: '' },
 
+            showServiceCategoryModal: false,
+            serviceCategoryEditMode: false,
+            serviceCategoryData: { id: '', name: '', description: '' },
+
             showMethodModal: false,
             methodEditMode: false,
             methodData: { id: '', name: '', description: '' },
@@ -410,6 +524,16 @@
                     this.categoryData = { id: '', name: '', description: '' };
                 }
                 this.showCategoryModal = true;
+            },
+
+            openServiceCategoryModal(mode, scat = null) {
+                this.serviceCategoryEditMode = (mode === 'edit');
+                if (scat) {
+                    this.serviceCategoryData = { id: scat.id, name: scat.name, description: scat.description || '' };
+                } else {
+                    this.serviceCategoryData = { id: '', name: '', description: '' };
+                }
+                this.showServiceCategoryModal = true;
             },
 
             openMethodModal(mode, method = null) {

@@ -5,6 +5,7 @@ namespace App\Modules\Settings\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Tax;
 use App\Modules\Product\Models\Category;
+use App\Modules\Service\Models\ServiceCategory;
 use App\Models\PaymentMethod;
 use App\Rules\UniqueForCompany;
 use Illuminate\Http\Request;
@@ -15,9 +16,10 @@ class CatalogController extends Controller
     {
         $taxes = Tax::orderBy('name')->get();
         $categories = Category::orderBy('name')->get();
+        $serviceCategories = ServiceCategory::orderBy('name')->get();
         $paymentMethods = PaymentMethod::orderBy('name')->get();
 
-        return view('settings.catalogs.index', compact('taxes', 'categories', 'paymentMethods'));
+        return view('settings.catalogs.index', compact('taxes', 'categories', 'serviceCategories', 'paymentMethods'));
     }
 
     public function storeTax(Request $request)
@@ -109,10 +111,40 @@ class CatalogController extends Controller
         return redirect()->route('settings.catalogs.index')->with('success', 'Método de pago actualizado correctamente.');
     }
 
+    public function storeServiceCategory(Request $request)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:100', new UniqueForCompany('service_categories', 'name')],
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $data['is_active'] = true;
+        $category = ServiceCategory::create($data);
+
+        if ($request->expectsJson()) {
+            return response()->json($category, 201);
+        }
+
+        return redirect()->route('settings.catalogs.index')->with('success', 'Categoría de servicio creada correctamente.');
+    }
+
+    public function updateServiceCategory(Request $request, $id)
+    {
+        $serviceCategory = ServiceCategory::findOrFail($id);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:100', new UniqueForCompany('service_categories', 'name', $serviceCategory->id)],
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $serviceCategory->update($data);
+
+        return redirect()->route('settings.catalogs.index')->with('success', 'Categoría de servicio actualizada correctamente.');
+    }
+
     public function toggleStatus(Request $request)
     {
         $request->validate([
-            'model' => 'required|string|in:tax,category,payment_method',
+            'model' => 'required|string|in:tax,category,service_category,payment_method',
             'id' => 'required|integer',
         ]);
 
@@ -125,6 +157,9 @@ class CatalogController extends Controller
                 break;
             case 'category':
                 $record = Category::findOrFail($id);
+                break;
+            case 'service_category':
+                $record = ServiceCategory::findOrFail($id);
                 break;
             case 'payment_method':
                 $record = PaymentMethod::findOrFail($id);
@@ -161,6 +196,15 @@ class CatalogController extends Controller
                 }
                 $category->delete();
                 $name = 'Categoría';
+                break;
+
+            case 'service-categories':
+                $category = ServiceCategory::findOrFail($id);
+                if ($category->services()->exists()) {
+                    return redirect()->back()->with('error', 'No se puede eliminar la categoría de servicio porque tiene servicios asociados. En su lugar, puede desactivarla.');
+                }
+                $category->delete();
+                $name = 'Categoría de servicio';
                 break;
 
             case 'payment-methods':

@@ -44,9 +44,10 @@ class SaleController extends Controller
     {
         $partners = Partner::clientes()->active()->orderBy('business_name')->get();
         $products = Product::active()->with('tax')->orderBy('name')->get();
+        $services = \App\Modules\Service\Models\Service::active()->with('tax')->orderBy('name')->get();
         $taxes    = Tax::where('is_active', true)->get();
         $nextNum  = SaleService::nextNumber();
-        return view('sales.create', compact('partners', 'products', 'taxes', 'nextNum'));
+        return view('sales.create', compact('partners', 'products', 'services', 'taxes', 'nextNum'));
     }
 
     public function store(Request $request)
@@ -57,7 +58,8 @@ class SaleController extends Controller
             'issue_date' => 'required|date',
             'due_date'   => 'nullable|date|after_or_equal:issue_date',
             'items'      => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_id' => 'nullable|exists:products,id|required_without:items.*.service_id',
+            'items.*.service_id' => 'nullable|exists:services,id|required_without:items.*.product_id',
             'items.*.quantity'   => 'required|numeric|min:0.01',
             'items.*.unit_price' => 'required|numeric|min:0',
         ]);
@@ -95,7 +97,7 @@ class SaleController extends Controller
 
     public function show(Sale $sale)
     {
-        $sale->load(['partner', 'details.product', 'payments.paymentMethod', 'user', 'tax', 'electronicInvoice']);
+        $sale->load(['partner', 'details.product', 'details.service', 'payments.paymentMethod', 'user', 'tax', 'electronicInvoice']);
         $paymentMethods = PaymentMethod::where('is_active', true)->get();
         return view('sales.show', compact('sale', 'paymentMethods'));
     }
@@ -142,7 +144,7 @@ class SaleController extends Controller
 
     public function downloadPdf(Sale $sale)
     {
-        $sale->load(['partner', 'details.product', 'payments.paymentMethod', 'user', 'tax']);
+        $sale->load(['partner', 'details.product', 'details.service', 'payments.paymentMethod', 'user', 'tax']);
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('sales.pdf', compact('sale'));
         return $pdf->download("factura-{$sale->series}-{$sale->number}.pdf");
     }

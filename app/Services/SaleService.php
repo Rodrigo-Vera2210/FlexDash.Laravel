@@ -58,13 +58,15 @@ class SaleService
 
         return DB::transaction(function () use ($sale) {
             foreach ($sale->details as $detail) {
-                $this->inventoryService->exit(
-                    $detail->product,
-                    $detail->quantity,
-                    Sale::class,
-                    $sale->id,
-                    "Venta #{$sale->number}"
-                );
+                if ($detail->isProduct()) {
+                    $this->inventoryService->exit(
+                        $detail->product,
+                        $detail->quantity,
+                        Sale::class,
+                        $sale->id,
+                        "Venta #{$sale->number}"
+                    );
+                }
             }
 
             $sale->update([
@@ -91,13 +93,15 @@ class SaleService
         return DB::transaction(function () use ($sale, $reason) {
             if ($sale->status === Sale::STATUS_APPROVED) {
                 foreach ($sale->details as $detail) {
-                    $this->inventoryService->return(
-                        $detail->product,
-                        $detail->quantity,
-                        Sale::class,
-                        $sale->id,
-                        "Anulación venta #{$sale->number}"
-                    );
+                    if ($detail->isProduct()) {
+                        $this->inventoryService->return(
+                            $detail->product,
+                            $detail->quantity,
+                            Sale::class,
+                            $sale->id,
+                            "Anulación venta #{$sale->number}"
+                        );
+                    }
                 }
             }
 
@@ -120,21 +124,39 @@ class SaleService
         $taxRate    = $sale->tax ? ($sale->tax->rate / 100) : 0;
 
         foreach ($items as $item) {
-            $product  = Product::findOrFail($item['product_id']);
+            $productId = $item['product_id'] ?? null;
+            $serviceId = $item['service_id'] ?? null;
+
             $qty      = (float) $item['quantity'];
             $price    = (float) $item['unit_price'];
             $discount = (float) ($item['discount'] ?? 0);
             $lineNet  = round(($price * $qty) - $discount, 2);
 
-            SaleDetail::create([
-                'sale_id'    => $sale->id,
-                'product_id' => $product->id,
-                'quantity'   => $qty,
-                'unit_price' => $price,
-                'cost_price' => $product->cost,
-                'discount'   => $discount,
-                'subtotal'   => $lineNet,
-            ]);
+            if ($productId) {
+                $product  = Product::findOrFail($productId);
+                SaleDetail::create([
+                    'sale_id'    => $sale->id,
+                    'product_id' => $product->id,
+                    'service_id' => null,
+                    'quantity'   => $qty,
+                    'unit_price' => $price,
+                    'cost_price' => $product->cost,
+                    'discount'   => $discount,
+                    'subtotal'   => $lineNet,
+                ]);
+            } elseif ($serviceId) {
+                $service  = \App\Modules\Service\Models\Service::findOrFail($serviceId);
+                SaleDetail::create([
+                    'sale_id'    => $sale->id,
+                    'product_id' => null,
+                    'service_id' => $service->id,
+                    'quantity'   => $qty,
+                    'unit_price' => $price,
+                    'cost_price' => $service->cost ?? 0,
+                    'discount'   => $discount,
+                    'subtotal'   => $lineNet,
+                ]);
+            }
 
             $subtotal += $lineNet;
         }

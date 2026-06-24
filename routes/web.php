@@ -10,6 +10,7 @@ use App\Modules\Product\Controllers\ProductController;
 use App\Modules\Profile\Controllers\ProfileController;
 use App\Modules\Purchase\Controllers\PurchaseController;
 use App\Modules\Sale\Controllers\SaleController;
+use App\Modules\Service\Controllers\ServiceController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -50,6 +51,10 @@ Route::middleware(['auth.jwt', 'auth.admin_only'])->group(function () {
             Route::post('/adjust',   [InventoryController::class, 'adjust'])->name('adjust');
         });
     });
+
+    // Servicios (disponible para todos los planes)
+    Route::resource('services', ServiceController::class);
+
 
     // Ventas
     Route::middleware('auth.module:ventas')->group(function () {

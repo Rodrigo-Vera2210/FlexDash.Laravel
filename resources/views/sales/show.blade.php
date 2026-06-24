@@ -195,17 +195,29 @@
                     @foreach ($sale->details as $detail)
                         <tr>
                             <td class="table-cell font-mono text-xs" style="color: var(--text-tertiary);">
-                                {{ $detail->product->code }}</td>
+                                {{ $detail->item_code }}</td>
                             <td class="table-cell">
-                                <a href="{{ route('products.show', $detail->product_id) }}"
-                                    class="font-bold transition-colors" style="color: var(--text-main);"
-                                    onmouseover="this.style.color='var(--primary)'"
-                                    onmouseout="this.style.color='var(--text-main)'">
-                                    {{ $detail->product->name }}
-                                </a>
+                                @if ($detail->isProduct() && $detail->product)
+                                    <a href="{{ route('products.show', $detail->product_id) }}"
+                                        class="font-bold transition-colors" style="color: var(--text-main);"
+                                        onmouseover="this.style.color='var(--primary)'"
+                                        onmouseout="this.style.color='var(--text-main)'">
+                                        {{ $detail->item_name }}
+                                    </a>
+                                @elseif ($detail->isService() && $detail->service)
+                                    <a href="{{ route('services.show', $detail->service_id) }}"
+                                        class="font-bold transition-colors" style="color: var(--text-main);"
+                                        onmouseover="this.style.color='var(--primary)'"
+                                        onmouseout="this.style.color='var(--text-main)'">
+                                        {{ $detail->item_name }}
+                                    </a>
+                                    <span class="badge" style="background-color: var(--success-bg); color: var(--success); font-size: 10px; padding: 2px 6px; margin-left: 4px;">Servicio</span>
+                                @else
+                                    {{ $detail->item_name }}
+                                @endif
                             </td>
                             <td class="table-cell text-right font-bold font-mono" style="color: var(--text-secondary);">
-                                {{ number_format($detail->quantity, 2) }} {{ $detail->product->unit }}</td>
+                                {{ number_format($detail->quantity, 2) }} {{ $detail->isProduct() && $detail->product ? $detail->product->unit : '' }}</td>
                             <td class="table-cell text-right font-semibold font-mono" style="color: var(--text-secondary);">
                                 S/ {{ number_format($detail->unit_price, 2) }}</td>
                             <td class="table-cell text-right font-bold font-mono" style="color: var(--danger);">

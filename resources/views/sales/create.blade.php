@@ -97,7 +97,7 @@
                 <h3 class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-main);">Detalle de Artículos</h3>
                 <button type="button" id="add-row-btn" class="btn-primary">
                     <i class="fa-solid fa-plus"></i>
-                    Agregar Producto
+                    Agregar Artículo
                 </button>
             </div>
             
@@ -105,7 +105,8 @@
                 <table class="table-custom" id="items-table">
                     <thead>
                         <tr>
-                            <th class="table-header w-4/12">Producto</th>
+                            <th class="table-header w-2/12">Tipo</th>
+                            <th class="table-header w-3/12">Artículo</th>
                             <th class="table-header text-right w-1/12">Stock Disp.</th>
                             <th class="table-header text-right w-2/12">Cantidad</th>
                             <th class="table-header text-right w-2/12">Precio Unitario</th>
@@ -155,8 +156,9 @@
 
 @push('scripts')
 <script>
-    // Inyectamos todos los productos como JSON desde Laravel para poder consultar stock y precio al instante.
+    // Inyectamos productos y servicios como JSON desde Laravel.
     const products = @json($products);
+    const services = @json($services);
     let rowIndex = 0;
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -178,21 +180,25 @@
             tr.className = 'item-row';
             tr.dataset.index = rowIndex;
 
-            let productOptions = '<option value="">Seleccionar artículo...</option>';
-            products.forEach(p => {
-                productOptions += `<option value="${p.id}">${p.code} - ${p.name}</option>`;
-            });
-
             tr.innerHTML = `
                 <td class="table-cell">
                     <div class="input-icon-wrapper">
-                        <i class="fa-solid fa-box"></i>
-                        <select name="items[${rowIndex}][product_id]" class="input-solid product-select" required>
-                            ${productOptions}
+                        <i class="fa-solid fa-tags"></i>
+                        <select class="input-solid type-select">
+                            <option value="product">Producto</option>
+                            <option value="service">Servicio</option>
                         </select>
                     </div>
                 </td>
-                <td class="table-cell text-right font-mono font-bold product-stock" style="color: var(--text-tertiary);">0.00</td>
+                <td class="table-cell">
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-box"></i>
+                        <select name="items[${rowIndex}][product_id]" class="input-solid item-select" required>
+                            <option value="">Seleccionar artículo...</option>
+                        </select>
+                    </div>
+                </td>
+                <td class="table-cell text-right font-mono font-bold item-stock" style="color: var(--text-tertiary);">0.00</td>
                 <td class="table-cell">
                     <div class="input-icon-wrapper">
                         <i class="fa-solid fa-cubes"></i>
@@ -221,28 +227,67 @@
 
             itemsBody.appendChild(tr);
 
-            const select = tr.querySelector('.product-select');
+            const typeSelect = tr.querySelector('.type-select');
+            const itemSelect = tr.querySelector('.item-select');
             const qtyInput = tr.querySelector('.quantity-input');
             const priceInput = tr.querySelector('.price-input');
             const discInput = tr.querySelector('.discount-input');
             const removeBtn = tr.querySelector('.remove-row-btn');
 
-            select.addEventListener('change', function() {
-                const prodId = this.value;
-                const prod = products.find(p => p.id == prodId);
+            function populateItems() {
+                const type = typeSelect.value;
+                let options = '<option value="">Seleccionar artículo...</option>';
+                if (type === 'product') {
+                    itemSelect.name = `items[${tr.dataset.index}][product_id]`;
+                    products.forEach(p => {
+                        options += `<option value="${p.id}">${p.code} - ${p.name}</option>`;
+                    });
+                } else {
+                    itemSelect.name = `items[${tr.dataset.index}][service_id]`;
+                    services.forEach(s => {
+                        options += `<option value="${s.id}">${s.code} - ${s.name}</option>`;
+                    });
+                }
+                itemSelect.innerHTML = options;
+                tr.querySelector('.item-stock').textContent = '—';
+                priceInput.value = '0.00';
+                qtyInput.value = '1.00';
+                discInput.value = '0.00';
+                qtyInput.disabled = true;
+                priceInput.disabled = true;
+                discInput.disabled = true;
+                calculateRowSubtotal(tr);
+            }
 
-                if (prod) {
-                    tr.querySelector('.product-stock').textContent = parseFloat(prod.stock).toFixed(2) + ' ' + prod.unit;
-                    priceInput.value = parseFloat(prod.price).toFixed(2);
+            typeSelect.addEventListener('change', populateItems);
+            populateItems(); // initial population
+
+            itemSelect.addEventListener('change', function() {
+                const itemId = this.value;
+                const type = typeSelect.value;
+
+                if (itemId) {
+                    if (type === 'product') {
+                        const prod = products.find(p => p.id == itemId);
+                        if (prod) {
+                            tr.querySelector('.item-stock').textContent = parseFloat(prod.stock).toFixed(2) + ' ' + (prod.unit || 'und');
+                            priceInput.value = parseFloat(prod.price).toFixed(2);
+                        }
+                    } else {
+                        const serv = services.find(s => s.id == itemId);
+                        if (serv) {
+                            tr.querySelector('.item-stock').textContent = '—';
+                            priceInput.value = parseFloat(serv.price).toFixed(2);
+                        }
+                    }
                     qtyInput.value = "1.00";
                     discInput.value = "0.00";
 
-                    // Habilitar campos
                     qtyInput.disabled = false;
                     priceInput.disabled = false;
                     discInput.disabled = false;
                 } else {
-                    tr.querySelector('.product-stock').textContent = '0.00';
+                    tr.querySelector('.item-stock').textContent = '—';
                     priceInput.value = '0.00';
                     qtyInput.value = '1.00';
                     discInput.value = '0.00';

@@ -153,9 +153,9 @@
                     $subtotal = round($qty * $price, 2);
                 @endphp
                 <tr>
-                    <td class="text-center font-mono" style="font-size: 10px;">{{ $item->product ? $item->product->code : 'SERV' }}</td>
+                    <td class="text-center font-mono" style="font-size: 10px;">{{ $item->item_code }}</td>
                     <td class="text-center">{{ number_format($qty, 2) }}</td>
-                    <td>{{ strtoupper($item->product ? $item->product->name : ($item->description ?? 'SERVICIO')) }}</td>
+                    <td>{{ strtoupper($item->item_name) }}</td>
                     <td class="text-right font-mono">{{ number_format($price, 2) }}</td>
                     <td class="text-right font-mono">{{ number_format($subtotal, 2) }}</td>
                 </tr>
@@ -215,7 +215,7 @@
                             $subtotalSinImpuestos += $subtotalItem;
                             
                             $taxRate = 12.0;
-                            $taxModel = $item->tax ?? ($item->product ? $item->product->tax : null);
+                            $taxModel = $item->tax ?? ($item->product ? $item->product->tax : ($item->service ? $item->service->tax : null));
                             if ($taxModel) {
                                 $taxRate = (float)$taxModel->rate;
                             }
