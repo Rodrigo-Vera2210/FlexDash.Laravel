@@ -793,8 +793,9 @@
         </nav>
 
         {{-- User Info --}}
-        <div class="p-3 m-3 rounded-xl"
-            style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);">
+        <div class="p-3 m-3 rounded-xl transition-all hover:bg-opacity-10 cursor-pointer"
+            style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);"
+            onclick="window.location.href='{{ route('profile.edit') }}'">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
                     style="background-color: var(--primary-light); color: var(--primary); border: 2px solid rgba(26,163,212,0.3);">
@@ -805,7 +806,7 @@
                     <p class="text-xs truncate" style="color: rgba(255,255,255,0.40);">
                         {{ auth()->user()->role ?? 'usuario' }}</p>
                 </div>
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('logout') }}" onclick="event.stopPropagation();">
                     @csrf
                     <button type="submit" class="btn-icon" style="color: rgba(255,255,255,0.40);"
                         title="Cerrar sesión">
