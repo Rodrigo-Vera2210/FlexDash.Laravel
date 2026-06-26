@@ -8,6 +8,7 @@ use App\Modules\Inventory\Controllers\InventoryController;
 use App\Modules\Partner\Controllers\PartnerController;
 use App\Modules\Product\Controllers\ProductController;
 use App\Modules\Profile\Controllers\ProfileController;
+use App\Modules\Profile\Controllers\PreferencesController;
 use App\Modules\Purchase\Controllers\PurchaseController;
 use App\Modules\Sale\Controllers\SaleController;
 use App\Modules\Service\Controllers\ServiceController;
@@ -39,6 +40,9 @@ Route::middleware(['auth.jwt', 'auth.admin_only'])->group(function () {
     Route::get('/profile',    [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile',  [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Preferencias de Usuario
+    Route::get('/preferences', [PreferencesController::class, 'index'])->name('preferences.index');
 
     // Partners (Clientes y Proveedores)
     Route::resource('partners', PartnerController::class)->middleware('auth.module:partners');
