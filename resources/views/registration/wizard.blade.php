@@ -25,6 +25,12 @@
 
     {{-- Tailwind CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
+
+    {{-- Font Awesome --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    {{-- Alpine.js --}}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -229,6 +235,15 @@
 
 <body>
 
+    {{-- Theme Toggle Button --}}
+    <div class="fixed top-6 right-6 z-50" x-data="themePreferencesHandler()" x-show="true">
+        <button @click="toggleTheme()" 
+                class="p-3 rounded-lg transition-all hover:scale-110 shadow-lg" 
+                style="background-color: #f8f9fa; border: 2px solid #e5e7eb; color: #0D1E36; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-lg" :class="theme === 'dark' ? 'fa-sun text-yellow-500' : 'fa-moon text-gray-700'"></i>
+        </button>
+    </div>
+
     @php
         /* Map $step (string) → numeric position for sidebar highlights */
         $stepMap = ['type' => 1, 'account' => 2, 'entity' => 3, 'billing' => 4, 'review' => 5, 'verify' => 6];
@@ -370,7 +385,7 @@
 
             {{-- Back link (except step 1) --}}
             @if ($currentStep > 1)
-                <div class="mt-6 pt-5" style="border-top: 1px solid var(--border-light);">
+                <div class="mt-8 pt-6" style="border-top: 1px solid var(--border-light);">
                     @php
                         $backRoutes = [
                             2 => 'registration.type',
@@ -381,9 +396,19 @@
                         ];
                     @endphp
                     <a href="{{ route($backRoutes[$currentStep] ?? 'registration.type') }}"
-                        class="text-sm font-semibold transition-colors inline-flex items-center gap-1"
-                        style="color: var(--text-tertiary);">
-                        ← Volver al paso anterior
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all hover:scale-105" 
+                        style="background-color: var(--primary-light); color: var(--primary); border: 1px solid var(--border);">
+                        <i class="fas fa-chevron-left"></i>
+                        Volver al paso anterior
+                    </a>
+                </div>
+            @elseif ($currentStep === 1)
+                <div class="mt-8 pt-6" style="border-top: 1px solid var(--border-light);">
+                    <a href="{{ route('login') }}"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all hover:scale-105" 
+                        style="background-color: rgba(220, 38, 38, 0.08); color: #DC2626; border: 1px solid rgba(220, 38, 38, 0.2);">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Volver a Iniciar Sesión
                     </a>
                 </div>
             @endif
@@ -406,6 +431,44 @@
             </div>
         </div>
     </div>
+
+    {{-- Alpine.js Theme Handler --}}
+    <script>
+        function themePreferencesHandler() {
+            return {
+                theme: localStorage.getItem('theme') || 'system',
+                
+                init() {
+                    this.applyTheme(this.theme);
+                },
+                
+                applyTheme(theme) {
+                    const html = document.documentElement;
+                    if (theme === 'dark') {
+                        html.classList.add('dark');
+                    } else if (theme === 'light') {
+                        html.classList.remove('dark');
+                    } else {
+                        // System preference
+                        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                            html.classList.add('dark');
+                        } else {
+                            html.classList.remove('dark');
+                        }
+                    }
+                    localStorage.setItem('theme', theme);
+                    this.theme = theme;
+                },
+                
+                toggleTheme() {
+                    const themes = ['light', 'dark'];
+                    const currentIndex = themes.indexOf(this.theme);
+                    const nextIndex = (currentIndex + 1) % themes.length;
+                    this.applyTheme(themes[nextIndex]);
+                }
+            }
+        }
+    </script>
 
     @stack('wizard-scripts')
 </body>
