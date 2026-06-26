@@ -1,423 +1,386 @@
-# Tasks: Enhanced Authentication UI & User Profile Management
+# Tasks: Enhanced Authentication UI & User Profile Management (Final - 38 Tasks)
 
-**Feature**: 018-auth-ui-and-profile | **Branch**: `018-auth-ui-and-profile` | **Status**: Ready for Implementation
+**Feature**: 018-auth-ui-and-profile | **Status**: Ready for Implementation | **Total Tasks**: 38 (reduced from 71)
 
-**Architecture**: Blade (server-side templates) + Alpine.js (client-side interactivity) + JSON API endpoints
+**Architecture**: Blade + Alpine.js + JSON API (NOT Vue SPA)
 
-**Feature Scope**: Profile UI improvements, theme toggle accessibility (already works), password change with OTP, profile inline editing, user preferences management.
+## Reality Check: What Exists vs. What's Missing
 
-**Test Approach**: TDD-First (Red-Green-Refactor); leverage existing Auth/Registration OTP infrastructure; reuse Blade layouts and CSS variables from constitution.md.
+### ✅ ALREADY BUILT (Complete)
+- 10 Auth controllers (login, logout, email OTP, password reset, etc.)
+- ProfileController with 3 routes: GET/PATCH/DELETE /profile
+- 9 Blade templates (auth screens + profile edit form with 3 partials)
+- EmailVerificationService (6-digit OTP, hashed, 24h TTL, 5 attempts)
+- Theme toggle + CSS variable system (functional)
+- Multi-tenant registration service
+- Email notification system
 
-**Key Constraint**: Project uses Blade templates + Alpine.js (NOT Vue SPA). Auth module, Registration module, and OTP system already functional. Focus on **integration and Blade view enhancement**, not rebuilding existing features.
-
----
-
-## Overview: Execution Strategy
-
-### Key Context: Blade + Alpine.js Architecture
-
-⚠️ **Critical Note**: This project uses **Blade templates + Alpine.js** (NOT Vue SPA). The theme toggle is already functional via localStorage and CSS variables. Profile views exist in `resources/views/profile/`. Leverage existing:
-- Layout system (`layouts/app.blade.php`, `layouts/guest.blade.php`)
-- CSS variables defined in constitution.md (`--primary`, `--text-*`, etc.)
-- Alpine.js for interactive components (no separate state management layer needed)
-- Existing navigation and theme infrastructure
-
-**Tasks focus on enhancement/integration, not UI recreation.**
-
-### User Story Prioritization & Dependencies
-
-| Story | Title | Priority | Dependencies | MVP Scope | Status |
-|-------|-------|----------|--------------|-----------|--------|
-| US1 | Navigation Between Auth Screens | P1 | Existing auth routes | ✓ Yes | Layout/JS enhance |
-| US2 | Theme Toggle Always Accessible | P1 | ✅ Already implemented | ✓ Yes | Polish only |
-| US3 | View & Edit Personal Information | P1 | Profile controller, Blade view exist | ✓ Yes | Enhance inline editing |
-| US4 | Change Password with OTP Verification | P2 | Reuse EmailVerificationService | Optional | Modal component |
-| US5 | Additional Profile Settings | P2 | User model extensions | Optional | Form component |
-
-### Parallel Execution Opportunities
-
-- **Phase 1 (Code Audit)**: T001–T003 (understand existing Blade structure, verify theme system) — parallelizable
-- **Phase 2 (Data Model Updates)**: T004–T008 (add missing fields) — parallelizable, optional if fields already exist
-- **Phase 3 (Backend Integration)**: T009–T020 (controllers, services, validation) — mostly sequential (Phase 2 → Phase 3)
-- **Phase 4 (Blade View Enhancements)**: T021–T030 (update existing Blade templates, Alpine.js interactions) — parallelizable after Phase 3
-- **Phase 5 (OTP Integration)**: T031–T040 (password change modal component, OTP reuse) — sequential (Phase 4 → Phase 5)
-- **Phase 6 (Navigation & Polish)**: T041–T048 (wire components, testing, docs) — parallelizable
-
-### Independent Test Criteria (Per User Story)
-
-- **US1**: User navigates login ↔ registration without full page reload; form state persists in localStorage; back button visible
-- **US2**: Theme toggle in top-right corner visible on all pages; persists via localStorage; applies instantly (<100ms); ✅ **Already works**
-- **US3**: Profile Blade view displays all user info; inline edit with pencil icon (Alpine.js toggle); save/cancel inline; changes persist to DB
-- **US4**: Password change requires OTP (reuse existing EmailVerificationService); session invalidated on OTHER devices; modal component in Blade
-- **US5**: Language/timezone/notifications form persist per user in DB; apply on page reload; integrated in profile view
-
-### MVP Scope (Recommended Start)
-
-**Phase 1–4 = US1 + US2 + US3**
-- Estimated effort: **1–2 days** (leverage existing Blade infrastructure)
-- All core profile and theme features working
-- Deferred: Password change with OTP (US4), advanced preferences (US5)
-
-
-## Phase 1: Code Audit & Infrastructure Validation
-
-**Goal**: Verify existing Blade views, layouts, theme system, and Auth/Registration services are ready for integration.
-
-**Test Criteria**: Clear mapping of Blade templates; theme variables confirmed; OTP service validated; no breaking changes.
-
-### T001–T004: Audit Existing Infrastructure
-
-- [ ] T001 [P] Audit Blade infrastructure: verify `layouts/app.blade.php`, `layouts/guest.blade.php` exist; confirm CSS variables (--primary, --text-main, etc.) in root; verify dark mode script functional; test on mobile/desktop
-- [ ] T002 [P] Audit existing views: `resources/views/auth/*.blade.php` (login, register, forgot-password); `resources/views/profile/edit.blade.php`; document current form layouts and identify Alpine.js enhancements needed
-- [ ] T003 [P] Audit `app/Modules/Auth/` and `app/Modules/Registration/`: verify EmailVerificationService (OTP logic), PasswordController, existing methods; identify what ProfileController needs to add
-- [ ] T004 Verify theme toggle implementation: check localStorage theme key ('theme'), CSS class application (dark:), system preference fallback; ensure no conflicts with existing styles
+### ❌ MISSING (38 Tasks to Fix)
+1. **Migration**: Add 4 user preference fields (theme_preference, language, timezone, notifications_enabled)
+2. **API Endpoints**: No /api/profile or /api/password JSON endpoints
+3. **Alpine.js AJAX**: Current Blade forms do full page reloads; need AJAX interactivity
+4. **Password OTP Modal**: Must adapt existing EmailVerificationService for password change workflow
+5. **Better Error Messages**: Improve validation UI
+6. **Testing**: TDD-first tests for new code
 
 ---
 
-## Phase 2: Data Model Updates (Conditional)
+## PHASE 1: Code Audit & Verification (3 Tasks)
 
-**Goal**: Add missing user preference fields ONLY if not already present in User model.
+**Goal**: Verify existing infrastructure is correct and ready for enhancement.
 
-**Test Criteria**: Migrations run without errors; User model has new fields (if added); no data loss on existing users.
+### T001: Audit Blade Structure & Theme System
+- **What**: Review `layouts/app.blade.php`, theme toggle script, CSS variable definitions
+- **Check**: localStorage 'theme' key, dark mode class application, CSS variables (--primary, --text-main, etc.)
+- **Test**: Theme toggle works instantly, persists on reload, system preference fallback works
+- **File**: `resources/views/layouts/app.blade.php`
+- **Expected**: ✓ Confirmed working; no changes needed
 
-### T005–T008: User Preference Fields (If Missing)
+### T002: Audit Existing Auth Infrastructure
+- **What**: Verify all 10 Auth controllers exist and core methods are implemented
+- **Check**: LoginController, LogoutController, PasswordResetController, EmailVerificationController, etc.
+- **Verify**: All routes in `routes/auth.php` map to existing controllers
+- **Files**: `app/Modules/Auth/Controllers/`, `routes/auth.php`
+- **Expected**: ✓ All 10 controllers exist; no changes needed
 
-- [ ] T005 [P] Check `app/Models/User.php` for existing fields: theme_preference, language, timezone, notifications_enabled; if ALL exist, skip to Phase 3; if ANY missing, create single migration `database/migrations/2026_06_XX_add_missing_user_preferences.php`
-- [ ] T006 [P] If migration needed: add theme_preference (enum: light|dark|system, default 'system'), language (enum: es|en, default 'es'), timezone (string, default 'America/Guayaquil'), notifications_enabled (bool, default true); backfill existing users with defaults
-- [ ] T007 Run migration: `php artisan migrate` and verify schema with `php artisan migrate:status`
-- [ ] T008 [P] Update `app/Models/User.php`: add new fields to fillable array, set appropriate $casts, add accessor for theme preference if needed for Blade templates
-
----
-
-## Phase 3: Backend Integration (Controllers & API Endpoints)
-
-**Goal**: Extend existing Auth controllers with profile endpoints and password change logic via JSON API.
-
-**Test Criteria**: All endpoints respond with correct JSON data; validation works; OTP integration verified; endpoints testable via AJAX/Axios from Blade.
-
-### T009–T019: Profile & Password Controllers
-
-- [ ] T009 [P] Create or extend `app/Modules/Auth/Controllers/ProfileController.php` with methods:
-  - `show()` [GET /api/profile] — return current user profile as JSON
-  - `update()` [PUT /api/profile] — update name, email, phone via JSON request
-  - Reuse validation rules from existing ProfileRequest if available
-- [ ] T010 [P] Create or extend `app/Modules/Auth/Controllers/PasswordController.php` with methods:
-  - `requestOtp()` [POST /api/password/request-otp] — validate current password, generate OTP, send email, return success
-  - `verifyOtp()` [POST /api/password/verify-otp] — validate OTP token, return confirmation
-  - `resetPassword()` [POST /api/password/reset] — update password, invalidate other sessions, return success
-- [ ] T011 Create or update `app/Modules/Auth/Requests/UpdateProfileRequest.php` with validation: name (required, string), email (required, email, unique:users), phone (nullable, phone format)
-- [ ] T012 Create `app/Modules/Auth/Requests/RequestPasswordOtpRequest.php` with validation: current_password (required, must match user's password hash)
-- [ ] T013 Create `app/Modules/Auth/Requests/VerifyPasswordOtpRequest.php` with validation: otp_code (required, string, length 6)
-- [ ] T014 Create `app/Modules/Auth/Requests/ResetPasswordRequest.php` with validation: new_password (required, min 12 chars, uppercase+digit+symbol, not same as current)
-- [ ] T015 [P] Create or extend `app/Modules/Auth/Services/ProfileService.php` with TDD approach:
-  - `getProfile(User $user): array` — fetch user with company data
-  - `updateProfile(User $user, array $data): User` — validate and persist updates
-  - `updatePassword(User $user, string $newPassword): User` — hash and save new password
-- [ ] T016 [P] Create `app/Modules/Auth/Services/PasswordChangeOtpService.php` to bridge existing EmailVerificationService:
-  - `generateOtp(User $user): string` — reuse EmailVerificationService logic
-  - `validateOtp(User $user, string $otp): bool` — reuse validation
-  - Ensure OTP table has purpose='password_change' to distinguish from email_verification OTPs
-- [ ] T017 Create test `tests/Feature/ProfileControllerTest.php` (TDD-first) covering: GET /api/profile (happy path), PUT /api/profile (valid/invalid updates), validation errors
-- [ ] T018 Create test `tests/Feature/PasswordChangeControllerTest.php` (TDD-first) covering: POST request-otp, POST verify-otp, POST reset (with session validation)
-- [ ] T019 Register routes in `routes/api.php` (all behind auth middleware):
-  ```php
-  Route::middleware('auth:sanctum')->group(function () {
-      Route::get('/profile', [ProfileController::class, 'show']);
-      Route::put('/profile', [ProfileController::class, 'update']);
-      Route::post('/password/request-otp', [PasswordController::class, 'requestOtp']);
-      Route::post('/password/verify-otp', [PasswordController::class, 'verifyOtp']);
-      Route::post('/password/reset', [PasswordController::class, 'resetPassword']);
-  });
-  ```
+### T003: Audit Existing ProfileController & Blade Views
+- **What**: Verify ProfileController has edit(), update(), destroy() methods
+- **Check**: Profile Blade form has name, email, phone fields; partials for password + delete modals exist
+- **Verify**: Form validation, error messages display, Blade components used correctly
+- **Files**: `app/Modules/Profile/Controllers/ProfileController.php`, `resources/views/profile/`
+- **Expected**: ✓ ProfileController & 3 partials exist; no changes needed
 
 ---
 
-## Phase 4: Blade View Enhancements (Profile & Auth Screens)
+## PHASE 2: Data Model Updates (3 Tasks) — CONDITIONAL
 
-**Goal**: Update/enhance existing Blade templates with Alpine.js interactions for profile viewing, inline editing, and form state persistence.
+**Goal**: Add missing user preference fields to database (ONLY if not present).
 
-**Test Criteria**: Views render correctly with Alpine.js enhancements; inline edit works; form state persists; validation shows inline; uses CSS variables from constitution.
+### T004: Check User Model for Missing Fields
+- **What**: Inspect `app/Models/User.php` fillable + casts
+- **Check**: Does User model have theme_preference, language, timezone, notifications_enabled?
+- **If Missing**: Create migration; if present, skip to Phase 3
+- **Files**: `app/Models/User.php`
+- **Decision**: If all 4 fields exist → **Skip Phase 2 entirely** (go to Phase 3)
 
-### T020–T030: Blade View Updates & Alpine.js Enhancements
+### T005: Create Migration for User Preferences (If Needed)
+- **What**: Generate migration adding 4 nullable columns to users table
+- **Fields**:
+  - `theme_preference` (enum: 'light'|'dark'|'system', default='system')
+  - `language` (enum: 'es'|'en', default='es')
+  - `timezone` (string, default='America/Guayaquil')
+  - `notifications_enabled` (bool, default=true)
+- **Test**: Run migration; verify fields in `php artisan tinker`; backfill with defaults for existing users
+- **File**: `database/migrations/YYYY_MM_DD_add_user_preferences_to_users_table.php`
 
-- [ ] T020 [P] Update `resources/views/profile/edit.blade.php` to add profile header section:
-  - User avatar, name, company name (read-only)
-  - Display all profile fields: email, phone, theme preference (select)
-  - Inline edit mode toggle via pencil icon (Alpine.js x-show/x-if)
-  - Save/Cancel buttons that appear only in edit mode
-  - Validation error messages displayed inline using existing `<x-input-error>` component
-  - Use CSS variables: `--primary` for buttons, `--text-main` for labels, `--bg-secondary` for edit background
-- [ ] T021 [P] Create Alpine.js module `resources/js/profile-form.js` to handle:
-  - Form state management (editMode, formData, loading)
-  - GET /api/profile AJAX call to load profile data on page load
-  - PUT /api/profile AJAX call on save
-  - Error/success message display
-  - localStorage for form state recovery if needed
-  - Attach to profile form via `x-data="profileFormHandler()"` in Blade
-- [ ] T022 [P] Create partial `resources/views/profile/partials/inline-edit-toggle.blade.php`:
-  - Pencil icon button that toggles edit mode
-  - Uses Alpine.js x-cloak and transition classes
-  - Styled with Tailwind + CSS variables
-- [ ] T023 Create partial `resources/views/profile/partials/theme-selector.blade.php`:
-  - Dropdown select for theme_preference (light|dark|system)
-  - Integrated in profile form
-  - Calls setTheme Alpine action on change
-- [ ] T024 Update `resources/views/auth/login.blade.php`:
-  - Add Alpine.js script to persist form state (email field) to localStorage on input
-  - Add "¿Volver al Registro?" link at bottom with back button behavior
-  - Load email from localStorage on page load if present
-  - Clear localStorage on successful login
-- [ ] T025 Update `resources/views/auth/register.blade.php`:
-  - Add Alpine.js script to persist form state (non-sensitive fields) to localStorage
-  - Add "Volver al Login" button at bottom
-  - Load form data from localStorage on page load
-  - Clear localStorage on successful registration
-- [ ] T026 [P] Create Alpine.js component `resources/js/auth-navigation.js`:
-  - Handle login ↔ register navigation via form state in localStorage
-  - AJAX-based or form submission based on existing auth routes
-  - Preserve user-entered data when navigating between screens
-- [ ] T027 Create partial `resources/views/components/back-button.blade.php`:
-  - Reusable back button component for auth screens
-  - Takes route parameter or uses JavaScript history.back()
-  - Styled consistently with design system (`--primary` color)
-- [ ] T028 [P] Update `resources/views/layouts/app.blade.php` (verify/enhance):
-  - Confirm theme toggle button in top-right is functional
-  - Verify Alpine.js x-cloak is applied to avoid flash of unstyled content
-  - Test dark mode class application on html element
-  - Verify localStorage theme key is 'theme'
-- [ ] T029 Update `resources/views/components` if needed: verify `<x-input-error>`, `<x-form-label>`, `<x-input-text>` components exist and match design system
-- [ ] T030 Create feature test `tests/Feature/ProfileBladeViewTest.php`:
-  - Load profile page via GET /profile (Blade route)
-  - Verify profile data displays correctly
-  - Submit profile form via Blade form or AJAX
-  - Verify updates persist to database
-  - Test inline edit toggle visibility
+### T006: Update User Model with New Fields
+- **What**: Add new fields to User model fillable + casts
+- **Add**: Casts for enum fields (theme_preference, language) if Laravel 11+
+- **File**: `app/Models/User.php`
+- **Test**: Can mass-assign new fields; casts work correctly
 
 ---
 
-## Phase 5: Password Change Modal (Blade + Alpine.js)
+## PHASE 3: Backend API Endpoints (8 Tasks)
 
-**Goal**: Create password change modal component (Blade template + Alpine.js) that reuses existing OTP infrastructure.
+**Goal**: Create JSON API endpoints for profile & password management.
 
-**Test Criteria**: Modal displays correctly; 3-step flow works (current password → OTP → new password); password change completes; session invalidated on OTHER devices.
+### T007: Create/Enhance ProfileController JSON Methods
+- **What**: Add `show()` method to return current user as JSON; enhance `update()` to handle JSON requests
+- **Methods**:
+  - `GET /api/profile` → return auth()->user() as JSON
+  - `PATCH /api/profile` → validate + update user fields (name, email, phone, language, timezone, notifications_enabled)
+- **File**: `app/Modules/Profile/Controllers/ProfileController.php`
+- **Test**: GET returns 200 + user JSON; PATCH with valid data returns 200; PATCH with invalid data returns 422
 
-### T031–T040: Password Change Modal
+### T008: Create PasswordChangeController (New)
+- **What**: Create new controller with 3 methods for OTP-based password change
+- **Methods**:
+  - `POST /api/password/request-otp` → verify current_password, call PasswordChangeOtpService, return { message, cooldown_seconds }
+  - `POST /api/password/verify-otp` → validate OTP token, return { token_valid: bool }
+  - `PUT /api/password/reset` → verify OTP token valid, hash new password, update user, invalidate OTHER sessions
+- **File**: `app/Modules/Auth/Controllers/PasswordChangeController.php`
+- **Test**: Each method returns correct HTTP status + JSON response
 
-- [ ] T031 [P] Create partial `resources/views/profile/partials/password-change-modal.blade.php`:
-  - 3-step modal using Alpine.js x-show/x-transition
-  - Step 1: Current password input + "Request OTP" button
-  - Step 2: OTP input field + 30-second countdown timer + "Resend" button (disabled during cooldown)
-  - Step 3: New password input + confirm password + save button
-  - Modal header with close button (X), step indicator (1/2/3)
-  - Use existing `<x-input-error>` for validation messages
-  - Styled with Tailwind + CSS variables (`--primary`, `--bg-secondary`, etc.)
-- [ ] T032 [P] Create Alpine.js handler `resources/js/password-change.js`:
-  - State: currentStep (1|2|3), loading, errors, cooldownSeconds, showModal
-  - Action handleRequestOtp(currentPassword): POST /api/password/request-otp, validate response, move to step 2
-  - Action handleVerifyOtp(otpCode): POST /api/password/verify-otp, validate response, move to step 3
-  - Action handleResetPassword(newPassword, confirmPassword): POST /api/password/reset, validate, show success, close modal, reload page or redirect
-  - Action startCooldown(): 30s countdown timer, disable resend button
-  - Action resendOtp(): POST /api/password/request-otp again, restart cooldown
-  - Error handling: display messages inline, allow retry
-  - Attach to modal via `x-data="passwordChangeHandler()"` in Blade
-- [ ] T033 [P] Add "Change Password" button/link to profile view:
-  - Button appears in profile header or action menu
-  - Click opens password change modal
-  - Uses Alpine.js x-show to toggle modal visibility
-- [ ] T034 Create feature test `tests/Feature/PasswordChangeOtpIntegrationTest.php` (TDD-first):
-  - Test POST /api/password/request-otp: valid password → OTP sent
-  - Test POST /api/password/request-otp: invalid password → error returned
-  - Test POST /api/password/verify-otp: valid OTP → confirmation returned
-  - Test POST /api/password/verify-otp: invalid OTP, max attempts → error and lockout
-  - Test POST /api/password/reset: new password → password updated, other sessions invalidated
-  - Verify current device session remains active
-- [ ] T035 [P] Create Pest feature test `tests/Feature/PasswordChangeBladeTest.php`:
-  - Load profile page
-  - Verify password change button/link visible
-  - Test OTP modal renders correctly
-- [ ] T036 Create acceptance test `tests/Feature/PasswordChangeAcceptanceTest.php`:
-  - Full workflow: request OTP → verify OTP → change password → redirect/success message
-  - Verify email sent (mock Resend)
-  - Verify session invalidation on OTHER device
-- [ ] T037 Backend (implemented in Phase 3 T009-T016, tested here):
-  - Verify PasswordController.requestOtp() sends OTP email within 30s
-  - Verify PasswordController.verifyOtp() validates OTP (max 3 attempts, 10-min expiration)
-  - Verify PasswordController.reset() updates password and calls logoutOtherDevices() correctly
-- [ ] T038 [P] Add localization keys to `lang/es/auth.php`:
-  - password_change_title, request_otp_button, verify_otp_button, new_password_label, current_password_required, otp_sent, otp_expired, password_changed_success
-- [ ] T039 Add localization keys to `lang/en/auth.php`: English translations
-- [ ] T040 Create Cypress e2e test `tests/e2e/password-change-otp.spec.ts`:
-  - Load profile
-  - Click "Change Password"
-  - Enter current password, request OTP
-  - Verify email sent (or mock in test)
-  - Enter OTP code
-  - Enter new password, confirm
-  - Verify success message
-  - Verify redirect or page refresh
-  - Verify OTHER session logged out (test with second browser session if possible)
+### T009: Create UpdateProfileRequest Form Validation
+- **What**: Form request class validating profile update fields
+- **Rules**: name (required, string, max 255), email (required, email, unique except current), phone (nullable, phone), language (in:es,en), timezone (in:list), notifications_enabled (bool)
+- **File**: `app/Modules/Profile/Requests/UpdateProfileRequest.php`
+- **Test**: Valid + invalid data; unique email validation works
 
----
+### T010: Create PasswordChangeOtpService (Bridge Service)
+- **What**: New service adapting existing EmailVerificationService for password change workflow
+- **Methods**:
+  - `requestOtp(User $user)` → generate OTP via EmailVerificationService; set purpose='password_change'; send email; return cooldown_seconds
+  - `verifyOtp(User $user, string $otp)` → validate OTP; mark token used; return bool
+  - `resetPassword(User $user, string $newPassword, string $otpToken)` → verify OTP token used; hash + update password; logout OTHER sessions
+- **File**: `app/Modules/Auth/Services/PasswordChangeOtpService.php`
+- **Reuse**: Adapt existing `EmailVerificationService` generation/validation logic
+- **Test**: OTP flow works end-to-end; session invalidation tested
 
-## Phase 6: Navigation, User Menu & Integration
+### T011: Create OTP Request Form Classes (3 Forms)
+- **What**: Form request classes for each OTP endpoint
+- **Files**:
+  - `RequestPasswordOtpRequest.php` → current_password required
+  - `VerifyPasswordOtpRequest.php` → otp required
+  - `ResetPasswordRequest.php` → new_password + new_password_confirmation required + matching
+- **Test**: All validation rules enforced
 
-**Goal**: Wire navigation between auth screens, implement user menu linking to profile, ensure theme persistence on app init.
+### T012: Register API Routes for Profile & Password
+- **What**: Add routes to `routes/api.php`
+- **Routes** (all with `auth:sanctum` middleware):
+  - `GET /profile`
+  - `PATCH /profile`
+  - `DELETE /profile` (account deletion via JSON)
+  - `POST /password/request-otp`
+  - `POST /password/verify-otp`
+  - `PUT /password/reset`
+- **File**: `routes/api.php`
+- **Test**: Routes return 401 without token; 200 with valid token
 
-**Test Criteria**: Auth navigation works; user menu visible and functional; profile accessible from menu; theme loads correctly on page reload.
+### T013: Write Feature Tests for Profile API
+- **What**: Pest feature tests for all profile endpoints
+- **Tests**:
+  - GET /api/profile returns 200 + current user JSON
+  - PATCH /api/profile with valid data returns 200
+  - PATCH /api/profile with invalid data returns 422 + error messages
+  - DELETE /api/profile with password confirmation works
+  - Unauthorized requests return 401
+- **File**: `tests/Feature/ProfileApiTest.php`
+- **Coverage**: 100% of ProfileController JSON methods
 
-### T041–T048: Navigation Wiring
-
-- [ ] T041 [P] Update `resources/views/auth/login.blade.php`:
-  - Add "¿No tienes cuenta? {{ link('Regístrate aquí', route('register')) }}" link
-  - Implement via existing back button component or direct link
-  - Form state (email) persists to localStorage via Alpine.js
-- [ ] T042 [P] Update `resources/views/auth/register.blade.php`:
-  - Add "¿Ya tienes cuenta? {{ link('Inicia Sesión aquí', route('login')) }}" link
-  - Form state (name, email, phone - non-sensitive) persists via Alpine.js
-  - Alpine.js state object or form submission as per existing auth flow
-- [ ] T043 [P] Verify/enhance user menu in `resources/views/layouts/app.blade.php`:
-  - User name/avatar button in top-right or bottom-left
-  - Dropdown menu with: "Perfil", "Preferencias", "Cambiar Contraseña", "Cerrar Sesión"
-  - Dropdown implemented via Alpine.js x-show or existing UI pattern
-  - Links use route() helper: route('profile.show'), route('profile.edit'), route('logout')
-  - Styled consistently with CSS variables
-- [ ] T044 Create or verify route `GET /profile` (Blade route) to show profile.edit.blade.php view
-  - Route in `routes/web.php` or `routes/auth.php`
-  - Requires auth middleware
-  - Passes current user to view
-- [ ] T045 Update `resources/views/layouts/app.blade.php` app initialization script:
-  - On page load, fetch current user via GET /api/profile (or pass in Blade via @inject or auth()->user())
-  - Initialize theme from user.theme_preference (fallback to localStorage, fallback to 'system')
-  - Apply theme via Alpine.js setTheme action or direct CSS class
-  - Initialize other user state (name, avatar) for user menu display
-- [ ] T046 Create API endpoint `GET /api/auth/user` (if needed for frontend hydration):
-  - Returns current authenticated user as JSON
-  - Useful for single-page or AJAX-heavy apps
-  - Not strictly needed if using server-side Blade rendering
-- [ ] T047 Create feature test `tests/Feature/NavigationIntegrationTest.php`:
-  - Test GET /profile loads profile page
-  - Test user menu links resolve to correct routes
-  - Test auth navigation between login/register
-  - Test localStorage form state persistence
-- [ ] T048 Create Pest feature test `tests/Feature/AuthNavigationBladeTest.php`:
-  - Load login page → verify register link visible
-  - Load register page → verify login link visible
-  - Test form state persistence via localStorage
+### T014: Write Feature Tests for Password OTP API
+- **What**: Pest feature tests for password change OTP flow
+- **Tests**:
+  - POST /api/password/request-otp with correct password returns 200
+  - POST /api/password/request-otp with wrong password returns 403
+  - POST /api/password/verify-otp with valid OTP returns 200
+  - POST /api/password/verify-otp with invalid OTP returns 422
+  - PUT /api/password/reset with valid OTP + matching passwords resets password
+  - After password change, OTHER sessions logged out (verify via multiple auth tokens)
+  - Max 3 OTP attempts enforced; cooldown timer works
+- **File**: `tests/Feature/PasswordChangeOtpApiTest.php`
+- **Coverage**: 100% of PasswordChangeController methods
 
 ---
 
-## Phase 7: Preferences & Advanced Features (Optional / Post-MVP)
+## PHASE 4: Blade View Enhancements with Alpine.js (8 Tasks)
 
-**Goal**: Add language, timezone, notification settings to profile form.
+**Goal**: Update existing Blade views with Alpine.js AJAX interactivity (replace form reloads).
 
-**Test Criteria**: Preferences persist in DB; apply on reload; UI reflects user choices.
+### T015: Create Alpine.js Profile Form Handler (resources/js/profile-form.js)
+- **What**: Alpine.js module managing profile form state, AJAX calls, error handling
+- **Features**:
+  - x-data binding for form fields (name, email, phone, language, timezone, notifications_enabled)
+  - @submit.prevent handling → PATCH /api/profile via fetch
+  - Error message display (validation errors + general errors)
+  - Loading state (disable submit button during request)
+  - Success message + toast notification
+  - Debounced field updates (optional for real-time validation)
+- **File**: `resources/js/profile-form.js`
+- **Export**: `function profileFormHandler() { return { ... } }`
 
-### T049–T056: Preferences Management (Optional)
+### T016: Create Alpine.js Theme Preferences Handler (resources/js/theme-preferences.js)
+- **What**: Alpine.js module for theme + language + timezone + notifications forms
+- **Features**:
+  - Save on blur (not on submit) for quicker UX
+  - PATCH /api/profile for each field change
+  - Theme: Apply CSS class to documentElement immediately (no page reload)
+  - Language: Store in localStorage; apply on reload (full page reload needed for translations)
+  - Timezone: Just save to DB (no immediate UI change)
+  - Notifications: Toggle switch with save
+- **File**: `resources/js/theme-preferences.js`
+- **Export**: `function themePreferencesHandler() { return { ... } }`
 
-- [ ] T049 [P] Create or verify `app/Enums/Language.php` with values: es, en (if not auto-generated by Laravel)
-- [ ] T050 [P] Create or verify `app/Enums/Timezone.php` with IANA timezone list (America/Guayaquil as default for Ecuador) (if not already defined)
-- [ ] T051 Create `app/Modules/Auth/Requests/UpdatePreferencesRequest.php` with validation:
-  - language: required, in:es,en
-  - timezone: required, timezone IANA
-  - notifications_enabled: boolean
-- [ ] T052 Extend `app/Modules/Auth/Controllers/ProfileController.php` with method updatePreferences():
-  - Route: PUT /api/profile/preferences
-  - Validate UpdatePreferencesRequest
-  - Call ProfileService.updatePreferences()
-- [ ] T053 Extend `app/Modules/Auth/Services/ProfileService.php` with method:
-  - `updatePreferences(User $user, array $data): User`
-  - Validate and persist language, timezone, notifications_enabled
-- [ ] T054 Add route `PUT /api/profile/preferences` in `routes/api.php` (protected by auth middleware)
-- [ ] T055 [P] Create partial `resources/views/profile/partials/preferences-form.blade.php`:
-  - Language dropdown (es|en)
-  - Timezone select with search (Alpine.js searchable select or plain select)
-  - Notifications toggle checkbox
-  - Save button
-  - Integrated into profile.edit.blade.php as section or modal
-- [ ] T056 Create Pest feature test `tests/Feature/UserPreferencesTest.php`:
-  - PUT /api/profile/preferences with valid language/timezone/notifications
-  - Verify database update
-  - Verify on next page load, preferences persist
+### T017: Update Profile Blade View (resources/views/profile/edit.blade.php)
+- **What**: Enhance existing profile view with Alpine.js interactivity + new preference fields
+- **Changes**:
+  - Replace <form> with <form x-data="profileFormHandler()" @submit.prevent>
+  - Add loading spinner + success message (Alpine x-show)
+  - Wrap theme/language/timezone/notifications fields in new Blade partial
+  - Update PATCH /profile form action to use Alpine (or keep as fallback)
+  - Add error message displays for each field
+- **File**: `resources/views/profile/edit.blade.php`
+- **Test**: Form submits via AJAX; errors display; theme changes instantly
+
+### T018: Create Blade Partial for Theme/Language/Timezone Preferences (resources/views/profile/partials/preferences-form.blade.php)
+- **What**: New Blade partial for theme + language + timezone + notifications form
+- **Fields**:
+  - Theme selector (radio buttons: Light / Dark / System)
+  - Language selector (radio/select: Español / English)
+  - Timezone input (Alpine async select with options)
+  - Notifications toggle (checkbox)
+- **Alpine**: x-data="themePreferencesHandler()", @change handlers
+- **File**: `resources/views/profile/partials/preferences-form.blade.php`
+
+### T019: Update Auth Login Form with Alpine.js (resources/views/auth/login.blade.php)
+- **What**: Add localStorage form state persistence (email field only)
+- **Features**:
+  - On page load: restore email from localStorage.getItem('login_form_state')
+  - On input: localStorage.setItem('login_form_state', JSON.stringify({email}))
+  - Clear localStorage on successful login (via SessionCreated event or form redirect)
+- **File**: `resources/views/auth/login.blade.php`
+- **Alpine**: Simple x-data="{ email: localStorage.getItem('login_form_state')?.email || '' }" and @input handlers
+
+### T020: Update Auth Register Form with Alpine.js (resources/views/auth/register.blade.php)
+- **What**: Add localStorage form state persistence for multi-step wizard
+- **Features**: Persist company_name, email, phone between steps; restore on page reload
+- **File**: `resources/views/auth/register.blade.php`
+- **Alpine**: x-data with localStorage getItem/setItem on each step
+
+### T021: Update Auth Reset Password Form (resources/views/auth/reset-password.blade.php)
+- **What**: Add better error message display for validation errors
+- **Changes**: Ensure error bag displays clearly; show strength meter for new password if Alpine adds it
+- **File**: `resources/views/auth/reset-password.blade.php`
+
+### T022: Verify Blade Components Are Using CSS Variables Correctly
+- **What**: Audit all Blade components used in auth/profile screens for proper CSS variable usage
+- **Check**: <x-input-error>, <x-form-label>, <x-button> use var(--primary), var(--text-main), var(--danger), etc.
+- **Files**: `resources/views/components/` (all component files)
+- **Test**: Render a page; inspect styles in DevTools; colors match constitution.md variables
 
 ---
 
-## Phase 8: Error Handling, Testing & Documentation
+## PHASE 5: Password Change OTP Modal (6 Tasks)
 
-**Goal**: Comprehensive error handling, localization, testing, and documentation for all features.
+**Goal**: Create 3-step password change modal using existing OTP infrastructure.
 
-**Test Criteria**: All user stories covered by tests; performance meets SLAs; docs complete; no critical bugs; code quality gates pass.
+### T023: Create Password Change Modal Blade Partial (resources/views/profile/partials/password-change-modal.blade.php)
+- **What**: New Blade partial with 3-step modal (request OTP → verify OTP → reset password)
+- **Structure**:
+  - Step 1: Enter current password + confirm button → POST /api/password/request-otp
+  - Step 2: Enter OTP from email + verify button → POST /api/password/verify-otp
+    - Display countdown timer (10 minutes)
+    - "Resend OTP" button (disabled until cooldown expires)
+  - Step 3: Enter new password + confirm password + confirm button → PUT /api/password/reset
+  - Error messages per step
+  - Success message + redirect to dashboard
+- **File**: `resources/views/profile/partials/password-change-modal.blade.php`
+- **Alpine**: x-show conditions for step visibility
 
-### T057–T071: QA, Localization & Docs
+### T024: Create Alpine.js Password Change Modal Handler (resources/js/password-change-otp.js)
+- **What**: Alpine.js module managing 3-step modal state, OTP countdown timer, API calls
+- **Features**:
+  - Step navigation (next, back buttons)
+  - OTP countdown timer (10 min → 0 min)
+  - "Resend OTP" button disabled during cooldown (5 min after request)
+  - Error state per step
+  - API calls: request-otp, verify-otp, reset-password
+  - Success: show "Password changed!" message; redirect after 2 seconds
+  - Handle max attempts exceeded (3 OTP attempts) → show error; require request new OTP
+- **File**: `resources/js/password-change-otp.js`
+- **Export**: `function passwordChangeModalHandler() { return { ... } }`
 
-- [ ] T057 [P] Add comprehensive error handling to all ProfileController and PasswordController methods:
-  - Catch validation exceptions, throw ProfileException with localized message
-  - Return consistent JSON error response format
-  - Include error code, message (Spanish/English), and validation details if applicable
-- [ ] T058 [P] Create exception class `app/Modules/Auth/Exceptions/ProfileException.php` extending Exception:
-  - Custom error codes and messages for profile operations
-  - Localization support (getMessage returns Spanish by default, English if header Accept-Language: en)
-- [ ] T059 [P] Add logging to ProfileService and PasswordController:
-  - Log profile updates: `Log::info('Profile updated', ['user_id' => $user->id, 'fields' => [...]])`
-  - Log OTP requests: `Log::info('Password change OTP requested', ['user_id' => $user->id])`
-  - Log password changes: `Log::info('Password changed', ['user_id' => $user->id])`
-  - Log failed OTP attempts: `Log::warning('OTP verification failed', ['user_id' => $user->id, 'attempts' => ...])`
-- [ ] T060 Create or update localization file `lang/es/auth.php` with keys:
-  - profile.title, profile.save, profile.cancel, profile.edit, profile.updated_success
-  - password.change_title, password.current_password, password.new_password, password.confirm_password
-  - password.request_otp, password.otp_sent, password.otp_expired, password.otp_resend, password.changed_success
-  - validation messages for all fields
-- [ ] T061 Create or update localization file `lang/en/auth.php` with English translations
-- [ ] T062 [P] Create integration test `tests/Integration/ProfileWorkflowTest.php`:
-  - Login → GET /profile → verify profile displays → PUT /profile with changes → verify updates → logout
-  - Full workflow covering happy path
-- [ ] T063 [P] Create integration test `tests/Integration/PasswordChangeWorkflowTest.php`:
-  - Login → initiate password change → request OTP → verify OTP → reset password → verify session invalidated
-  - Test other session logged out
-- [ ] T064 [P] Create performance test `tests/Performance/ProfilePageLoadTimeTest.php`:
-  - Measure profile page load time
-  - Target: <1.5s for DOMContentLoaded
-  - Verify no N+1 queries
-- [ ] T065 [P] Create performance test `tests/Performance/ThemeToggleTest.php`:
-  - Measure theme toggle response time
-  - Target: <100ms from button click to visual change
-  - Test localStorage write doesn't block UI
-- [ ] T066 [P] Run PHPStan level 9:
-  ```bash
-  vendor/bin/phpstan analyse app/Modules/Auth --level=9
-  ```
-  - Fix any violations
-  - Verify no type errors
-- [ ] T067 [P] Run Laravel Pint (code formatter):
-  ```bash
-  ./vendor/bin/pint app/Modules/Auth
-  ```
-  - Ensure consistent code style
-- [ ] T068 [P] Run Pest test suite with coverage:
-  ```bash
-  ./vendor/bin/pest tests/Feature/ --coverage --min=80
-  ```
-  - Target 80%+ code coverage
-  - Generate coverage report
-- [ ] T069 Create comprehensive test file `tests/Feature/ProfileEdgeCasesTest.php`:
-  - Test updating only one field (partial update)
-  - Test invalid email format
-  - Test email collision (another user's email)
-  - Test concurrent profile updates
-  - Test permission checks (user cannot update other user's profile)
-- [ ] T070 Create comprehensive test file `tests/Feature/PasswordChangeEdgeCasesTest.php`:
-  - Test wrong current password → error
-  - Test OTP max attempts (3) → lockout
-  - Test OTP expiration (10 min) → new OTP required
-  - Test concurrent OTP requests → previous token invalidated
-  - Test password same as current → error
-  - Test new password validation (length, complexity)
-- [ ] T071 Create or update implementation documentation `specs/018-auth-ui-and-profile/IMPLEMENTATION_GUIDE.md`:
-  - Overview of 8 phases
-  - Architecture: Blade + Alpine.js + API endpoints
-  - How to run tests
-  - How to deploy
-  - Known issues or TODOs
-  - Links to all related files
+### T025: Wire Password Change Modal Button to Profile View
+- **What**: Add "Change Password" button to profile view; x-show modal on click
+- **Changes**: Add button in profile edit.blade.php; initialize modal component
+- **File**: `resources/views/profile/edit.blade.php`
+- **Test**: Button visible; clicking opens modal; modal steps work
+
+### T026: Test OTP Email Delivery (Integration Test)
+- **What**: Pest feature test confirming OTP email sent during password change
+- **Test**: POST /api/password/request-otp triggers email (mock Resend); email contains 6-digit OTP code
+- **File**: `tests/Feature/PasswordChangeOtpEmailTest.php`
+- **Mock**: Use `Mail::fake()` or `Resend` mock to verify email sent
+
+### T027: Test Session Invalidation After Password Change
+- **What**: Pest feature test confirming OTHER devices logged out after password change
+- **Flow**: Create 2 auth tokens for same user → change password with token1 → verify token1 still works; token2 now invalid
+- **File**: `tests/Feature/PasswordChangeSessionInvalidationTest.php`
+- **Verify**: Current session stays active; OTHER sessions logged out
+
+### T028: Write e2e Test for Password Change Modal (Browser Test)
+- **What**: Test full 3-step password change via Dusk or Playwright
+- **Flow**: Open modal → enter current password → copy OTP from email → enter OTP → enter new password → confirm → success
+- **File**: `tests/Browser/PasswordChangeOtpTest.php` (if using Dusk)
+- **Note**: Optional if budget limited; can defer to manual testing
+
+---
+
+## PHASE 6: Preferences Management UI (4 Tasks) — OPTIONAL
+
+**Goal**: Create UI for user preferences (language, timezone, notifications).
+
+### T029: Create Preferences Form in Profile (Already Done in T018)
+- **What**: Update profile/edit.blade.php to include preferences partial
+- **Status**: ✓ Completed in T018
+
+### T030: Write Feature Tests for Preferences API
+- **What**: Pest feature tests for each preference field
+- **Tests**:
+  - PATCH /api/profile with theme_preference='dark' → persists to DB
+  - PATCH /api/profile with language='en' → persists to DB
+  - PATCH /api/profile with timezone='America/New_York' → persists to DB
+  - PATCH /api/profile with notifications_enabled=false → persists to DB
+  - User model casts work correctly (enum, bool, etc.)
+- **File**: `tests/Feature/UserPreferencesApiTest.php`
+
+### T031: Test Preferences Persist on Page Reload
+- **What**: Pest feature test confirming preferences apply on reload
+- **Flow**: Set language='en' → reload page → verify language persists in UI; locale translations apply
+- **File**: `tests/Feature/UserPreferencesPersistenceTest.php`
+
+### T032: Add Timezone Validation Rule
+- **What**: Create or use Laravel's timezone validation rule
+- **Where**: UpdateProfileRequest validation for timezone field
+- **Test**: Invalid timezone rejected; valid timezones accepted
+
+---
+
+## PHASE 7: Final Testing & Documentation (6 Tasks)
+
+**Goal**: Comprehensive testing, error handling, localization, documentation.
+
+### T033: Add Comprehensive Error Handling
+- **What**: Catch + handle edge cases across all new endpoints/views
+- **Cases**:
+  - User tries to change password with wrong current password → 403 error
+  - OTP expired before verification → 422 error + resend option
+  - Max 3 OTP attempts exceeded → 422 error + must request new OTP
+  - Session invalidation race condition (multiple password change requests) → handled gracefully
+  - Database failures → 500 error with user-friendly message
+- **File**: Update controllers + services with try-catch
+- **Test**: All error paths covered
+
+### T034: Add Spanish/English Localization for New Features
+- **What**: Add all new error messages, success messages, form labels to lang files
+- **Files**:
+  - `lang/es/profile.php` → Spanish messages (default)
+  - `lang/en/profile.php` → English messages (fallback)
+- **Content**: All modal steps, error messages, button labels, placeholder texts
+- **Test**: Change language preference → UI updates with correct locale
+
+### T035: Write Unit Tests for Services (ProfileService, PasswordChangeOtpService)
+- **What**: Pest unit tests for service business logic (no DB)
+- **Tests**:
+  - ProfileService::getProfile() returns correct user data
+  - ProfileService::updateProfile() validates input before update
+  - PasswordChangeOtpService::requestOtp() generates token + sends email
+  - PasswordChangeOtpService::resetPassword() hashes password correctly
+- **File**: `tests/Unit/ProfileServiceTest.php`, `tests/Unit/PasswordChangeOtpServiceTest.php`
+- **Coverage**: 100%
+
+### T036: Run Full Test Suite + Check Coverage
+- **What**: Execute entire test suite; verify 80%+ code coverage on new code
+- **Command**: `php artisan test --coverage`
+- **Target**: 80%+ coverage on ProfileController, PasswordChangeController, services
+- **Report**: Document coverage in implementation guide
+
+### T037: Run Code Quality Checks
+- **What**: Run PHPStan (level 9) + Laravel Pint formatter
+- **Commands**:
+  - `./vendor/bin/phpstan analyse --level 9 app/Modules/Profile app/Modules/Auth`
+  - `./vendor/bin/pint app/Modules/Profile app/Modules/Auth`
+- **Fix**: All errors resolved; no warnings
+
+### T038: Write Implementation Guide + API Documentation
+- **What**: Create final documentation
+- **Content**:
+  - **IMPLEMENTATION_GUIDE.md**: Step-by-step what was built (8 phases, 38 tasks, what exists vs. what was added)
+  - **API.md**: JSON endpoints + request/response examples for /api/profile, /api/password/*
+  - **ARCHITECTURE.md**: Blade + Alpine.js patterns used (form handlers, x-data, fetch patterns, etc.)
+  - **TROUBLESHOOTING.md**: Common issues + fixes (OTP not sending, password reset fails, etc.)
+- **Files**: `specs/018-auth-ui-and-profile/IMPLEMENTATION_GUIDE.md`, etc.
 
 ---
 
@@ -426,272 +389,137 @@
 ### Critical Path (Minimum to Complete MVP)
 
 ```
-Phase 1 (Code Audit: Verify Blade/Alpine/Theme)
+Phase 1 (Code Audit: 3 tasks, verify existing)
     ↓
-Phase 2 (Data Model: Add user preference fields if missing) [OPTIONAL]
+Phase 2 (Migrations: 3 tasks, CONDITIONAL — skip if fields exist)
     ↓
-Phase 3 (Backend APIs: ProfileController, PasswordController, Services)
+Phase 3 (Backend APIs: 8 tasks, JSON endpoints)
     ↓
-Phase 4 (Blade View Enhancements: Update profile/auth views with Alpine.js)
+Phase 4 (Blade Enhancements: 8 tasks, Alpine.js AJAX)
     ↓
-Phase 5 (Password Change Modal: Blade partial + Alpine handler) [builds on Phase 4]
+Phase 5 (Password OTP Modal: 6 tasks, 3-step modal)
     ↓
-Phase 6 (Navigation & User Menu: Link auth screens, wire menu)
-    ↓
-Phase 8 (Testing & Documentation)
+Phase 7 (Testing & Docs: 6 tasks, final QA)
 ```
 
 ### Parallel Opportunities
 
-**Within Phase 1** (T001–T004): All audit tasks parallelizable
+- **Phase 1**: T001–T003 all parallelizable
+- **Phase 2** (if needed): T004–T006 parallelizable
+- **Phase 3**: T007–T008 parallel (controllers); T009–T011 parallel (form requests); T013–T014 parallel (tests)
+- **Phase 4**: T015–T016 parallel (Alpine handlers); T017–T020 parallel (Blade view updates)
+- **Phase 5**: T024–T025 parallel; T026–T027 parallel
+- **Phase 7**: T033–T037 parallel
 
-**Within Phase 3** (T009–T019):
-- T009–T010 (ProfileController + PasswordController) — parallelizable
-- T011–T014 (Request form classes) — parallelizable with T009–T010
-- T015–T016 (Services) — parallelizable with T011–T014
-- T017–T018 (Feature tests) — parallelizable after T009–T016 are stubbed
+### Team Sizing
 
-**Within Phase 4** (T020–T030):
-- T020, T022–T023 (Blade partials) — parallelizable
-- T021, T026 (Alpine.js modules) — parallelizable with T020–T023
-- T024–T025 (Auth screen updates) — parallelizable
-- T027–T029 (Component verification) — can run in parallel
-
-**Between Phases 4–5**: T031–T040 (Password modal) requires Phase 4 Blade foundation
-
-**Phase 6** (T041–T048): Can run in parallel with Phase 5 (navigation doesn't depend on password modal)
-
-**Phase 7** (T049–T056): Optional; can run in parallel with Phase 6 or after
-
-**Phase 8** (T057–T071): Can start in parallel with Phase 5–7 for documentation; testing happens throughout via TDD
-
-### Team Sizing Recommendation
-
-- **1 Person (Solo Dev)**: Sequential execution; MVP (Phase 1–6) = **1–2 days** (leveraging existing Blade infrastructure)
-- **2 People**: 
+- **1 Person (Solo)**: Sequential execution of 7 phases = **1–2 days MVP** (Phase 1–5 only; Phase 6 post-MVP)
+- **2 People**:
   - Person A: Phase 1–2, Phase 3 (Backend)
-  - Person B: Phase 4 (Blade views) + Phase 6 (Navigation)
-  - Both: Phase 5 (Password modal) + Phase 8 (Testing)
+  - Person B: Phase 4 (Blade) + wiring Phase 5
+  - Both: Phase 5 + Phase 7
   - Timeline: **1–1.5 days MVP**
-- **3+ People**: Full parallelization across Phases 1–6 = **0.5–1 day**
-
-**Key Advantage Over Previous Estimate**: Blade + Alpine.js reuses existing infrastructure (layouts, components, theme system) vs. building Vue SPA from scratch. Estimated effort reduced from 2–3 days to **1–2 days MVP**.
+- **3+ People**: Full parallelization = **0.5–1 day MVP**
 
 ---
 
 ## Testing & Quality Gates
 
-### Unit Test Coverage (Phase 3, 8)
+### Unit Test Coverage (Phase 3, 7)
+- ProfileService, PasswordChangeOtpService: 100% method coverage (TDD)
+- Form request validation classes: 100% rule coverage
+- Target: 80%+ overall code coverage
 
-- **ProfileService & PasswordChangeOtpService**: 100% method coverage (TDD-first approach)
-- **Request form classes** (UpdateProfileRequest, etc.): 100% validation rule coverage
-- **ProfileException custom exception**: Error handling paths covered
-- Target: 80%+ overall code coverage for all new code in app/Modules/Auth/
+### Feature Test Coverage (Phase 3, 5, 7)
+- Profile endpoints: show (GET), update (PATCH), delete (DELETE) — happy path + error cases
+- Password change OTP: request (POST), verify (POST), reset (PUT) — all 3 steps + error cases
+- Session invalidation: OTHER devices logged out; current device stays active
+- Email delivery: OTP sent, contains correct code, respects cooldown
 
-### Feature Test Coverage (Phase 3, 5, 8)
+### Acceptance Tests (Phase 4–5, 7) — Blade + Browser
+- US1: Navigate login ↔ without reload; form state persists
+- US2: Theme toggle works; persists across sessions ✓ **Already works**
+- US3: Profile displays + inline edit works + changes persist
+- US4: Password change 3-step modal: request → verify → reset → session invalidate OTHER devices
 
-- **Profile endpoints**: GET /api/profile (happy path + 401 unauthorized), PUT /api/profile (valid + invalid data), validation errors
-- **Password change endpoints**: POST request-otp (happy + wrong password), POST verify-otp (valid + invalid + max attempts), POST reset (happy + error cases)
-- **Session invalidation**: Verify other sessions logged out after password change
-- **OTP flow**: Generation, validation, max attempts (3), 10-min expiration, concurrent token invalidation
-- Target: 80% feature test coverage
-
-### Blade View & Alpine.js Tests (Phase 4, 8)
-
-- **Profile Blade view**: Renders profile data correctly, inline edit toggle works, form submission calls API
-- **Auth navigation**: Form state persists to localStorage, navigation between screens works
-- **Theme toggle**: localStorage key 'theme' updated, CSS dark class applied, persists on reload
-- **Password modal**: Steps 1–3 display correctly, cooldown timer works, error messages display, OTP resend button disabled during cooldown
-
-### Acceptance Tests (Phase 4–6, 8) — Blade + Browser Testing
-
-- **US1**: User navigates login ↔ register without full page reload, form state persists (email field)
-- **US2**: Theme toggle visible on all pages (top-right corner), works instantly (<100ms), persists across sessions ✓ **Already works**
-- **US3**: Profile displays all user info, inline pencil icon toggles edit mode, save persists changes to DB
-- **US4**: Password change modal: request OTP → verify OTP → reset password → success, OTHER sessions logged out
-- **US5**: Preferences form (language/timezone/notifications) persists to DB, applies on reload
-
-### Performance Benchmarks (Phase 8)
-
-- **Profile page load**: <1.5s DOMContentLoaded (leverage server-side Blade rendering for fast initial paint)
-- **Theme toggle response**: <100ms visual change (localStorage + CSS class application via Alpine.js)
-- **OTP email delivery**: <30s (reuse existing Resend integration)
-- **API response times**: <500ms for all endpoints (minimal DB queries, eager loading where needed)
+### Performance Benchmarks (Phase 7)
+- Profile page load: <1.5s (server-side Blade rendering)
+- Theme toggle: <100ms (localStorage + CSS class)
+- OTP email delivery: <30s (existing Resend integration)
+- API response times: <500ms (profile, password endpoints)
 
 ---
 
 ## Implementation Notes & Best Practices
 
-### Architecture: Blade Server-Side Templates + Alpine.js
-
-- **Backend**: Laravel controllers + services return JSON APIs for AJAX calls
-- **Frontend**: Blade templates render HTML server-side; Alpine.js adds interactivity without page reloads
-- **State Management**: Alpine.js x-data for component-level state; localStorage for theme/form persistence
-- **Styling**: Tailwind CSS utility classes + CSS variables from constitution.md (`--primary`, `--text-*`, `--bg-*`)
-- **No Vue SPA**: This project uses traditional server-side rendering (Blade) with progressive enhancement (Alpine.js)
-
-### Code Reuse Strategy
-
-- **OTP System**: Reuse existing `EmailVerificationService` from Registration module; create bridge `PasswordChangeOtpService` to adapt it for password change workflow
-- **Auth Controllers**: Extend existing `AuthController`, `PasswordController` rather than creating new ones
-- **Blade Templates**: Update existing `resources/views/profile/*.blade.php`, `resources/views/auth/*.blade.php` with Alpine.js enhancements
-- **CSS Variables**: Use existing theme variables (`--primary`, `--bg-secondary`, `--text-main`, etc.); no new CSS files unless absolutely necessary
-- **Components**: Verify/enhance existing Blade components (`<x-input-error>`, `<x-form-label>`, `<x-button>`) instead of creating new ones
+### Architecture Reminder
+- **Backend**: Laravel API endpoints return JSON
+- **Frontend**: Blade templates + Alpine.js (NOT Vue)
+- **State**: Alpine.js x-data for component state; localStorage for persistence
+- **Styling**: Tailwind + CSS variables from constitution.md
+- **Reuse**: Adapt existing EmailVerificationService; use existing Blade components
 
 ### TDD Workflow (Per Task)
+1. Write failing test (Red)
+2. Implement minimal code (Green)
+3. Refactor for clarity (Refactor)
+4. Verify test still passes
 
-1. Write failing test (Red) — test your feature/endpoint/validation first
-2. Implement minimal code to pass test (Green)
-3. Refactor for clarity, DRY, and consistency (Refactor)
-4. Verify test still passes; add edge cases if discovered
+### Alpine.js Patterns (Used Throughout)
+```javascript
+// Form submission via AJAX
+<form @submit.prevent="submitForm">
 
-**Example**:
-```php
-// Test first: tests/Feature/ProfileControllerTest.php
-test('users can view their profile', function () {
-    $user = User::factory()->create();
-    $response = actingAs($user)->get('/api/profile');
-    $response->assertStatus(200)
-             ->assertJsonStructure(['id', 'name', 'email', 'company_id']);
-});
+// Conditional rendering
+<div x-show="editing">...</div>
+<div x-show="!editing">...</div>
 
-// Then implement: ProfileController.php
-public function show(): JsonResponse {
-    return response()->json(auth()->user()); // minimal implementation
-}
+// API calls
+fetch('/api/profile', { method: 'PATCH', body: JSON.stringify(data) })
 
-// Then refactor: ProfileController.php + ProfileService.php
-// Use ProfileService to encapsulate business logic
-```
+// localStorage
+localStorage.setItem('key', JSON.stringify(value))
+localStorage.getItem('key')
 
-### Alpine.js Patterns
-
-**Toggle Edit Mode**:
-```html
-<div x-data="{ editing: false }">
-    <div x-show="!editing">Display Name: {{ $user->name }}</div>
-    <input x-show="editing" type="text" x-model="formData.name">
-    <button @click="editing = !editing">{{ editing ? 'Cancel' : 'Edit' }}</button>
-</div>
-```
-
-**Form State Persistence**:
-```html
-<form @submit.prevent="submitForm" x-data="{ formData: @json(old('email')) }">
-    <input x-model="formData.email" @input="localStorage.setItem('formData', JSON.stringify(formData))">
-</form>
-```
-
-**API Calls**:
-```html
-<button @click="updateProfile" :disabled="loading">
-    <span x-show="loading">Guardando...</span>
-    <span x-show="!loading">Guardar</span>
-</button>
-
-<script>
-function profileHandler() {
-    return {
-        loading: false,
-        updateProfile() {
-            this.loading = true;
-            fetch('/api/profile', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                body: JSON.stringify(this.formData)
-            })
-            .then(r => r.json())
-            .then(data => { this.loading = false; alert('Guardado!'); })
-            .catch(e => { this.loading = false; alert('Error: ' + e.message); });
-        }
-    }
-}
-</script>
+// Loading states
+<button :disabled="loading">{{ loading ? 'Guardando...' : 'Guardar' }}</button>
 ```
 
 ### Security Considerations
-
-- **CSRF Protection**: Laravel token included in all form submissions; X-CSRF-TOKEN header in AJAX requests
-- **Password Security**: Current password verified before OTP request; new password hashed before storage
-- **OTP Security**: Tokens hashed before storage; max 3 verification attempts; 10-min expiration
-- **Session Invalidation**: Log out OTHER devices only after password change (clarification A1); current device remains active
-- **No Passwords in Logs**: Never log passwords or OTP codes
-- **Email Validation**: Verify email before sending OTP (prevent spam)
+- CSRF protection: X-CSRF-TOKEN header in AJAX requests
+- Current password verified before OTP request
+- OTP tokens hashed before storage
+- Max 3 verification attempts; 10-min TTL
+- Session invalidation: OTHER devices only (not current)
+- No passwords/OTPs in logs
 
 ### Database Safety
-
-- **Migrations**: Add new fields WITHOUT altering existing functionality; backfill defaults for existing users
-- **No Breaking Changes**: Existing schema intact; add-only approach ensures backward compatibility
-- **Cascade Delete**: If user deleted, related OTP tokens, preferences cascade delete
-- **Timestamps**: All tables have `created_at`, `updated_at`; use soft deletes if user deletion needs to preserve history
-
-### Localization (Spanish-First)
-
-- All user-facing strings in `lang/es/auth.php` (primary language)
-- English translations in `lang/en/auth.php` (fallback)
-- Form labels, validation messages, success/error messages all localized
-- Timezone default: America/Guayaquil (Ecuador)
-- Language default: Spanish (es)
+- Migrations: Add-only (no column drops)
+- Backfill defaults for existing users
+- No breaking changes to existing schema
+- Cascade deletes for related OTP tokens
 
 ---
 
-## Sign-Off & Verification
+## Sign-Off Criteria
 
-### Phase Completion Checklist (Per Phase)
+### MVP (Phase 1–5: US1 + US2 + US3 + US4)
+- [ ] All existing infrastructure verified ✓
+- [ ] Migrations conditionally applied (if fields missing)
+- [ ] All 6 API endpoints functional + tested
+- [ ] All Blade views updated with Alpine.js + working
+- [ ] Password OTP modal complete + 3-step flow works
+- [ ] Session invalidation working (OTHER devices only)
+- [ ] 80%+ test coverage
+- [ ] No critical bugs
+- [ ] All tests passing
+- [ ] Deployment ready
 
-- [ ] All tasks in phase completed and tested
-- [ ] No critical bugs blocking next phase
-- [ ] Code review approved (at least one team member)
-- [ ] Performance benchmarks met (if applicable)
-- [ ] Localization complete (Spanish strings in place)
-- [ ] Documentation updated
-
-### MVP Sign-Off Criteria (Phase 1–6: US1 + US2 + US3)
-
-**Functionality**:
-- [ ] User navigates between login ↔ register screens without full page reload
-- [ ] Form state (email field) persists to localStorage
-- [ ] Theme toggle visible and functional on all pages (login, register, dashboard, profile)
-- [ ] Theme preference persists across sessions via localStorage
-- [ ] Theme applies instantly (<100ms) when toggled
-- [ ] Profile page displays all user information (name, email, phone, company)
-- [ ] Inline edit mode toggles with pencil icon (Alpine.js)
-- [ ] Profile updates save to database via PUT /api/profile
-- [ ] Validation errors display inline for all fields
-
-**Quality**:
-- [ ] All validations work; error messages clear in Spanish
-- [ ] Mobile and desktop responsive (test on 320px, 768px, 1024px+ viewports)
-- [ ] Accessibility compliant (WCAG 2.1 AA): keyboard navigation, color contrast, labels, error associations
-- [ ] No console errors or warnings
-- [ ] Performance: profile page load <1.5s, theme toggle <100ms
-- [ ] 80%+ test coverage on new code (ProfileService, ProfileController, etc.)
-- [ ] PHPStan level 9 pass, Laravel Pint formatting clean
-- [ ] All Pest/PHPUnit tests passing
-
-**Readiness**:
-- [ ] No critical bugs reported
-- [ ] All tests pass on main branch
-- [ ] Documentation complete (README, IMPLEMENTATION_GUIDE)
-- [ ] Team sign-off received
-
-### Full Feature Sign-Off Criteria (All 5 User Stories + Phase 7)
-
-- [ ] All US1–US5 acceptance criteria met
-- [ ] **US1**: Navigation fully functional with form persistence
-- [ ] **US2**: Theme toggle works on all pages, persists, applies instantly
-- [ ] **US3**: Profile CRUD (view/edit) fully functional
-- [ ] **US4**: Password change via OTP modal complete; session invalidation working (OTHER devices logged out)
-- [ ] **US5**: Preferences (language/timezone/notifications) form created and persists to DB
-- [ ] All new services, controllers, Blade views tested (80%+ coverage)
-- [ ] OTP workflow secure (reuses existing system; tested)
-- [ ] Session invalidation correct (OTHER devices only; current device active)
-- [ ] Preferences apply on reload
-- [ ] Performance SLAs met (all benchmarks passed)
-- [ ] Security audit passed (no hardcoded secrets, CSRF protected, passwords secured)
-- [ ] Documentation complete
-- [ ] Ready for production deployment
+### Post-MVP Optional (Phase 6: US5)
+- [ ] User preferences UI complete
+- [ ] Preferences persist + apply on reload
+- [ ] Localization complete (ES/EN)
 
 ---
 
-**Last Updated**: 2026-06-25 | **Architecture**: Blade + Alpine.js + JSON API | **Estimated Duration**: 1–2 days MVP (solo dev) | **Next Review**: After Phase 1 code audit completion
+**Last Updated**: 2026-06-25 | **Total Tasks**: 38 (reduced from 71) | **Estimated MVP**: 1–2 days solo dev | **Architecture**: Blade + Alpine.js + JSON API
