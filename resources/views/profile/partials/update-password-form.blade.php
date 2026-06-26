@@ -157,8 +157,9 @@
                     </button>
                 </template>
 
-                <button @click="closeModal()" type="button" class="btn-secondary" :disabled="loading">
-                    {{ __('Cancelar') }}
+                <button @click="closeModal()" type="button" class="btn-secondary" :disabled="loading" style="padding: 0.625rem 1rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-times"></i>
+                    <span>{{ __('Cancelar') }}</span>
                 </button>
             </div>
         </div>

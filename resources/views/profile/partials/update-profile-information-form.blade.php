@@ -8,6 +8,38 @@
         </p>
     </header>
 
+    <!-- INFORMACIÓN ACTUAL DEL USUARIO -->
+    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border" style="border-color: var(--border-light);">
+        <h3 class="text-sm font-semibold mb-3" style="color: var(--text-main);">{{ __('Información Actual') }}</h3>
+        <div class="grid grid-cols-1 gap-3 text-sm">
+            <div class="flex justify-between">
+                <span style="color: var(--text-tertiary);">{{ __('Nombre') }}:</span>
+                <span class="font-medium" style="color: var(--text-main);" x-text="currentData.name"></span>
+            </div>
+            <div class="flex justify-between">
+                <span style="color: var(--text-tertiary);">{{ __('Correo Electrónico') }}:</span>
+                <span class="font-medium" style="color: var(--text-main);" x-text="currentData.email"></span>
+            </div>
+            <div class="flex justify-between">
+                <span style="color: var(--text-tertiary);">{{ __('Teléfono') }}:</span>
+                <span class="font-medium" style="color: var(--text-main);" x-text="currentData.phone || '{{ __('No especificado') }}'"></span>
+            </div>
+            <div class="flex justify-between">
+                <span style="color: var(--text-tertiary);">{{ __('Idioma') }}:</span>
+                <span class="font-medium" style="color: var(--text-main);" x-text="currentData.language === 'es' ? '{{ __('Español') }}' : '{{ __('English') }}'"></span>
+            </div>
+            <div class="flex justify-between">
+                <span style="color: var(--text-tertiary);">{{ __('Zona Horaria') }}:</span>
+                <span class="font-medium" style="color: var(--text-main);" x-text="currentData.timezone"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de edición -->
+    <div class="border-t pt-4" style="border-color: var(--border-light);">
+        <h3 class="text-sm font-semibold mb-4" style="color: var(--text-main);">{{ __('Editar Información') }}</h3>
+    </div>
+
     <form id="send-verification" method="post" action="{{ route('verification.send') }}">
         @csrf
     </form>

@@ -11,6 +11,14 @@ function profileFormHandler() {
         showSuccess: false,
         successMessage: '',
         errors: {},
+        currentData: {
+            name: '',
+            email: '',
+            phone: '',
+            language: 'es',
+            timezone: 'America/Guayaquil',
+            notifications_enabled: true,
+        },
         formData: {
             name: '',
             email: '',
@@ -44,7 +52,7 @@ function profileFormHandler() {
             })
             .then(response => response.json())
             .then(data => {
-                this.formData = {
+                const userData = {
                     name: data.name || '',
                     email: data.email || '',
                     phone: data.phone || '',
@@ -52,6 +60,10 @@ function profileFormHandler() {
                     timezone: data.timezone || 'America/Guayaquil',
                     notifications_enabled: data.notifications_enabled ?? true,
                 };
+                // Mostrar información actual
+                this.currentData = userData;
+                // Pre-llenar formulario de edición
+                this.formData = userData;
             })
             .catch(error => console.error('Failed to load profile:', error));
         },
