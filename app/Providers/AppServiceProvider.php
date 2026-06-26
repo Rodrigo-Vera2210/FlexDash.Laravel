@@ -23,7 +23,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Bind services as singletons
-        $this->app->singleton(\App\Services\InventoryService::class);
+        $this->app->singleton(\App\Modules\Inventory\Services\InventoryService::class);
+        $this->app->singleton(\App\Services\InventoryService::class, fn ($app) => $app->make(\App\Modules\Inventory\Services\InventoryService::class));
         $this->app->singleton(\App\Services\SaleService::class);
         $this->app->singleton(\App\Services\PurchaseService::class);
         $this->app->singleton(\App\Services\PaymentService::class);

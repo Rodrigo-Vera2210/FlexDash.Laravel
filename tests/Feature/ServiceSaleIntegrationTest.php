@@ -235,9 +235,18 @@ class ServiceSaleIntegrationTest extends TestCase
             'is_active' => true
         ]);
 
+        $branch = \App\Modules\Branch\Models\Branch::create([
+            'company_id'         => $company->id,
+            'name'               => 'Matriz',
+            'establishment_code' => '001',
+            'is_active'          => true,
+        ]);
+        $user->update(['branch_id' => $branch->id]);
+        $product->branches()->attach([$branch->id => ['stock' => 0]]);
+
         // Initialize stock
         $inventoryService = app(\App\Services\InventoryService::class);
-        $inventoryService->adjust($product, 10.00, 'Stock inicial');
+        $inventoryService->adjust($product, 10.00, 'Stock inicial', $branch->id);
         $this->assertEquals(10.00, $product->fresh()->stock);
 
         $service = Service::create([

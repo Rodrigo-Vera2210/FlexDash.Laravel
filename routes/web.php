@@ -95,6 +95,7 @@ Route::middleware(['auth.jwt', 'auth.admin_only'])->group(function () {
     Route::middleware('auth.module:settings')->group(function () {
         Route::resource('sellers', \App\Modules\Seller\Controllers\SellerController::class)->only(['index', 'create', 'store']);
         Route::post('sellers/{seller}/toggle', [\App\Modules\Seller\Controllers\SellerController::class, 'toggleStatus'])->name('sellers.toggle');
+        Route::resource('branches', \App\Modules\Branch\Controllers\BranchController::class);
     });
 
     // Facturación Electrónica (Tenants)

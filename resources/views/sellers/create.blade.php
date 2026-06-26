@@ -37,6 +37,22 @@
                            placeholder="Mínimo 8 caracteres" required>
                 </div>
 
+                {{-- Branch --}}
+                @if(isset($branches) && $branches->isNotEmpty())
+                <div>
+                    <label for="branch_id" class="block text-sm font-semibold mb-1 text-slate-700 dark:text-slate-300">Local / Sucursal Asignado</label>
+                    <select id="branch_id" name="branch_id"
+                            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 bg-transparent rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-blue">
+                        <option value="">— Sin asignar —</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
+                                {{ $branch->name }} ({{ $branch->establishment_code }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
+
                 {{-- Actions --}}
                 <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
                     <a href="{{ route('sellers.index') }}" class="btn-secondary">

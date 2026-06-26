@@ -25,8 +25,13 @@ class User extends Authenticatable
         'email',
         'password',
         'company_id',
+        'branch_id',
         'role',
         'status',
+        'theme_preference',
+        'language',
+        'timezone',
+        'notifications_enabled',
     ];
 
     /**
@@ -51,6 +56,10 @@ class User extends Authenticatable
             'password'          => 'hashed',
             'role'              => 'string',
             'status'            => 'string',
+            'theme_preference'  => 'string',
+            'language'          => 'string',
+            'timezone'          => 'string',
+            'notifications_enabled' => 'boolean',
         ];
     }
 
@@ -60,6 +69,14 @@ class User extends Authenticatable
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Get the branch that this user is assigned to.
+     */
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\Branch\Models\Branch::class);
     }
 
     /**

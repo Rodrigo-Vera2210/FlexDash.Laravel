@@ -21,7 +21,9 @@
         "/^git add \\.$/": {
             "approve": true,
             "matchCommandLine": true
-        }
+        },
+        "git add": true,
+        "git commit": true
     },
     "appService.defaultWebAppToDeploy": "/subscriptions/946c8945-bab4-4689-8adc-01f3e278e509/resourceGroups/appsvc_linux_eastus/providers/Microsoft.Web/sites/erp-flex-dash",
     "appService.deploySubpath": "."

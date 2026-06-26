@@ -68,6 +68,21 @@
                     </div>
                 </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="max_branches" class="form-label font-semibold text-slate-700 dark:text-slate-200">Límite de Locales</label>
+                        <input type="number" name="max_branches" id="max_branches"
+                               value="{{ old('max_branches', $plan?->max_branches ?? 1) }}"
+                               required placeholder="Ej: 3" class="input-solid" min="1">
+                    </div>
+                    <div>
+                        <label for="monthly_invoice_limit" class="form-label font-semibold text-slate-700 dark:text-slate-200">Límite de Facturas Mensuales</label>
+                        <input type="number" name="monthly_invoice_limit" id="monthly_invoice_limit"
+                               value="{{ old('monthly_invoice_limit', $plan?->monthly_invoice_limit ?? 0) }}"
+                               required placeholder="Ej: 500" class="input-solid" min="0">
+                    </div>
+                </div>
+
                 <div class="mb-6">
                     <label class="form-label font-semibold text-slate-700 dark:text-slate-200 mb-2 block">Módulos Habilitados</label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">

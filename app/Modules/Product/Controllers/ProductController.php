@@ -3,6 +3,7 @@
 namespace App\Modules\Product\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Branch\Models\Branch;
 use App\Modules\Product\Models\Category;
 use App\Modules\Product\Models\Product;
 use App\Models\Tax;
@@ -17,7 +18,7 @@ class ProductController extends Controller
         $category = $request->get('category');
         $lowStock = $request->boolean('low_stock');
 
-        $products = Product::with(['category', 'tax'])
+        $products = Product::with(['category', 'tax', 'branches'])
             ->when($search,   fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%"))
             ->when($category, fn($q) => $q->where('category_id', $category))
             ->when($lowStock,  fn($q) => $q->lowStock())
@@ -26,8 +27,9 @@ class ProductController extends Controller
             ->withQueryString();
 
         $categories = Category::where('is_active', true)->orderBy('name')->get();
+        $branches   = Branch::active()->orderBy('establishment_code')->get();
 
-        return view('products.index', compact('products', 'categories', 'search', 'category', 'lowStock'));
+        return view('products.index', compact('products', 'categories', 'branches', 'search', 'category', 'lowStock'));
     }
 
     public function create()
@@ -58,6 +60,12 @@ class ProductController extends Controller
 
         unset($data['image']);
         $product = Product::create($data);
+
+        $branches = Branch::active()->get();
+        if ($branches->isNotEmpty()) {
+            $pivotData = $branches->mapWithKeys(fn ($branch) => [$branch->id => ['stock' => 0]])->all();
+            $product->branches()->attach($pivotData);
+        }
 
         return redirect()->route('products.show', $product)
             ->with('success', 'Producto creado correctamente.');

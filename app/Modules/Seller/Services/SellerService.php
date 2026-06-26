@@ -35,6 +35,7 @@ class SellerService
 
         return User::create([
             'company_id'        => $company->id,
+            'branch_id'         => $data['branch_id'] ?? null,
             'name'              => $data['name'],
             'email'             => $data['email'],
             'password'          => Hash::make($data['password']),

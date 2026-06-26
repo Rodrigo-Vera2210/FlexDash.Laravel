@@ -167,6 +167,8 @@ class SuperAdminController extends Controller
             'max_admins'               => ['required', 'integer', 'min:1'],
             'max_sellers'              => ['required', 'integer', 'min:0'],
             'max_monthly_transactions' => ['required', 'integer', 'min:1'],
+            'max_branches'             => ['required', 'integer', 'min:1'],
+            'monthly_invoice_limit'    => ['required', 'integer', 'min:0'],
             'modules'                  => ['nullable', 'array'],
             'is_active'                => ['nullable', 'boolean'],
         ]);
@@ -196,6 +198,8 @@ class SuperAdminController extends Controller
             'max_admins'               => ['required', 'integer', 'min:1'],
             'max_sellers'              => ['required', 'integer', 'min:0'],
             'max_monthly_transactions' => ['required', 'integer', 'min:1'],
+            'max_branches'             => ['required', 'integer', 'min:1'],
+            'monthly_invoice_limit'    => ['required', 'integer', 'min:0'],
             'modules'                  => ['nullable', 'array'],
             'is_active'                => ['nullable', 'boolean'],
         ]);

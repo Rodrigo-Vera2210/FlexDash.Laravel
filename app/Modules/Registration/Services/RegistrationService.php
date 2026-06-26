@@ -47,13 +47,16 @@ class RegistrationService implements RegistrationServiceInterface
 
             // Create subscription payment log
             \App\Models\SubscriptionPayment::create([
-                'company_id'          => $company->id,
-                'plan'                => $data['subscription_plan'] ?? 'basic',
-                'bank_origin'         => $data['bank_origin'] ?? '',
-                'account_destination' => $data['account_destination'] ?? '',
-                'receipt_path'        => $data['payment_receipt_path'] ?? '',
-                'status'              => 'pending',
-                'type'                => 'signup',
+                'company_id'            => $company->id,
+                'plan'                  => $data['subscription_plan'] ?? 'basic',
+                'duration_months'       => $data['subscription_duration_months'] ?? 1,
+                'discount_percentage'   => $data['subscription_discount_percentage'] ?? 0,
+                'amount'                => $data['subscription_amount'] ?? 0,
+                'bank_origin'           => $data['bank_origin'] ?? '',
+                'account_destination'   => $data['account_destination'] ?? '',
+                'receipt_path'          => $data['payment_receipt_path'] ?? '',
+                'status'                => 'pending',
+                'type'                  => 'signup',
             ]);
 
             $this->emailVerificationService->generateOtp($user);

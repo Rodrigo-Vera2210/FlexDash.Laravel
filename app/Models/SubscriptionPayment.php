@@ -19,6 +19,15 @@ class SubscriptionPayment extends Model
         'status',
         'rejection_reason',
         'type',
+        'duration_months',
+        'discount_percentage',
+        'amount',
+    ];
+
+    protected $casts = [
+        'duration_months'     => 'integer',
+        'discount_percentage' => 'decimal:2',
+        'amount'              => 'decimal:2',
     ];
 
     public function company(): BelongsTo

@@ -186,11 +186,23 @@
         <form method="POST" action="{{ route('inventory.adjust') }}" class="p-6 space-y-4">
             @csrf
             <div>
+                <label for="modal_branch_id" class="form-label">Sucursal / Local</label>
+                <select name="branch_id" id="modal_branch_id" class="form-input" required onchange="updateCurrentStockDisplay()">
+                    <option value="">Seleccionar sucursal...</option>
+                    @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}">{{ $branch->name }} ({{ $branch->establishment_code }})</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
                 <label for="modal_product_id" class="form-label">Producto a Ajustar</label>
                 <select name="product_id" id="modal_product_id" class="form-input" required onchange="updateCurrentStockDisplay()">
                     <option value="">Seleccionar producto...</option>
                     @foreach($products as $prod)
-                        <option value="{{ $prod->id }}" data-stock="{{ $prod->stock }}" data-unit="{{ $prod->unit }}">
+                        <option value="{{ $prod->id }}"
+                                data-unit="{{ $prod->unit }}"
+                                data-branch-stocks="{{ $prod->branches->mapWithKeys(fn($b) => [$b->id => $b->pivot->stock])->toJson() }}">
                             [{{ $prod->code }}] {{ $prod->name }}
                         </option>
                     @endforeach
@@ -237,10 +249,14 @@
         document.getElementById('adjust-modal').classList.add('hidden');
     }
     function updateCurrentStockDisplay() {
-        const select = document.getElementById('modal_product_id');
-        const selectedOpt = select.options[select.selectedIndex];
-        if (selectedOpt && selectedOpt.value) {
-            const stock = parseFloat(selectedOpt.dataset.stock) || 0;
+        const productSelect = document.getElementById('modal_product_id');
+        const branchSelect = document.getElementById('modal_branch_id');
+        const selectedOpt = productSelect.options[productSelect.selectedIndex];
+        const branchId = branchSelect.value;
+
+        if (selectedOpt && selectedOpt.value && branchId) {
+            const stocks = JSON.parse(selectedOpt.dataset.branchStocks || '{}');
+            const stock = parseFloat(stocks[branchId]) || 0;
             const unit = selectedOpt.dataset.unit || '';
             document.getElementById('current-stock-span').textContent = stock.toFixed(2) + ' ' + unit;
         } else {

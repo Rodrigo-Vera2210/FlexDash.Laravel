@@ -65,7 +65,10 @@
                             <th class="table-header">Código</th>
                             <th class="table-header">Nombre</th>
                             <th class="table-header">Categoría</th>
-                            <th class="table-header text-right">Stock Actual</th>
+                            @foreach ($branches as $branch)
+                                <th class="table-header text-right">{{ $branch->name }}</th>
+                            @endforeach
+                            <th class="table-header text-right">Stock Total</th>
                             <th class="table-header text-right">Costo</th>
                             <th class="table-header text-right">Precio Venta</th>
                             <th class="table-header">Impuesto</th>
@@ -94,14 +97,26 @@
                                 </td>
                                 <td class="table-cell" style="color: var(--text-secondary);">{{ $product->category->name }}
                                 </td>
+                                @php
+                                    $branchStocks = $product->branches->keyBy('id');
+                                    $totalStock = $product->total_stock;
+                                @endphp
+                                @foreach ($branches as $branch)
+                                    @php $branchStock = (float) ($branchStocks[$branch->id]->pivot->stock ?? 0); @endphp
+                                    <td class="table-cell text-right font-mono">
+                                        <span class="font-bold text-sm" style="color: var(--text-main);">
+                                            {{ number_format($branchStock, 2) }} {{ $product->unit }}
+                                        </span>
+                                    </td>
+                                @endforeach
                                 <td class="table-cell text-right font-mono">
-                                    @if ($product->stock <= $product->minimum_stock)
+                                    @if ($totalStock <= $product->minimum_stock)
                                         <span class="badge badge-danger font-bold">
-                                            {{ number_format($product->stock, 2) }} {{ $product->unit }}
+                                            {{ number_format($totalStock, 2) }} {{ $product->unit }}
                                         </span>
                                     @else
                                         <span class="font-bold text-sm" style="color: var(--text-main);">
-                                            {{ number_format($product->stock, 2) }} {{ $product->unit }}
+                                            {{ number_format($totalStock, 2) }} {{ $product->unit }}
                                         </span>
                                     @endif
                                     <div class="text-xs mt-0.5" style="color: var(--text-tertiary);">mín:
@@ -146,7 +161,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="px-6 py-16 text-center">
+                                <td colspan="{{ 9 + count($branches) }}" class="px-6 py-16 text-center">
                                     <div class="flex flex-col items-center gap-3">
                                         <div class="w-14 h-14 rounded-2xl flex items-center justify-center"
                                             style="background-color: var(--primary-light);">

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Product\Models\Product;
 use App\Modules\Purchase\Models\Purchase;
 use App\Modules\Purchase\Models\PurchaseDetail;
@@ -57,7 +58,8 @@ class PurchaseService
                     $detail->unit_cost,
                     Purchase::class,
                     $purchase->id,
-                    "Compra #{$purchase->number}"
+                    "Compra #{$purchase->number}",
+                    $purchase->branch_id
                 );
             }
 
@@ -84,7 +86,8 @@ class PurchaseService
                         $detail->quantity,
                         Purchase::class,
                         $purchase->id,
-                        "Anulación compra #{$purchase->number}"
+                        "Anulación compra #{$purchase->number}",
+                        $purchase->branch_id
                     );
                 }
             }

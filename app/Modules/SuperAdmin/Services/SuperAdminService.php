@@ -95,9 +95,29 @@ class SuperAdminService
             $company->subscription_status = 'active';
             $company->suspension_reason = null; // clear suspension reason
             
-            // Set expiration date to 1 month in the future
-            $company->subscription_expires_at = now()->addMonth();
+            // Extend subscription by selected payment duration
+            $company->subscription_expires_at = now()->addMonths($payment->duration_months ?? 1);
+
+            $plan = \App\Models\Plan::where('code', $payment->plan)->first();
+            if ($plan) {
+                $company->max_branches = $plan->max_branches;
+            }
+
             $company->save();
+
+            // Create default branch if none exists
+            if ($company->branches()->count() === 0) {
+                $branch = \App\Modules\Branch\Models\Branch::create([
+                    'company_id'          => $company->id,
+                    'name'                => 'Matriz',
+                    'establishment_code'  => '001',
+                    'is_active'           => true,
+                ]);
+
+                User::where('company_id', $company->id)
+                    ->whereIn('role', ['owner', 'company_representative'])
+                    ->update(['branch_id' => $branch->id]);
+            }
 
             // Activate administrator user accounts for the company
             User::where('company_id', $company->id)
@@ -203,6 +223,8 @@ class SuperAdminService
             'max_admins'               => $data['max_admins'],
             'max_sellers'              => $data['max_sellers'],
             'max_monthly_transactions' => $data['max_monthly_transactions'],
+            'max_branches'             => $data['max_branches'],
+            'monthly_invoice_limit'    => $data['monthly_invoice_limit'],
             'modules'                  => $data['modules'] ?? [],
             'is_active'                => $data['is_active'] ?? true,
         ]);
@@ -217,6 +239,8 @@ class SuperAdminService
             'max_admins'               => $data['max_admins'],
             'max_sellers'              => $data['max_sellers'],
             'max_monthly_transactions' => $data['max_monthly_transactions'],
+            'max_branches'             => $data['max_branches'],
+            'monthly_invoice_limit'    => $data['monthly_invoice_limit'],
             'modules'                  => $data['modules'] ?? [],
             'is_active'                => $data['is_active'] ?? true,
         ]);

@@ -3,6 +3,7 @@
 namespace App\Modules\Registration\Models;
 
 use App\Models\User;
+use App\Modules\Branch\Models\Branch;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -32,6 +33,7 @@ class Company extends Model
         'max_sellers',
         'has_electronic_billing',
         'monthly_invoice_limit',
+        'max_branches',
     ];
 
     protected $casts = [
@@ -45,6 +47,11 @@ class Company extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    public function branches(): HasMany
+    {
+        return $this->hasMany(Branch::class);
     }
 
     public function subscriptionPayments(): HasMany
@@ -113,6 +120,11 @@ class Company extends Model
     public function companyCertificates(): HasMany
     {
         return $this->hasMany(\App\Modules\Billing\Models\CompanyCertificate::class, 'company_id');
+    }
+
+    public function getMaxBranchesAttribute($value)
+    {
+        return $value ?? ($this->plan ? $this->plan->max_branches : 1);
     }
 
     public function getMaxCertificatesAttribute($value)

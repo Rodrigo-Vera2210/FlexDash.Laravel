@@ -13,7 +13,7 @@ class InventoryMovement extends Model
     use BelongsToCompany;
 
     protected $fillable = [
-        'product_id', 'user_id', 'type', 'quantity',
+        'product_id', 'user_id', 'branch_id', 'type', 'quantity',
         'stock_before', 'stock_after', 'unit_cost',
         'reference_type', 'reference_id', 'notes', 'company_id',
     ];
@@ -38,5 +38,10 @@ class InventoryMovement extends Model
     public function reference(): \Illuminate\Database\Eloquent\Relations\MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function branch(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\Branch\Models\Branch::class);
     }
 }

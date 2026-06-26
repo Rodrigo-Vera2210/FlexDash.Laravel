@@ -111,7 +111,10 @@ class RegistrationController extends Controller
             return redirect()->route('registration.account.show');
         }
 
-        return view('registration::wizard', ['step' => 'billing']);
+        return view('registration::wizard', [
+            'step'  => 'billing',
+            'plans' => \App\Models\Plan::where('is_active', true)->orderBy('price')->get(),
+        ]);
     }
 
     /** POST /register/billing */

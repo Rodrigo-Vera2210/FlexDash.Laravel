@@ -77,6 +77,8 @@ class PlanManagementTest extends TestCase
             'max_admins'               => 5,
             'max_sellers'              => 20,
             'max_monthly_transactions' => 1000,
+            'max_branches'             => 5,
+            'monthly_invoice_limit'    => 200,
             'modules'                  => ['ventas', 'clientes'],
             'is_active'                => true,
         ]);
@@ -102,6 +104,8 @@ class PlanManagementTest extends TestCase
             'max_admins'               => 3,
             'max_sellers'              => 12,
             'max_monthly_transactions' => 600,
+            'max_branches'             => 3,
+            'monthly_invoice_limit'    => 500,
             'modules'                  => ['ventas', 'clientes', 'compras'],
         ]);
 
@@ -122,6 +126,8 @@ class PlanManagementTest extends TestCase
             'max_admins'               => 1,
             'max_sellers'              => 1,
             'max_monthly_transactions' => 10,
+            'max_branches'             => 1,
+            'monthly_invoice_limit'    => 50,
             'modules'                  => ['ventas'],
         ]);
 

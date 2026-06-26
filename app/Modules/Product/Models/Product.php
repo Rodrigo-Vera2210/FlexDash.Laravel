@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 use App\Traits\BelongsToCompany;
 
@@ -68,6 +69,12 @@ class Product extends Model
         return $this->hasMany(PurchaseDetail::class);
     }
 
+    public function branches(): BelongsToMany
+    {
+        return $this->belongsToMany(\App\Modules\Branch\Models\Branch::class, 'branch_product')
+                    ->withPivot('stock');
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────
     public function getImageUrlAttribute(): string
     {
@@ -88,5 +95,18 @@ class Product extends Model
     public function isLowStock(): bool
     {
         return $this->stock <= $this->minimum_stock;
+    }
+
+    /**
+     * Returns the total stock across all branches.
+     * Falls back to the product's own stock column if no branch pivots exist.
+     */
+    public function getTotalStockAttribute(): float
+    {
+        if ($this->relationLoaded('branches') && $this->branches->isNotEmpty()) {
+            return (float) $this->branches->sum('pivot.stock');
+        }
+
+        return (float) $this->stock;
     }
 }

@@ -751,6 +751,12 @@
                     <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest"
                         style="color: rgba(255,255,255,0.30);">Sistema</p>
 
+                    <a href="{{ route('branches.index') }}"
+                        class="nav-item {{ request()->routeIs('branches.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-store w-5 text-center text-amber-400"></i>
+                        <span>Locales / Sucursales</span>
+                    </a>
+
                     <a href="{{ route('sellers.index') }}"
                         class="nav-item {{ request()->routeIs('sellers.*') ? 'active' : '' }}">
                         <i class="fa-solid fa-users-gear w-5 text-center"></i>

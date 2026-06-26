@@ -25,7 +25,7 @@ class Sale extends Model
     const STATUS_CANCELLED = 'ANULADO';
 
     protected $fillable = [
-        'partner_id', 'user_id', 'tax_id', 'series', 'number',
+        'partner_id', 'user_id', 'tax_id', 'branch_id', 'series', 'number',
         'issue_date', 'due_date', 'status', 'currency',
         'subtotal', 'tax_amount', 'discount', 'total',
         'paid_amount', 'pending_balance', 'notes',
@@ -68,6 +68,7 @@ class Sale extends Model
     public function partner(): BelongsTo  { return $this->belongsTo(Partner::class); }
     public function user(): BelongsTo     { return $this->belongsTo(User::class); }
     public function tax(): BelongsTo      { return $this->belongsTo(Tax::class); }
+    public function branch(): BelongsTo   { return $this->belongsTo(\App\Modules\Branch\Models\Branch::class); }
 
     public function details(): HasMany
     {

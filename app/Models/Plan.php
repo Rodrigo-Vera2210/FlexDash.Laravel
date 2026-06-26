@@ -18,6 +18,7 @@ class Plan extends Model
         'has_electronic_billing',
         'monthly_invoice_limit',
         'max_certificates',
+        'max_branches',
     ];
 
     protected $casts = [
@@ -30,5 +31,6 @@ class Plan extends Model
         'has_electronic_billing' => 'boolean',
         'monthly_invoice_limit' => 'integer',
         'max_certificates' => 'integer',
+        'max_branches' => 'integer',
     ];
 }

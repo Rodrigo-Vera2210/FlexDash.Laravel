@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\ImmutableDocumentException;
+use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Product\Models\Product;
 use App\Modules\Sale\Models\Sale;
 use App\Modules\Sale\Models\SaleDetail;
@@ -64,7 +65,8 @@ class SaleService
                         $detail->quantity,
                         Sale::class,
                         $sale->id,
-                        "Venta #{$sale->number}"
+                        "Venta #{$sale->number}",
+                        $sale->branch_id
                     );
                 }
             }
@@ -99,7 +101,8 @@ class SaleService
                             $detail->quantity,
                             Sale::class,
                             $sale->id,
-                            "Anulación venta #{$sale->number}"
+                            "Anulación venta #{$sale->number}",
+                            $sale->branch_id
                         );
                     }
                 }

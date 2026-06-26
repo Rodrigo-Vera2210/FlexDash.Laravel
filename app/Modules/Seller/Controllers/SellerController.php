@@ -3,6 +3,7 @@
 namespace App\Modules\Seller\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Branch\Models\Branch;
 use App\Models\User;
 use App\Modules\Seller\Services\SellerService;
 use Illuminate\Http\Request;
@@ -26,15 +27,18 @@ class SellerController extends Controller
 
     public function create()
     {
-        return view('sellers.create');
+        $branches = Branch::active()->orderBy('name')->get();
+
+        return view('sellers.create', compact('branches'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
+            'name'      => ['required', 'string', 'max:255'],
+            'email'     => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password'  => ['required', 'string', 'min:8'],
+            'branch_id' => ['nullable', 'exists:branches,id'],
         ]);
 
         $company = auth()->user()->company;

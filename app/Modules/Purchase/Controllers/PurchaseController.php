@@ -75,8 +75,9 @@ class PurchaseController extends Controller
         }
 
         $header = $request->only(['partner_id', 'tax_id', 'issue_date', 'due_date', 'supplier_invoice', 'notes', 'discount']);
-        $header['user_id'] = auth()->id();
-        $header['number']  = PurchaseService::nextNumber();
+        $header['user_id']   = auth()->id();
+        $header['branch_id'] = auth()->user()->branch_id;
+        $header['number']    = PurchaseService::nextNumber();
         $header['series']  = 'C001';
 
         $purchase = $this->purchaseService->create($header, $request->items);

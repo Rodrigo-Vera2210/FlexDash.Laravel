@@ -16,7 +16,7 @@ class CashBox extends Model
     protected $table = 'cash_boxes';
 
     protected $fillable = [
-        'user_id', 'status', 'opening_balance',
+        'user_id', 'branch_id', 'status', 'opening_balance',
         'expected_closing_balance', 'actual_closing_balance',
         'difference', 'opened_at', 'closed_at', 'notes', 'company_id',
     ];
@@ -33,6 +33,11 @@ class CashBox extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\Branch\Models\Branch::class);
     }
 
     public function transactions(): HasMany
