@@ -32,14 +32,15 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="min-h-screen flex flex-col sm:justify-center items-center py-10 px-4"
+<body class="min-h-screen flex flex-col sm:justify-center items-center py-10 px-4 relative"
       style="background-color: var(--bg); font-family: 'Plus Jakarta Sans', sans-serif;">
 
     {{-- Theme Toggle Button --}}
-    <div class="absolute top-4 right-4" x-data="themePreferencesHandler()" @keydown.escape="" x-cloak>
-        <button @click="toggleTheme()" class="p-2 rounded-lg transition-colors" 
-                style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-main);">
-            <i class="fas" :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i>
+    <div class="fixed top-6 right-6 z-50" x-data="themePreferencesHandler()" x-show="true">
+        <button @click="toggleTheme()" 
+                class="p-3 rounded-lg transition-all hover:scale-110 shadow-lg" 
+                style="background-color: #f8f9fa; border: 2px solid #e5e7eb; color: #0D1E36; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-lg" :class="theme === 'dark' ? 'fa-sun text-yellow-500' : 'fa-moon text-gray-700'"></i>
         </button>
     </div>
 

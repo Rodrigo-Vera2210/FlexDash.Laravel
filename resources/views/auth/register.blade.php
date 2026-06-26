@@ -63,12 +63,14 @@
     </form>
 
     {{-- Link de Retorno --}}
-    <p class="text-center text-sm mt-6" style="color: var(--text-tertiary);">
-        ¿Ya tienes cuenta?
+    <div class="text-center text-sm mt-8 pt-6 border-t" style="border-color: #e5e7eb;">
+        <p style="color: #6b7280;">
+            ¿Ya tienes cuenta?
+        </p>
         <a href="{{ route('login') }}"
-           class="font-bold ml-1 transition-colors"
-           style="color: var(--primary);">
-            Inicia sesión aquí
+           class="inline-block font-bold mt-2 px-4 py-2 rounded transition-all hover:scale-105" 
+           style="color: white; background-color: #0A7EA5; text-decoration: none;">
+            ← Volver a Iniciar Sesión
         </a>
-    </p>
+    </div>
 </x-guest-layout>
