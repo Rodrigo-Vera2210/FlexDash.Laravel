@@ -22,12 +22,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    {{-- Font Awesome --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    {{-- AlpineJS --}}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     {{-- Vite compiled CSS --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="min-h-screen flex flex-col sm:justify-center items-center py-10 px-4"
       style="background-color: var(--bg); font-family: 'Plus Jakarta Sans', sans-serif;">
+
+    {{-- Theme Toggle Button --}}
+    <div class="absolute top-4 right-4" x-data="themePreferencesHandler()" @keydown.escape="" x-cloak>
+        <button @click="toggleTheme()" class="p-2 rounded-lg transition-colors" 
+                style="background-color: var(--surface); border: 1px solid var(--border); color: var(--text-main);">
+            <i class="fas" :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i>
+        </button>
+    </div>
 
     {{-- Logo --}}
     <div class="mb-6 flex flex-col items-center">
@@ -44,5 +58,42 @@
         {{ $slot }}
     </div>
 
+    {{-- Alpine.js Theme Handler --}}
+    <script>
+        function themePreferencesHandler() {
+            return {
+                theme: localStorage.getItem('theme') || 'system',
+                
+                init() {
+                    this.applyTheme(this.theme);
+                },
+                
+                applyTheme(theme) {
+                    const html = document.documentElement;
+                    if (theme === 'dark') {
+                        html.classList.add('dark');
+                    } else if (theme === 'light') {
+                        html.classList.remove('dark');
+                    } else {
+                        // System preference
+                        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                            html.classList.add('dark');
+                        } else {
+                            html.classList.remove('dark');
+                        }
+                    }
+                    localStorage.setItem('theme', theme);
+                    this.theme = theme;
+                },
+                
+                toggleTheme() {
+                    const themes = ['light', 'dark'];
+                    const currentIndex = themes.indexOf(this.theme);
+                    const nextIndex = (currentIndex + 1) % themes.length;
+                    this.applyTheme(themes[nextIndex]);
+                }
+            }
+        }
+    </script>
 </body>
 </html>

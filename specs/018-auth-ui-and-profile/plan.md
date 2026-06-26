@@ -23,6 +23,7 @@ This feature improves user experience (P1 priority), addresses accessibility nee
 **Language/Version**: PHP 8.2+ (Laravel 12.x)
 
 **Primary Dependencies**:
+
 - Laravel Framework 12.x
 - Tailwind CSS 4.3.0 (frontend styling)
 - Resend ^1.4 (email delivery)
@@ -38,6 +39,7 @@ This feature improves user experience (P1 priority), addresses accessibility nee
 **Project Type**: Laravel monolithic POS system with multi-tenant architecture
 
 **Performance Goals**:
+
 - Theme toggle response: <100ms (CSS class manipulation)
 - Profile page load: <1.5s (authenticated users)
 - OTP delivery: <30s (Resend SLA)
@@ -45,6 +47,7 @@ This feature improves user experience (P1 priority), addresses accessibility nee
 - OTP expiration window: 10 minutes
 
 **Constraints**:
+
 - OTP: 3 attempts max; 10-minute TTL
 - Password reset: Invalidates all active sessions
 - Theme preference: Must respect system preference when set to 'system'
@@ -52,6 +55,7 @@ This feature improves user experience (P1 priority), addresses accessibility nee
 - Email: Must use Resend (configured in project)
 
 **Scale/Scope**:
+
 - Initial: Single user profile per session
 - Future: Bulk user management (admin), audit logs, 2FA integration
 - Multi-tenant: Profile isolated to authenticated user; company context optional
@@ -60,27 +64,34 @@ This feature improves user experience (P1 priority), addresses accessibility nee
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 ### Principle I: Test-Driven Development ✓
+
 All service logic written via Red-Green-Refactor. Unit, feature, and acceptance tests cover validation, OTP generation, API endpoints, and user journeys.
 
 ### Principle II: Layered Architecture ✓
+
 Controllers → Services → Models with strict separation. No business logic in controllers; no direct DB queries in services.
 
 ### Principle III: Module-Based Backend ✓
+
 Feature organized under `app/Modules/Auth/` with self-contained Controllers, Services, Tests.
 
 ### Principle IV: Clean Code ✓
+
 Self-documenting names, max 30-line methods, single responsibility, DRY principles enforced.
 
 ### Principle V: Technology Stack ✓
+
 Laravel 12.x, Tailwind CSS, SQLite, PHPUnit, Git branches, Markdown docs.
 
 ### Principle VI: JWT Authentication ✓
+
 All profile/password endpoints require JWT Bearer token validation before reaching services.
 
 ### Principle VII: Ecuador Localization ✓
+
 Spanish-first UI, timezone default America/Guayaquil, localized error messages.
 
 **Status**: ✓ **ALL PRINCIPLES COMPLIANT**
@@ -162,7 +173,7 @@ lang/
 
 ## Complexity Tracking
 
-*No violations requiring justification.*
+_No violations requiring justification._
 
 All architectural decisions align with Constitution principles. Design is compliant and ready for implementation.
 
@@ -175,6 +186,7 @@ All architectural decisions align with Constitution principles. Design is compli
 File: [research.md](research.md)
 
 **5 Clarifications Resolved**:
+
 1. Session invalidation after password change → YES
 2. Priority preferences → Language (P1), Timezone (P2), Notifications (P2)
 3. OTP delivery failures → Resend + retries + user guidance
@@ -188,6 +200,7 @@ File: [research.md](research.md)
 File: [data-model.md](data-model.md)
 
 **Entities**:
+
 - User (updated): +theme_preference, language, timezone, notifications_enabled
 - OtpToken (new): Manages 10-min TTL OTP tokens with 3-attempt limit
 
@@ -212,6 +225,7 @@ File: [contracts/api.md](contracts/api.md)
 File: [quickstart.md](quickstart.md)
 
 **Implementation Path**: 14.5-hour roadmap with:
+
 - Database setup & models (45 min)
 - ProfileService TDD (2h)
 - OtpService TDD (2h)

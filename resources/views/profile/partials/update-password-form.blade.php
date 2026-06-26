@@ -16,14 +16,10 @@
     </div>
 
     <!-- Password Change OTP Modal -->
-    <div 
-        x-show="showModal" 
-        class="fixed inset-0 z-50 flex items-center justify-center" 
-        style="background: rgba(0, 0, 0, 0.5);"
-        @click.self="closeModal()"
-        x-cloak
-    >
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 dark:bg-gray-800" style="color: var(--text-main);">
+    <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center"
+        style="background: rgba(0, 0, 0, 0.5);" @click.self="closeModal()" x-cloak>
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 dark:bg-gray-800"
+            style="color: var(--text-main);">
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-6 border-b" style="border-color: var(--border-light);">
                 <h3 class="text-lg font-semibold">{{ __('Cambiar Contraseña') }}</h3>
@@ -39,18 +35,13 @@
                     <p class="text-sm mb-4" style="color: var(--text-tertiary);">
                         {{ __('Ingresa tu contraseña actual para recibir un código OTP por correo.') }}
                     </p>
-                    
+
                     <div>
                         <label for="current_password" class="form-label">{{ __('Contraseña Actual') }}</label>
-                        <input 
-                            id="current_password"
-                            x-model="currentPassword"
-                            type="password"
+                        <input id="current_password" x-model="currentPassword" type="password"
                             class="input-solid mt-1 w-full"
-                            :class="{ 'border-red-500': getFieldError('currentPassword') }"
-                            :disabled="loading"
-                            autocomplete="current-password"
-                        />
+                            :class="{ 'border-red-500': getFieldError('currentPassword') }" :disabled="loading"
+                            autocomplete="current-password" />
                         <template x-if="getFieldError('currentPassword')">
                             <p class="text-red-500 text-xs mt-1" x-text="getFieldError('currentPassword')"></p>
                         </template>
@@ -62,20 +53,13 @@
                     <p class="text-sm mb-4" style="color: var(--text-tertiary);">
                         {{ __('Se ha enviado un código OTP a tu correo. Ingresalo aquí.') }}
                     </p>
-                    
+
                     <div>
                         <label for="otp" class="form-label">{{ __('Código OTP') }}</label>
-                        <input 
-                            id="otp"
-                            x-model="otp"
-                            type="text"
+                        <input id="otp" x-model="otp" type="text"
                             class="input-solid mt-1 w-full text-center tracking-widest"
-                            :class="{ 'border-red-500': getFieldError('otp') }"
-                            :disabled="loading || otpCooldown > 0"
-                            placeholder="000000"
-                            maxlength="6"
-                            autocomplete="off"
-                        />
+                            :class="{ 'border-red-500': getFieldError('otp') }" :disabled="loading || otpCooldown > 0"
+                            placeholder="000000" maxlength="6" autocomplete="off" />
                         <template x-if="getFieldError('otp')">
                             <p class="text-red-500 text-xs mt-1" x-text="getFieldError('otp')"></p>
                         </template>
@@ -92,36 +76,23 @@
                     <p class="text-sm mb-4" style="color: var(--text-tertiary);">
                         {{ __('Ingresa tu nueva contraseña.') }}
                     </p>
-                    
+
                     <div>
                         <label for="new_password" class="form-label">{{ __('Nueva Contraseña') }}</label>
-                        <input 
-                            id="new_password"
-                            x-model="newPassword"
-                            type="password"
-                            class="input-solid mt-1 w-full"
-                            :class="{ 'border-red-500': getFieldError('newPassword') }"
-                            :disabled="loading"
-                            autocomplete="new-password"
-                            minlength="8"
-                        />
+                        <input id="new_password" x-model="newPassword" type="password" class="input-solid mt-1 w-full"
+                            :class="{ 'border-red-500': getFieldError('newPassword') }" :disabled="loading"
+                            autocomplete="new-password" minlength="8" />
                         <template x-if="getFieldError('newPassword')">
                             <p class="text-red-500 text-xs mt-1" x-text="getFieldError('newPassword')"></p>
                         </template>
                     </div>
 
                     <div class="mt-3">
-                        <label for="new_password_confirmation" class="form-label">{{ __('Confirmar Contraseña') }}</label>
-                        <input 
-                            id="new_password_confirmation"
-                            x-model="newPasswordConfirmation"
-                            type="password"
-                            class="input-solid mt-1 w-full"
-                            :class="{ 'border-red-500': !passwordsMatch() }"
-                            :disabled="loading"
-                            autocomplete="new-password"
-                            minlength="8"
-                        />
+                        <label for="new_password_confirmation"
+                            class="form-label">{{ __('Confirmar Contraseña') }}</label>
+                        <input id="new_password_confirmation" x-model="newPasswordConfirmation" type="password"
+                            class="input-solid mt-1 w-full" :class="{ 'border-red-500': !passwordsMatch() }"
+                            :disabled="loading" autocomplete="new-password" minlength="8" />
                         <template x-if="!passwordsMatch() && newPasswordConfirmation">
                             <p class="text-red-500 text-xs mt-1">{{ __('Las contraseñas no coinciden.') }}</p>
                         </template>
@@ -130,7 +101,8 @@
 
                 <!-- Success Message -->
                 <template x-if="showSuccess">
-                    <div class="p-3 rounded-lg" style="background-color: var(--success-light); border-left: 4px solid var(--success);">
+                    <div class="p-3 rounded-lg"
+                        style="background-color: var(--success-light); border-left: 4px solid var(--success);">
                         <p class="text-sm font-semibold" style="color: var(--success);">
                             <i class="fa-solid fa-circle-check"></i>
                             <span x-text="successMessage"></span>
@@ -140,7 +112,8 @@
 
                 <!-- Form Errors -->
                 <template x-if="hasErrors() && !showSuccess && errors.form">
-                    <div class="p-3 rounded-lg" style="background-color: var(--danger-light); border-left: 4px solid var(--danger);">
+                    <div class="p-3 rounded-lg"
+                        style="background-color: var(--danger-light); border-left: 4px solid var(--danger);">
                         <p class="text-sm font-semibold" style="color: var(--danger);">
                             <i class="fa-solid fa-circle-exclamation"></i>
                             <span x-text="errors.form[0]"></span>
@@ -150,7 +123,8 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="flex items-center justify-between gap-3 p-6 border-t" style="border-color: var(--border-light);">
+            <div class="flex items-center justify-between gap-3 p-6 border-t"
+                style="border-color: var(--border-light);">
                 <template x-if="step > 1">
                     <button @click="goBack()" type="button" class="btn-secondary" :disabled="loading">
                         <i class="fa-solid fa-arrow-left"></i>
@@ -159,23 +133,27 @@
                 </template>
 
                 <template x-if="step === 1">
-                    <button @click="requestOtp()" type="button" class="btn-primary ml-auto" :disabled="loading || !currentPassword">
+                    <button @click="requestOtp()" type="button" class="btn-primary ml-auto"
+                        :disabled="loading || !currentPassword">
                         <i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-envelope'"></i>
                         <span x-text="loading ? '{{ __('Enviando...') }}' : '{{ __('Enviar OTP') }}'"></span>
                     </button>
                 </template>
 
                 <template x-if="step === 2">
-                    <button @click="verifyOtp()" type="button" class="btn-primary ml-auto" :disabled="loading || otp.length !== 6">
+                    <button @click="verifyOtp()" type="button" class="btn-primary ml-auto"
+                        :disabled="loading || otp.length !== 6">
                         <i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-check'"></i>
                         <span x-text="loading ? '{{ __('Verificando...') }}' : '{{ __('Verificar') }}'"></span>
                     </button>
                 </template>
 
                 <template x-if="step === 3">
-                    <button @click="resetPassword()" type="button" class="btn-primary ml-auto" :disabled="loading || !passwordValid() || !passwordsMatch()">
+                    <button @click="resetPassword()" type="button" class="btn-primary ml-auto"
+                        :disabled="loading || !passwordValid() || !passwordsMatch()">
                         <i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-check'"></i>
-                        <span x-text="loading ? '{{ __('Cambiando...') }}' : '{{ __('Cambiar Contraseña') }}'"></span>
+                        <span
+                            x-text="loading ? '{{ __('Cambiando...') }}' : '{{ __('Cambiar Contraseña') }}'"></span>
                     </button>
                 </template>
 

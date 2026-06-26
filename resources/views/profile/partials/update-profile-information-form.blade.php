@@ -16,16 +16,8 @@
     <form @submit.prevent="submitForm" class="mt-6 space-y-4">
         <div>
             <label for="name" class="form-label">{{ __('Nombre') }}</label>
-            <input 
-                id="name" 
-                x-model="formData.name" 
-                type="text" 
-                class="input-solid mt-1"
-                :class="{ 'border-red-500': getFieldError('name') }"
-                required 
-                autofocus 
-                autocomplete="name" 
-            />
+            <input id="name" x-model="formData.name" type="text" class="input-solid mt-1"
+                :class="{ 'border-red-500': getFieldError('name') }" required autofocus autocomplete="name" />
             <template x-if="getFieldError('name')">
                 <p class="text-red-500 text-xs mt-1" x-text="getFieldError('name')"></p>
             </template>
@@ -33,21 +25,15 @@
 
         <div>
             <label for="email" class="form-label">{{ __('Correo Electrónico') }}</label>
-            <input 
-                id="email" 
-                x-model="formData.email" 
-                type="email" 
-                class="input-solid mt-1"
-                :class="{ 'border-red-500': getFieldError('email') }"
-                required 
-                autocomplete="username" 
-            />
+            <input id="email" x-model="formData.email" type="email" class="input-solid mt-1"
+                :class="{ 'border-red-500': getFieldError('email') }" required autocomplete="username" />
             <template x-if="getFieldError('email')">
                 <p class="text-red-500 text-xs mt-1" x-text="getFieldError('email')"></p>
             </template>
 
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div class="mt-3 p-3 rounded-lg border" style="background-color: var(--warning-light); border-color: var(--warning);">
+            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail())
+                <div class="mt-3 p-3 rounded-lg border"
+                    style="background-color: var(--warning-light); border-color: var(--warning);">
                     <p class="text-sm" style="color: var(--warning);">
                         {{ __('Tu dirección de correo electrónico no está verificada.') }}
 
@@ -67,14 +53,8 @@
 
         <div>
             <label for="phone" class="form-label">{{ __('Teléfono (Opcional)') }}</label>
-            <input 
-                id="phone" 
-                x-model="formData.phone" 
-                type="tel" 
-                class="input-solid mt-1"
-                :class="{ 'border-red-500': getFieldError('phone') }"
-                autocomplete="tel" 
-            />
+            <input id="phone" x-model="formData.phone" type="tel" class="input-solid mt-1"
+                :class="{ 'border-red-500': getFieldError('phone') }" autocomplete="tel" />
             <template x-if="getFieldError('phone')">
                 <p class="text-red-500 text-xs mt-1" x-text="getFieldError('phone')"></p>
             </template>
@@ -102,12 +82,8 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <input 
-                id="notifications_enabled" 
-                x-model="formData.notifications_enabled" 
-                type="checkbox" 
-                class="rounded"
-            />
+            <input id="notifications_enabled" x-model="formData.notifications_enabled" type="checkbox"
+                class="rounded" />
             <label for="notifications_enabled" class="text-sm" style="color: var(--text-main);">
                 {{ __('Recibir notificaciones por correo electrónico') }}
             </label>
@@ -120,12 +96,7 @@
             </button>
 
             <template x-if="showSuccess">
-                <p
-                    x-transition
-                    class="text-sm font-semibold"
-                    style="color: var(--success);"
-                    x-text="successMessage"
-                >
+                <p x-transition class="text-sm font-semibold" style="color: var(--success);" x-text="successMessage">
                 </p>
             </template>
 
