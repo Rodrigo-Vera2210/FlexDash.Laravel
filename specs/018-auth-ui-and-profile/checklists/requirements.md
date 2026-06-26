@@ -31,21 +31,38 @@
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] No implementation details leak into specification
 
-## Remaining Clarifications
+## Clarifications Resolved
 
-Two minor clarifications marked in FR-017 and FR-020, but these do not block specification readiness:
+All clarifications have been **RESOLVED** during speckit.clarify phase (2026-06-25):
 
-1. **FR-017**: Should user be logged out of all sessions after password change?
-   - Suggested default: YES (security best practice)
-   - Can be clarified during planning phase
+1. **FR-017**: Session invalidation after password change
+    - ✅ **RESOLVED**: Option B - Log out OTHER devices only; current session remains active
+    - Rationale: Balances security with UX; no friction on the device initiating change
 
-2. **FR-020**: Which additional preferences (language, timezone, notifications) are highest priority for Phase 1?
-   - Suggested default: Language first, then timezone, notifications in P3
-   - Can be clarified during planning phase
+2. **FR-009**: Profile edit UI pattern
+    - ✅ **RESOLVED**: Option A - Inline editing with pencil icon
+    - Rationale: Lightweight SPA UX, minimizes routes, immediate feedback
+
+3. **FR-018**: OTP delivery retry strategy
+    - ✅ **RESOLVED**: Option B - User-initiated retry (30s cooldown) + single auto-retry
+    - Rationale: Automation + user control; modern UX pattern
+
+4. **FR-006**: Theme persistence scope
+    - ✅ **RESOLVED**: Option A - Browser localStorage only (no server sync)
+    - Rationale: Performance-first; instant load, works offline
+
+5. **Accessibility**: WCAG 2.1 AA + modern browsers (Chrome, Firefox, Safari, Edge last 2 versions)
+    - ✅ **RESOLVED**: Option A - Standard compliance, no legacy IE11 support
+    - Rationale: Meets legal requirements, aligns with enterprise standards
+
+6. **FR-020**: User preferences priority
+    - ✅ **RESOLVED**: Language (P1), Timezone (P2), Notifications (P2)
+    - Rationale: Language most impactful for user experience
 
 ## Notes
 
-- Spec is complete and ready for planning phase
+- Spec is **COMPLETE** and ready for planning phase
 - All 5 user stories are independently testable and deliverable
+- All 5 clarifications resolved and encoded back into spec.md
 - Clear dependencies on existing systems (auth, email service, theme system) documented
 - Security considerations (OTP, session invalidation) are explicit

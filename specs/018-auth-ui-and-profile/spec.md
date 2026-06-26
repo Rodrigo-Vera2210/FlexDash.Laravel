@@ -8,7 +8,7 @@
 
 **Input**: User description: Cambios de flujo en login/registro con botón para volver, botón de tema siempre visible, y sección de perfil de usuario con edición de datos personales, cambio de contraseña con OTP, etc.
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Navigation Between Auth Screens (Priority: P1)
 
@@ -101,7 +101,7 @@ Users may want to manage additional preferences such as notification settings, l
 - What if a user toggles theme while in the middle of filling out a form? → Form data MUST be preserved during theme switch
 - What happens if a user's email bounces when sending OTP? → System MUST notify the user and suggest updating their email address
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -110,10 +110,10 @@ Users may want to manage additional preferences such as notification settings, l
 - **FR-003**: System MUST preserve form state when navigating between login and registration screens
 - **FR-004**: System MUST display a theme toggle button in the top-right corner of every page (login, registration, profile, dashboard)
 - **FR-005**: System MUST toggle between light and dark themes when the button is clicked
-- **FR-006**: System MUST persist the user's theme preference (in localStorage or user settings) and apply it on subsequent visits
+- **FR-006**: System MUST persist the user's theme preference in browser localStorage only (no server sync) and apply it on subsequent visits
 - **FR-007**: System MUST provide a profile/settings page accessible to authenticated users
 - **FR-008**: System MUST display all personal information fields on the profile page (name, email, phone, company details, etc.)
-- **FR-009**: System MUST allow users to edit their personal information through an in-line editor or modal form
+- **FR-009**: System MUST allow users to edit their personal information through inline editing (pencil icon; save/cancel inline in the same layout)
 - **FR-010**: System MUST validate all input fields (email format, phone format, required fields, etc.)
 - **FR-011**: System MUST persist updated personal information and show a success message
 - **FR-012**: System MUST provide a "Cambiar Contraseña" option in the profile settings
@@ -121,10 +121,16 @@ Users may want to manage additional preferences such as notification settings, l
 - **FR-014**: System MUST send an OTP to the user's registered email when they initiate a password change
 - **FR-015**: System MUST require OTP verification before allowing password reset
 - **FR-016**: System MUST validate the new password (minimum length, complexity requirements per project standards)
-- **FR-017**: System MUST persist the new password securely and invalidate all existing sessions after password change [NEEDS CLARIFICATION: should user be logged out after password change?]
-- **FR-018**: System MUST provide a "Resend OTP" option if the user doesn't receive the email
+- **FR-017**: System MUST persist the new password securely and invalidate sessions on OTHER devices only; current session where password was changed remains active (user does not need to re-login on this device)
+- **FR-018**: System MUST provide a "Resend OTP" option with 30-second cooldown; single auto-retry on first delivery failure; user can manually retry after cooldown expires
 - **FR-019**: System MUST display clear error messages for invalid OTP, expired OTP, or max attempts exceeded
-- **FR-020**: System MUST support additional user preferences (language, timezone, notification settings) [NEEDS CLARIFICATION: which preferences are highest priority?]
+- **FR-020**: System MUST support additional user preferences in priority order: (P1) Language, (P2) Timezone, (P2) Notification settings
+
+### Accessibility & Browser Support Requirements
+
+- **A11y**: System MUST comply with WCAG 2.1 Level AA (keyboard navigation, screen reader support, color contrast 4.5:1)
+- **Browsers**: System MUST support modern browsers: Chrome, Firefox, Safari, Edge (last 2 versions)
+- **Mobile**: Theme toggle and all profile features MUST be fully functional on mobile devices (touch targets ≥44px)
 
 ### Non-Functional Requirements
 
@@ -134,7 +140,7 @@ Users may want to manage additional preferences such as notification settings, l
 - Profile page MUST load within 1.5 seconds for authenticated users
 - OTP emails MUST be delivered within 30 seconds of request
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 - ✓ Users can navigate freely between login and registration screens
 - ✓ Theme toggle is visible and functional on 100% of user-facing pages (login, registration, dashboard, profile)
@@ -195,3 +201,13 @@ Users may want to manage additional preferences such as notification settings, l
 - ORM for database operations (Eloquent)
 - Frontend theme framework (Tailwind CSS dark mode)
 - UUID generation library
+
+## Clarifications
+
+### Session 2026-06-25
+
+- Q: Session & Authentication After Password Change → A: Option B - Log out only on OTHER devices; current session (where password was changed) remains active. Rationale: Balances security (prevents unauthorized access on compromised devices) with usability (no friction on the device initiating the change).
+- Q: Profile Edit UI Pattern → A: Option A - Inline editing with pencil icon; save/cancel inline in the same layout. Rationale: Lightweight SPA UX, minimizes route bloat, provides immediate feedback for personal info edits.
+- Q: OTP Delivery Retry Strategy → A: Option B - User-initiated retry with 30s cooldown; single auto-retry on first attempt. Rationale: Balances automation (single silent retry) with user control (manual retry after cooldown). Aligns with modern UX patterns and reduces support load.
+- Q: Theme Persistence Scope → A: Option A - Browser localStorage only; no server sync. Rationale: Combines speed (localStorage cache for instant theme without FOUC) with simplicity (no backend state management). Works offline, survives logout/login.
+- Q: Accessibility & Browser Support → A: Option A - WCAG 2.1 AA compliance + modern browsers (Chrome, Firefox, Safari, Edge last 2 versions). Rationale: Meets legal/ethical requirements in most jurisdictions, aligns with Laravel/enterprise standards, reduces maintenance burden vs. legacy browser support.
