@@ -45,10 +45,12 @@ Route::middleware(['auth.jwt', 'auth.admin_only'])->group(function () {
     // Preferencias de Usuario
     Route::get('/preferences', [PreferencesController::class, 'index'])->name('preferences.index');
 
-    // Cambio de contrasena con OTP
-    Route::post('/password/request-otp', [PasswordChangeController::class, 'requestOtp'])->name('password.request-otp');
-    Route::post('/password/verify-otp',  [PasswordChangeController::class, 'verifyOtp'])->name('password.verify-otp');
-    Route::put('/password/reset',        [PasswordChangeController::class, 'reset'])->name('password.otp-reset');
+    // Cambio de contraseña con OTP (flujo de páginas)
+    Route::get('/password/change',         [PasswordChangeController::class, 'showChangeForm'])->name('password.change');
+    Route::post('/password/change',        [PasswordChangeController::class, 'submitChangeForm'])->name('password.change.submit');
+    Route::get('/password/change/verify',  [PasswordChangeController::class, 'showVerifyForm'])->name('password.change.verify');
+    Route::post('/password/change/verify', [PasswordChangeController::class, 'submitVerifyForm'])->name('password.change.verify.submit');
+    Route::post('/password/change/resend', [PasswordChangeController::class, 'resendOtp'])->name('password.change.resend');
 
     // Partners (Clientes y Proveedores)
     Route::resource('partners', PartnerController::class)->middleware('auth.module:partners');

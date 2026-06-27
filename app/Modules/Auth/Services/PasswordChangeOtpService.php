@@ -153,4 +153,20 @@ class PasswordChangeOtpService
         Session::forget("password_change_otp_verified_{$user->id}");
         Session::forget("password_change_otp_expires_{$user->id}");
     }
+
+    /**
+     * Resend OTP by deleting the existing one and generating a new one.
+     *
+     * @param User $user
+     * @return array{cooldown_seconds: int}
+     */
+    public function resendOtp(User $user): array
+    {
+        // Force delete existing OTP to bypass the cooldown check in requestOtp
+        EmailVerification::where('user_id', $user->id)
+            ->where('purpose', 'password_change')
+            ->delete();
+
+        return $this->requestOtp($user);
+    }
 }
