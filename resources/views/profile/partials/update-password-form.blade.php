@@ -89,18 +89,18 @@
     }
 }" class="space-y-4">
 
-    <header class="border-b pb-3" style="border-color: var(--border-light);">
-        <h2 class="text-base font-bold" style="color: var(--text-main);">
+    <header class="border-b border-[color:var(--border-light)] pb-3">
+        <h2 class="text-base font-bold text-[color:var(--text-main)]">
             {{ __('Actualizar Contraseña') }}
         </h2>
-        <p class="mt-1 text-sm" style="color: var(--text-tertiary);">
+        <p class="mt-1 text-sm text-[color:var(--text-tertiary)]">
             {{ __('Asegúrate de que tu cuenta esté usando una contraseña larga y aleatoria para mantenerla segura.') }}
         </p>
     </header>
 
     <div class="pt-2">
         <button @click="openModal()" type="button"
-            style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.625rem 1.25rem;border-radius:0.5rem;font-weight:600;background:#0A7EA5;color:white;border:none;cursor:pointer;">
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold bg-[#0A7EA5] text-white border-0 cursor-pointer hover:bg-[#075f7d] transition-colors">
             <i class="fa-solid fa-key"></i>
             <span>{{ __('Cambiar Contraseña') }}</span>
         </button>
@@ -108,74 +108,63 @@
 
     <!-- Modal overlay -->
     <div x-show="showModal" x-cloak
-        style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);"
+        class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60"
         @click.self="closeModal()">
 
-        <div
-            style="background:var(--surface,#fff);color:var(--text-main,#0d1e36);border-radius:0.75rem;box-shadow:0 20px 60px rgba(0,0,0,0.3);width:100%;max-width:28rem;margin:1rem;">
+        <div class="bg-[color:var(--surface)] text-[color:var(--text-main)] rounded-xl shadow-2xl w-full max-w-md mx-4">
 
             <!-- Header del modal -->
-            <div
-                style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-light,#e5e7eb);">
-                <h3 style="font-size:1.05rem;font-weight:700;">{{ __('Cambiar Contraseña') }}</h3>
+            <div class="flex items-center justify-between px-6 py-5 border-b border-[color:var(--border-light)]">
+                <h3 class="text-base font-bold">{{ __('Cambiar Contraseña') }}</h3>
                 <button @click="closeModal()" type="button"
-                    style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:#6b7280;padding:0.25rem;">
+                    class="bg-transparent border-0 cursor-pointer text-lg text-[color:var(--text-tertiary)] p-1 hover:text-[color:var(--text-secondary)] leading-none transition-colors">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
 
             <!-- Indicador de pasos -->
-            <div style="display:flex;gap:0.5rem;padding:1rem 1.5rem 0;">
-                <div
-                    :style="step >= 1 ? 'flex:1;height:4px;border-radius:2px;background:#0A7EA5;' :
-                        'flex:1;height:4px;border-radius:2px;background:#e5e7eb;'">
-                </div>
-                <div
-                    :style="step >= 2 ? 'flex:1;height:4px;border-radius:2px;background:#0A7EA5;' :
-                        'flex:1;height:4px;border-radius:2px;background:#e5e7eb;'">
-                </div>
-                <div
-                    :style="step >= 3 ? 'flex:1;height:4px;border-radius:2px;background:#0A7EA5;' :
-                        'flex:1;height:4px;border-radius:2px;background:#e5e7eb;'">
-                </div>
+            <div class="flex gap-2 px-6 pt-4">
+                <div class="flex-1 h-1 rounded-sm transition-colors"
+                    :class="step >= 1 ? 'bg-[#0A7EA5]' : 'bg-[color:var(--border)]'"></div>
+                <div class="flex-1 h-1 rounded-sm transition-colors"
+                    :class="step >= 2 ? 'bg-[#0A7EA5]' : 'bg-[color:var(--border)]'"></div>
+                <div class="flex-1 h-1 rounded-sm transition-colors"
+                    :class="step >= 3 ? 'bg-[#0A7EA5]' : 'bg-[color:var(--border)]'"></div>
             </div>
 
             <!-- Contenido -->
-            <div style="padding:1.25rem 1.5rem;">
+            <div class="px-6 py-5">
 
                 <!-- Paso 1: Contraseña actual -->
                 <div x-show="step === 1">
-                    <p style="font-size:0.875rem;color:#6b7280;margin-bottom:0.75rem;">
+                    <p class="text-sm text-[color:var(--text-tertiary)] mb-3">
                         Ingresa tu contraseña actual para verificar tu identidad.
                     </p>
-                    <label style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.25rem;">Contraseña
-                        Actual</label>
+                    <label class="block text-sm font-medium text-[color:var(--text-main)] mb-1">Contraseña Actual</label>
                     <input x-model="currentPassword" type="password"
-                        style="width:100%;padding:0.5rem 0.75rem;border-radius:0.375rem;border:1px solid #d1d5db;background:var(--surface-alt,#f9fafb);color:var(--text-main,#0d1e36);box-sizing:border-box;"
+                        class="w-full px-3 py-2 rounded-md border border-[color:var(--border)] bg-[color:var(--bg)] text-[color:var(--text-main)] text-sm focus:outline-none focus:border-[#0A7EA5] focus:ring-2 focus:ring-[#0A7EA5]/20 transition-colors"
                         :disabled="loading" placeholder="••••••••" autocomplete="current-password"
                         @keyup.enter="currentPassword && requestOtp()" />
                     <template x-if="fieldError('currentPassword')">
-                        <p style="color:#ef4444;font-size:0.75rem;margin-top:0.25rem;"
-                            x-text="fieldError('currentPassword')"></p>
+                        <p class="text-red-500 text-xs mt-1" x-text="fieldError('currentPassword')"></p>
                     </template>
                 </div>
 
                 <!-- Paso 2: Código OTP -->
                 <div x-show="step === 2">
-                    <p style="font-size:0.875rem;color:#6b7280;margin-bottom:0.75rem;">
+                    <p class="text-sm text-[color:var(--text-tertiary)] mb-3">
                         Se envió un código de 6 dígitos a tu correo electrónico.
                     </p>
-                    <label style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.25rem;">Código
-                        OTP</label>
+                    <label class="block text-sm font-medium text-[color:var(--text-main)] mb-1">Código OTP</label>
                     <input x-model="otp" type="text"
-                        style="width:100%;padding:0.5rem 0.75rem;border-radius:0.375rem;border:1px solid #d1d5db;background:var(--surface-alt,#f9fafb);color:var(--text-main,#0d1e36);text-align:center;letter-spacing:0.5rem;font-size:1.25rem;box-sizing:border-box;"
+                        class="w-full px-3 py-2 rounded-md border border-[color:var(--border)] bg-[color:var(--bg)] text-[color:var(--text-main)] text-center tracking-[0.5rem] text-xl focus:outline-none focus:border-[#0A7EA5] focus:ring-2 focus:ring-[#0A7EA5]/20 transition-colors"
                         :disabled="loading" placeholder="000000" maxlength="6"
                         @keyup.enter="otp.length === 6 && verifyOtp()" />
                     <template x-if="fieldError('otp')">
-                        <p style="color:#ef4444;font-size:0.75rem;margin-top:0.25rem;" x-text="fieldError('otp')"></p>
+                        <p class="text-red-500 text-xs mt-1" x-text="fieldError('otp')"></p>
                     </template>
                     <template x-if="otpCooldown > 0">
-                        <p style="font-size:0.75rem;color:#6b7280;margin-top:0.25rem;">
+                        <p class="text-xs text-[color:var(--text-tertiary)] mt-1">
                             Reenviar disponible en <span x-text="otpCooldown"></span>s
                         </p>
                     </template>
@@ -183,34 +172,30 @@
 
                 <!-- Paso 3: Nueva contraseña -->
                 <div x-show="step === 3">
-                    <p style="font-size:0.875rem;color:#6b7280;margin-bottom:0.75rem;">
+                    <p class="text-sm text-[color:var(--text-tertiary)] mb-3">
                         Ingresa tu nueva contraseña (mínimo 8 caracteres).
                     </p>
-                    <label style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.25rem;">Nueva
-                        Contraseña</label>
+                    <label class="block text-sm font-medium text-[color:var(--text-main)] mb-1">Nueva Contraseña</label>
                     <input x-model="newPassword" type="password"
-                        style="width:100%;padding:0.5rem 0.75rem;border-radius:0.375rem;border:1px solid #d1d5db;background:var(--surface-alt,#f9fafb);color:var(--text-main,#0d1e36);box-sizing:border-box;margin-bottom:0.75rem;"
+                        class="w-full px-3 py-2 rounded-md border border-[color:var(--border)] bg-[color:var(--bg)] text-[color:var(--text-main)] text-sm focus:outline-none focus:border-[#0A7EA5] focus:ring-2 focus:ring-[#0A7EA5]/20 transition-colors mb-3"
                         :disabled="loading" placeholder="Mínimo 8 caracteres" autocomplete="new-password"
                         minlength="8" />
-                    <label style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.25rem;">Confirmar
-                        Contraseña</label>
+                    <label class="block text-sm font-medium text-[color:var(--text-main)] mb-1">Confirmar Contraseña</label>
                     <input x-model="newPasswordConfirmation" type="password"
-                        style="width:100%;padding:0.5rem 0.75rem;border-radius:0.375rem;background:var(--surface-alt,#f9fafb);color:var(--text-main,#0d1e36);box-sizing:border-box;"
-                        :style="newPasswordConfirmation && !passwordsMatch ? 'border:1px solid #ef4444;' :
-                            'border:1px solid #d1d5db;'"
+                        class="w-full px-3 py-2 rounded-md bg-[color:var(--bg)] text-[color:var(--text-main)] text-sm focus:outline-none focus:border-[#0A7EA5] focus:ring-2 focus:ring-[#0A7EA5]/20 transition-colors"
+                        :class="newPasswordConfirmation && !passwordsMatch ? 'border border-red-400' : 'border border-[color:var(--border)]'"
                         :disabled="loading" placeholder="Repite la contraseña" autocomplete="new-password"
                         minlength="8" />
                     <template x-if="newPasswordConfirmation && !passwordsMatch">
-                        <p style="color:#ef4444;font-size:0.75rem;margin-top:0.25rem;">Las contraseñas no coinciden.</p>
+                        <p class="text-red-500 text-xs mt-1">Las contraseñas no coinciden.</p>
                     </template>
                 </div>
 
                 <!-- Mensaje de éxito -->
                 <template x-if="showSuccess">
-                    <div
-                        style="margin-top:1rem;padding:0.75rem;background:#d1fae5;border-left:4px solid #059669;border-radius:0.375rem;">
-                        <p style="color:#065f46;font-size:0.875rem;font-weight:600;">
-                            <i class="fa-solid fa-circle-check"></i>
+                    <div class="mt-4 p-3 bg-emerald-100 border-l-4 border-emerald-600 rounded-md">
+                        <p class="text-emerald-800 text-sm font-semibold">
+                            <i class="fa-solid fa-circle-check mr-1"></i>
                             <span x-text="successMessage"></span>
                         </p>
                     </div>
@@ -218,10 +203,9 @@
 
                 <!-- Error general -->
                 <template x-if="hasErrors && errors.form">
-                    <div
-                        style="margin-top:1rem;padding:0.75rem;background:#fee2e2;border-left:4px solid #dc2626;border-radius:0.375rem;">
-                        <p style="color:#7f1d1d;font-size:0.875rem;font-weight:600;">
-                            <i class="fa-solid fa-circle-exclamation"></i>
+                    <div class="mt-4 p-3 bg-red-100 border-l-4 border-red-600 rounded-md">
+                        <p class="text-red-900 text-sm font-semibold">
+                            <i class="fa-solid fa-circle-exclamation mr-1"></i>
                             <span x-text="errors.form[0]"></span>
                         </p>
                     </div>
@@ -229,23 +213,22 @@
             </div>
 
             <!-- Footer del modal -->
-            <div
-                style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-top:1px solid var(--border-light,#e5e7eb);gap:0.75rem;">
+            <div class="flex items-center justify-between px-6 py-4 border-t border-[color:var(--border-light)] gap-3">
 
                 <!-- Botón atrás -->
                 <div>
                     <template x-if="step > 1">
                         <button @click="step--" type="button" :disabled="loading"
-                            style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:0.5rem;font-weight:500;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;cursor:pointer;">
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-medium bg-[color:var(--border-light)] text-[color:var(--text-secondary)] border border-[color:var(--border)] cursor-pointer hover:bg-[color:var(--bg)] transition-colors">
                             <i class="fa-solid fa-arrow-left"></i>
                             Atrás
                         </button>
                     </template>
                 </div>
 
-                <div style="display:flex;gap:0.75rem;">
+                <div class="flex gap-3">
                     <button @click="closeModal()" type="button"
-                        style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:0.5rem;font-weight:500;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;cursor:pointer;">
+                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-medium bg-[color:var(--border-light)] text-[color:var(--text-secondary)] border border-[color:var(--border)] cursor-pointer hover:bg-[color:var(--bg)] transition-colors">
                         <i class="fa-solid fa-times"></i>
                         Cancelar
                     </button>
@@ -253,9 +236,8 @@
                     <!-- Paso 1: Enviar OTP -->
                     <template x-if="step === 1">
                         <button @click="requestOtp()" type="button" :disabled="loading || !currentPassword"
-                            :style="(loading || !currentPassword) ?
-                            'display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:0.5rem;font-weight:600;background:#0A7EA5;color:white;border:none;cursor:not-allowed;opacity:0.6;' :
-                            'display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:0.5rem;font-weight:600;background:#0A7EA5;color:white;border:none;cursor:pointer;'">
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold bg-[#0A7EA5] text-white border-0 cursor-pointer hover:bg-[#075f7d] transition-colors"
+                            :class="(loading || !currentPassword) ? 'opacity-60 !cursor-not-allowed' : ''">
                             <i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-envelope'"></i>
                             <span x-text="loading ? 'Enviando...' : 'Enviar Código'"></span>
                         </button>
@@ -264,9 +246,8 @@
                     <!-- Paso 2: Verificar -->
                     <template x-if="step === 2">
                         <button @click="verifyOtp()" type="button" :disabled="loading || otp.length !== 6"
-                            :style="(loading || otp.length !== 6) ?
-                            'display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:0.5rem;font-weight:600;background:#0A7EA5;color:white;border:none;cursor:not-allowed;opacity:0.6;' :
-                            'display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:0.5rem;font-weight:600;background:#0A7EA5;color:white;border:none;cursor:pointer;'">
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold bg-[#0A7EA5] text-white border-0 cursor-pointer hover:bg-[#075f7d] transition-colors"
+                            :class="(loading || otp.length !== 6) ? 'opacity-60 !cursor-not-allowed' : ''">
                             <i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-check'"></i>
                             <span x-text="loading ? 'Verificando...' : 'Verificar'"></span>
                         </button>
@@ -276,9 +257,8 @@
                     <template x-if="step === 3">
                         <button @click="resetPassword()" type="button"
                             :disabled="loading || !passwordValid || !passwordsMatch"
-                            :style="(loading || !passwordValid || !passwordsMatch) ?
-                            'display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:0.5rem;font-weight:600;background:#0A7EA5;color:white;border:none;cursor:not-allowed;opacity:0.6;' :
-                            'display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:0.5rem;font-weight:600;background:#0A7EA5;color:white;border:none;cursor:pointer;'">
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold bg-[#0A7EA5] text-white border-0 cursor-pointer hover:bg-[#075f7d] transition-colors"
+                            :class="(loading || !passwordValid || !passwordsMatch) ? 'opacity-60 !cursor-not-allowed' : ''">
                             <i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-lock'"></i>
                             <span x-text="loading ? 'Cambiando...' : 'Cambiar Contraseña'"></span>
                         </button>

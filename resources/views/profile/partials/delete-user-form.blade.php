@@ -1,14 +1,16 @@
 <section class="space-y-4" x-data="{ open: {{ $errors->userDeletion->isNotEmpty() ? 'true' : 'false' }} }">
-    <header class="border-b pb-3" style="border-color: var(--border-light);">
-        <h2 class="text-base font-bold" style="color: var(--danger);">
+    <header class="border-b border-[color:var(--border-light)] pb-3">
+        <h2 class="text-base font-bold text-[color:var(--danger)]">
             {{ __('Eliminar Cuenta') }}
         </h2>
-        <p class="mt-1 text-sm" style="color: var(--text-tertiary);">
+        <p class="mt-1 text-sm text-[color:var(--text-tertiary)]">
             {{ __('Una vez que tu cuenta sea eliminada, todos sus recursos y datos se borrarán permanentemente.') }}
         </p>
     </header>
 
-    <button type="button" class="btn-primary" style="background-color: var(--danger);" @click="open = true">
+    <button type="button"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-[color:var(--danger)] text-white border-0 cursor-pointer hover:opacity-90 transition-opacity text-sm"
+        @click="open = true">
         <i class="fa-solid fa-trash-can"></i>
         {{ __('Eliminar Cuenta') }}
     </button>
@@ -24,10 +26,10 @@
              {{-- Modal Header --}}
              <div class="flex items-center justify-between px-6 py-5" style="border-bottom: 1px solid var(--border-light);">
                  <div class="flex items-center gap-3">
-                     <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background-color: var(--danger-light); color: var(--danger);">
+                     <div class="w-9 h-9 rounded-xl flex items-center justify-center bg-[color:var(--danger-light)] text-[color:var(--danger)]">
                          <i class="fa-solid fa-triangle-exclamation"></i>
                      </div>
-                     <h3 class="text-base font-bold" style="color: var(--text-main);">¿Confirmar eliminación?</h3>
+                     <h3 class="text-base font-bold text-[color:var(--text-main)]">¿Confirmar eliminación?</h3>
                  </div>
                  <button type="button" @click="open = false" class="btn-icon">
                      <i class="fa-solid fa-xmark"></i>
@@ -39,7 +41,7 @@
                  @csrf
                  @method('delete')
 
-                 <p class="text-sm" style="color: var(--text-secondary);">
+                 <p class="text-sm text-[color:var(--text-secondary)]">
                      {{ __('Una vez que tu cuenta sea eliminada, todos sus recursos y datos se borrarán permanentemente. Por favor, introduce tu contraseña para confirmar la eliminación definitiva.') }}
                  </p>
 
@@ -51,11 +53,11 @@
                      @endif
                  </div>
 
-                 <div class="flex justify-end gap-2 pt-4 border-t" style="border-color: var(--border-light);">
+                 <div class="flex justify-end gap-2 pt-4 border-t border-[color:var(--border-light)]">
                      <button type="button" @click="open = false" class="btn-outline">
                          {{ __('Cancelar') }}
                      </button>
-                     <button type="submit" class="btn-primary" style="background-color: var(--danger);">
+                     <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-[color:var(--danger)] text-white border-0 cursor-pointer hover:opacity-90 transition-opacity text-sm">
                          {{ __('Eliminar Cuenta') }}
                      </button>
                  </div>

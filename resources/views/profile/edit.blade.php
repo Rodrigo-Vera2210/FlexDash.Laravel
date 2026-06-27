@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <div class="card-panel p-6" style="border-left: 4px solid var(--danger);">
+    <div class="card-panel p-6 border-l-4 border-l-[color:var(--danger)]">
         <div class="max-w-xl">
             @include('profile.partials.delete-user-form')
         </div>

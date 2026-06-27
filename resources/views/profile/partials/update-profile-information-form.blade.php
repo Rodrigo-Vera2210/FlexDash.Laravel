@@ -43,11 +43,11 @@
     }
 }" class="space-y-4">
 
-    <header class="border-b pb-3" style="border-color: var(--border-light);">
-        <h2 class="text-base font-bold" style="color: var(--text-main);">
+    <header class="border-b border-[color:var(--border-light)] pb-3">
+        <h2 class="text-base font-bold text-[color:var(--text-main)]">
             {{ __('Información de Perfil') }}
         </h2>
-        <p class="mt-1 text-sm" style="color: var(--text-tertiary);">
+        <p class="mt-1 text-sm text-[color:var(--text-tertiary)]">
             {{ __('Actualiza la información de tu cuenta y dirección de correo electrónico.') }}
         </p>
     </header>
@@ -76,16 +76,15 @@
             </template>
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail())
-                <div class="mt-3 p-3 rounded-lg border"
-                    style="background-color: var(--warning-light); border-color: var(--warning);">
-                    <p class="text-sm" style="color: var(--warning);">
+                <div class="mt-3 p-3 rounded-lg border border-[color:var(--warning)] bg-[color:var(--warning-light)]">
+                    <p class="text-sm text-[color:var(--warning)]">
                         {{ __('Tu dirección de correo electrónico no está verificada.') }}
-                        <button form="send-verification" class="underline font-semibold" style="color: var(--primary);">
+                        <button form="send-verification" class="underline font-semibold text-[color:var(--primary)]">
                             {{ __('Haz clic aquí para reenviar el correo de verificación.') }}
                         </button>
                     </p>
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-bold text-xs" style="color: var(--success);">
+                        <p class="mt-2 font-bold text-xs text-[color:var(--success)]">
                             {{ __('Se ha enviado un nuevo enlace de verificación a tu correo.') }}
                         </p>
                     @endif
@@ -126,25 +125,24 @@
         <div class="flex items-center gap-2">
             <input id="notifications_enabled" x-model="formData.notifications_enabled" type="checkbox"
                 class="rounded" />
-            <label for="notifications_enabled" class="text-sm" style="color: var(--text-main);">
+            <label for="notifications_enabled" class="text-sm text-[color:var(--text-main)]">
                 {{ __('Recibir notificaciones por correo electrónico') }}
             </label>
         </div>
 
         <div class="flex items-center gap-4 pt-2">
             <button type="submit" :disabled="saving"
-                style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.625rem 1.25rem;border-radius:0.5rem;font-weight:600;background:#0A7EA5;color:white;border:none;cursor:pointer;"
-                :style="saving ? 'opacity:0.6;cursor:not-allowed;' : ''">
+                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold bg-[#0A7EA5] text-white border-0 cursor-pointer hover:bg-[#075f7d] transition-colors"
+                :class="saving ? 'opacity-60 !cursor-not-allowed' : ''">
                 <i class="fa-solid" :class="saving ? 'fa-spinner fa-spin' : 'fa-floppy-disk'"></i>
                 <span x-text="saving ? 'Guardando...' : 'Guardar Cambios'"></span>
             </button>
 
             <template x-if="showSuccess">
-                <p x-transition class="text-sm font-semibold" style="color: var(--success);" x-text="successMessage">
-                </p>
+                <p x-transition class="text-sm font-semibold text-[color:var(--success)]" x-text="successMessage"></p>
             </template>
             <template x-if="hasErrors && !showSuccess && errors.form">
-                <p class="text-sm font-semibold" style="color: var(--danger);">
+                <p class="text-sm font-semibold text-[color:var(--danger)]">
                     <i class="fa-solid fa-circle-exclamation mr-1"></i>
                     <span x-text="errors.form[0]"></span>
                 </p>
