@@ -237,9 +237,8 @@
 
     {{-- Theme Toggle Button --}}
     <div class="fixed top-6 right-6 z-50" x-data="themePreferencesHandler()" x-show="true">
-        <button @click="toggleTheme()" 
-                class="p-3 rounded-lg transition-all hover:scale-110 shadow-lg" 
-                style="background-color: #f8f9fa; border: 2px solid #e5e7eb; color: #0D1E36; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;">
+        <button @click="toggleTheme()" class="p-3 rounded-lg transition-all hover:scale-110 shadow-lg"
+            style="background-color: #f8f9fa; border: 2px solid #e5e7eb; color: #0D1E36; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;">
             <i class="fas fa-lg" :class="theme === 'dark' ? 'fa-sun text-yellow-500' : 'fa-moon text-gray-700'"></i>
         </button>
     </div>
@@ -396,7 +395,7 @@
                         ];
                     @endphp
                     <a href="{{ route($backRoutes[$currentStep] ?? 'registration.type') }}"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all hover:scale-105" 
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all hover:scale-105"
                         style="background-color: var(--primary-light); color: var(--primary); border: 1px solid var(--border);">
                         <i class="fas fa-chevron-left"></i>
                         Volver al paso anterior
@@ -405,7 +404,7 @@
             @elseif ($currentStep === 1)
                 <div class="mt-8 pt-6" style="border-top: 1px solid var(--border-light);">
                     <a href="{{ route('login') }}"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all hover:scale-105" 
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all hover:scale-105"
                         style="background-color: rgba(220, 38, 38, 0.08); color: #DC2626; border: 1px solid rgba(220, 38, 38, 0.2);">
                         <i class="fas fa-sign-out-alt"></i>
                         Volver a Iniciar Sesión
@@ -437,11 +436,11 @@
         function themePreferencesHandler() {
             return {
                 theme: localStorage.getItem('theme') || 'system',
-                
+
                 init() {
                     this.applyTheme(this.theme);
                 },
-                
+
                 applyTheme(theme) {
                     const html = document.documentElement;
                     if (theme === 'dark') {
@@ -459,7 +458,7 @@
                     localStorage.setItem('theme', theme);
                     this.theme = theme;
                 },
-                
+
                 toggleTheme() {
                     const themes = ['light', 'dark'];
                     const currentIndex = themes.indexOf(this.theme);

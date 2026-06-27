@@ -9,9 +9,10 @@
     </header>
 
     <div class="flex items-center gap-4 pt-2">
-        <button @click="openModal()" type="button" class="btn-primary">
+        <button @click="openModal()" type="button" class="btn-primary"
+            style="display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1rem; font-weight: 500;">
             <i class="fa-solid fa-key"></i>
-            {{ __('Cambiar Contraseña') }}
+            <span>{{ __('Cambiar Contraseña') }}</span>
         </button>
     </div>
 
@@ -157,7 +158,8 @@
                     </button>
                 </template>
 
-                <button @click="closeModal()" type="button" class="btn-secondary" :disabled="loading" style="padding: 0.625rem 1rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+                <button @click="closeModal()" type="button" class="btn-secondary" :disabled="loading"
+                    style="padding: 0.625rem 1rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
                     <i class="fa-solid fa-times"></i>
                     <span>{{ __('Cancelar') }}</span>
                 </button>

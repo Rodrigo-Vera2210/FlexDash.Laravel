@@ -8,50 +8,32 @@
         {{-- Nombre --}}
         <div>
             <label for="name" class="form-label">Nombre Completo</label>
-            <input id="name"
-                   type="text"
-                   name="name"
-                   value="{{ old('name') }}"
-                   required autofocus autocomplete="name"
-                   class="input-solid"
-                   placeholder="Juan Pérez">
+            <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus
+                autocomplete="name" class="input-solid" placeholder="Juan Pérez">
             <x-input-error :messages="$errors->get('name')" class="mt-1.5 text-xs" />
         </div>
 
         {{-- Email --}}
         <div>
             <label for="email" class="form-label">Correo Electrónico</label>
-            <input id="email"
-                   type="email"
-                   name="email"
-                   value="{{ old('email') }}"
-                   required autocomplete="username"
-                   class="input-solid"
-                   placeholder="usuario@empresa.com">
+            <input id="email" type="email" name="email" value="{{ old('email') }}" required
+                autocomplete="username" class="input-solid" placeholder="usuario@empresa.com">
             <x-input-error :messages="$errors->get('email')" class="mt-1.5 text-xs" />
         </div>
 
         {{-- Contraseña --}}
         <div>
             <label for="password" class="form-label">Contraseña</label>
-            <input id="password"
-                   type="password"
-                   name="password"
-                   required autocomplete="new-password"
-                   class="input-solid"
-                   placeholder="••••••••">
+            <input id="password" type="password" name="password" required autocomplete="new-password"
+                class="input-solid" placeholder="••••••••">
             <x-input-error :messages="$errors->get('password')" class="mt-1.5 text-xs" />
         </div>
 
         {{-- Confirmar Contraseña --}}
         <div>
             <label for="password_confirmation" class="form-label">Confirmar Contraseña</label>
-            <input id="password_confirmation"
-                   type="password"
-                   name="password_confirmation"
-                   required autocomplete="new-password"
-                   class="input-solid"
-                   placeholder="••••••••">
+            <input id="password_confirmation" type="password" name="password_confirmation" required
+                autocomplete="new-password" class="input-solid" placeholder="••••••••">
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1.5 text-xs" />
         </div>
 
@@ -68,8 +50,8 @@
             ¿Ya tienes cuenta?
         </p>
         <a href="{{ route('login') }}"
-           class="inline-block font-bold mt-2 px-4 py-2 rounded transition-all hover:scale-105" 
-           style="color: white; background-color: #0A7EA5; text-decoration: none;">
+            class="inline-block font-bold mt-2 px-4 py-2 rounded transition-all hover:scale-105"
+            style="color: white; background-color: #0A7EA5; text-decoration: none;">
             ← Volver a Iniciar Sesión
         </a>
     </div>
