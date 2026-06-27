@@ -14,10 +14,14 @@
     get hasErrors() { return Object.keys(this.errors).length > 0; },
     get passwordsMatch() { return this.newPassword === this.newPasswordConfirmation; },
     get passwordValid() { return this.newPassword.length >= 8; },
-    openModal() { this.showModal = true;
-        this.reset(); },
-    closeModal() { this.showModal = false;
-        this.reset(); },
+    openModal() {
+        this.showModal = true;
+        this.reset();
+    },
+    closeModal() {
+        this.showModal = false;
+        this.reset();
+    },
     reset() {
         this.step = 1;
         this.currentPassword = '';
@@ -43,8 +47,10 @@
                 body: JSON.stringify({ current_password: this.currentPassword }),
             });
             const data = await res.json();
-            if (res.ok) { this.step = 2;
-                this.startCooldown(data.cooldown_seconds || 30); } else { this.errors = { currentPassword: [data.message || 'Contraseña incorrecta'] }; }
+            if (res.ok) {
+                this.step = 2;
+                this.startCooldown(data.cooldown_seconds || 30);
+            } else { this.errors = { currentPassword: [data.message || 'Contraseña incorrecta'] }; }
         } catch (e) { this.errors = { form: ['Error de conexión'] }; } finally { this.loading = false; }
     },
     async verifyOtp() {

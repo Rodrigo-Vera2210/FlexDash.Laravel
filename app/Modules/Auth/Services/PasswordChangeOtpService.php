@@ -61,7 +61,7 @@ class PasswordChangeOtpService
 
         // Send OTP via email
         try {
-            $user->notify(new EmailOtpNotification($otp, 'password_change'));
+            $user->notify(new EmailOtpNotification($otp, 10)); // expires in 10 minutes
         } catch (\Exception $e) {
             $emailVerification->delete();
             throw new \Exception("Failed to send OTP. Please try again.");
