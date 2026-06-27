@@ -89,7 +89,7 @@ class EnsureJwtAuthenticated
 
         // Resolve request user and authenticate in standard guard session
         $request->setUserResolver(fn() => $user);
-        Auth::login($user);
+        Auth::setUser($user); // setUser avoids session regeneration (Auth::login regenerates session/CSRF token)
 
         if ($user->role === 'superadmin') {
             if (!$request->routeIs('superadmin.*') && !$request->is('superadmin*') 
