@@ -9,6 +9,7 @@ use App\Modules\Partner\Controllers\PartnerController;
 use App\Modules\Product\Controllers\ProductController;
 use App\Modules\Profile\Controllers\ProfileController;
 use App\Modules\Profile\Controllers\PreferencesController;
+use App\Modules\Auth\Controllers\PasswordChangeController;
 use App\Modules\Purchase\Controllers\PurchaseController;
 use App\Modules\Sale\Controllers\SaleController;
 use App\Modules\Service\Controllers\ServiceController;
@@ -43,6 +44,11 @@ Route::middleware(['auth.jwt', 'auth.admin_only'])->group(function () {
 
     // Preferencias de Usuario
     Route::get('/preferences', [PreferencesController::class, 'index'])->name('preferences.index');
+
+    // Cambio de contrasena con OTP
+    Route::post('/password/request-otp', [PasswordChangeController::class, 'requestOtp'])->name('password.request-otp');
+    Route::post('/password/verify-otp',  [PasswordChangeController::class, 'verifyOtp'])->name('password.verify-otp');
+    Route::put('/password/reset',        [PasswordChangeController::class, 'reset'])->name('password.otp-reset');
 
     // Partners (Clientes y Proveedores)
     Route::resource('partners', PartnerController::class)->middleware('auth.module:partners');

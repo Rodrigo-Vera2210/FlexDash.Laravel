@@ -5,45 +5,43 @@
         'phone' => $user->phone ?? '',
         'language' => $user->language ?? 'es',
         'timezone' => $user->timezone ?? 'America/Guayaquil',
-        'notifications_enabled' => (bool)($user->notifications_enabled ?? true),
+        'notifications_enabled' => (bool) ($user->notifications_enabled ?? true),
     ]);
 @endphp
 
-<section
-    x-data="{
-        saving: false,
-        showSuccess: false,
-        successMessage: '',
-        errors: {},
-        formData: {{ $userData }},
-        get hasErrors() { return Object.keys(this.errors).length > 0; },
-        fieldError(field) { return this.errors[field]?.[0] || ''; },
-        async submit() {
-            this.saving = true;
-            this.errors = {};
-            const token = document.querySelector('meta[name=csrf-token]').content;
-            try {
-                const res = await fetch('/api/profile', {
-                    method: 'PATCH',
-                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
-                    body: JSON.stringify(this.formData),
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    this.successMessage = data.message || 'Perfil actualizado exitosamente.';
-                    this.showSuccess = true;
-                    setTimeout(() => { this.showSuccess = false; }, 3000);
-                } else {
-                    this.errors = data.errors || { form: [data.message || 'Error al actualizar'] };
-                }
-            } catch(e) {
-                this.errors = { form: ['Error de conexión. Intenta de nuevo.'] };
-            } finally {
-                this.saving = false;
+<section x-data="{
+    saving: false,
+    showSuccess: false,
+    successMessage: '',
+    errors: {},
+    formData: {{ $userData }},
+    get hasErrors() { return Object.keys(this.errors).length > 0; },
+    fieldError(field) { return this.errors[field]?.[0] || ''; },
+    async submit() {
+        this.saving = true;
+        this.errors = {};
+        const token = document.querySelector('meta[name=csrf-token]').content;
+        try {
+            const res = await fetch('/profile', {
+                method: 'PATCH',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+                body: JSON.stringify(this.formData),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                this.successMessage = data.message || 'Perfil actualizado exitosamente.';
+                this.showSuccess = true;
+                setTimeout(() => { this.showSuccess = false; }, 3000);
+            } else {
+                this.errors = data.errors || { form: [data.message || 'Error al actualizar'] };
             }
+        } catch (e) {
+            this.errors = { form: ['Error de conexión. Intenta de nuevo.'] };
+        } finally {
+            this.saving = false;
         }
-    }"
-    class="space-y-4">
+    }
+}" class="space-y-4">
 
     <header class="border-b pb-3" style="border-color: var(--border-light);">
         <h2 class="text-base font-bold" style="color: var(--text-main);">
@@ -61,9 +59,8 @@
         <div>
             <label for="name" class="form-label">{{ __('Nombre') }}</label>
             <input id="name" x-model="formData.name" type="text" class="input-solid mt-1"
-                placeholder="{{ $user->name }}"
-                :class="{ 'border-red-500': fieldError('name') }"
-                required autofocus autocomplete="name" />
+                placeholder="{{ $user->name }}" :class="{ 'border-red-500': fieldError('name') }" required autofocus
+                autocomplete="name" />
             <template x-if="fieldError('name')">
                 <p class="text-red-500 text-xs mt-1" x-text="fieldError('name')"></p>
             </template>
@@ -72,9 +69,8 @@
         <div>
             <label for="email" class="form-label">{{ __('Correo Electrónico') }}</label>
             <input id="email" x-model="formData.email" type="email" class="input-solid mt-1"
-                placeholder="{{ $user->email }}"
-                :class="{ 'border-red-500': fieldError('email') }"
-                required autocomplete="username" />
+                placeholder="{{ $user->email }}" :class="{ 'border-red-500': fieldError('email') }" required
+                autocomplete="username" />
             <template x-if="fieldError('email')">
                 <p class="text-red-500 text-xs mt-1" x-text="fieldError('email')"></p>
             </template>
@@ -101,8 +97,7 @@
             <label for="phone" class="form-label">{{ __('Teléfono (Opcional)') }}</label>
             <input id="phone" x-model="formData.phone" type="tel" class="input-solid mt-1"
                 placeholder="{{ $user->phone ?? __('Ingresa tu teléfono') }}"
-                :class="{ 'border-red-500': fieldError('phone') }"
-                autocomplete="tel" />
+                :class="{ 'border-red-500': fieldError('phone') }" autocomplete="tel" />
             <template x-if="fieldError('phone')">
                 <p class="text-red-500 text-xs mt-1" x-text="fieldError('phone')"></p>
             </template>
@@ -129,8 +124,8 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <input id="notifications_enabled" x-model="formData.notifications_enabled"
-                type="checkbox" class="rounded" />
+            <input id="notifications_enabled" x-model="formData.notifications_enabled" type="checkbox"
+                class="rounded" />
             <label for="notifications_enabled" class="text-sm" style="color: var(--text-main);">
                 {{ __('Recibir notificaciones por correo electrónico') }}
             </label>
@@ -145,7 +140,8 @@
             </button>
 
             <template x-if="showSuccess">
-                <p x-transition class="text-sm font-semibold" style="color: var(--success);" x-text="successMessage"></p>
+                <p x-transition class="text-sm font-semibold" style="color: var(--success);" x-text="successMessage">
+                </p>
             </template>
             <template x-if="hasErrors && !showSuccess && errors.form">
                 <p class="text-sm font-semibold" style="color: var(--danger);">
@@ -156,4 +152,3 @@
         </div>
     </form>
 </section>
-
