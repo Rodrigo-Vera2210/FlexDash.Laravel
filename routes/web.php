@@ -61,6 +61,12 @@ Route::middleware(['auth.jwt', 'auth.admin_only'])->group(function () {
         Route::prefix('inventory')->name('inventory.')->group(function () {
             Route::get('/',          [InventoryController::class, 'index'])->name('index');
             Route::post('/adjust',   [InventoryController::class, 'adjust'])->name('adjust');
+            
+            // Stock View & Inter-branch transfers (Spec 020)
+            Route::get('/stock',              [\App\Modules\Inventory\Controllers\InventoryStockController::class, 'stockIndex'])->name('stock');
+            Route::get('/transfers',          [\App\Modules\Inventory\Controllers\StockTransferController::class, 'index'])->name('transfers.index');
+            Route::get('/transfers/create',   [\App\Modules\Inventory\Controllers\StockTransferController::class, 'create'])->name('transfers.create');
+            Route::post('/transfers',         [\App\Modules\Inventory\Controllers\StockTransferController::class, 'store'])->name('transfers.store');
         });
     });
 
@@ -115,6 +121,13 @@ Route::middleware(['auth.jwt', 'auth.admin_only'])->group(function () {
     Route::post('/billing/invoices', [\App\Modules\Billing\Controllers\InvoiceController::class, 'store'])->name('billing.invoices.store');
     Route::get('/billing/invoices/{id}/xml', [\App\Modules\Billing\Controllers\InvoiceController::class, 'downloadXml'])->name('billing.invoices.xml');
     Route::get('/billing/invoices/{id}/pdf', [\App\Modules\Billing\Controllers\InvoiceController::class, 'downloadPdf'])->name('billing.invoices.pdf');
+
+    // Tickets (User facing)
+    Route::get('/tickets', [\App\Modules\Tickets\Controllers\TicketController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/create', [\App\Modules\Tickets\Controllers\TicketController::class, 'create'])->name('tickets.create');
+    Route::post('/tickets', [\App\Modules\Tickets\Controllers\TicketController::class, 'store'])->name('tickets.store');
+    Route::get('/tickets/{ticket}', [\App\Modules\Tickets\Controllers\TicketController::class, 'show'])->name('tickets.show');
+    Route::post('/tickets/{ticket}/messages', [\App\Modules\Tickets\Controllers\TicketController::class, 'storeMessage'])->name('tickets.messages.store');
 });
 
 require __DIR__ . '/auth.php';
@@ -154,4 +167,10 @@ Route::middleware(['auth.jwt', 'auth.superadmin'])
         Route::post('/billing/certificates/{certificate}/default', [\App\Modules\Billing\Controllers\SuperAdminBillingController::class, 'setDefault'])->name('billing.certificates.default');
         Route::delete('/billing/certificates/{certificate}', [\App\Modules\Billing\Controllers\SuperAdminBillingController::class, 'destroyCertificate'])->name('billing.certificates.destroy');
         Route::post('/payments/{payment}/invoice', [\App\Modules\Billing\Controllers\SuperAdminBillingController::class, 'invoicePayment'])->name('payments.invoice');
+
+        // Tickets Management
+        Route::get('/tickets', [\App\Modules\Tickets\Controllers\SuperAdminTicketController::class, 'index'])->name('tickets.index');
+        Route::get('/tickets/{ticket}', [\App\Modules\Tickets\Controllers\SuperAdminTicketController::class, 'show'])->name('tickets.show');
+        Route::post('/tickets/{ticket}/messages', [\App\Modules\Tickets\Controllers\SuperAdminTicketController::class, 'storeMessage'])->name('tickets.messages.store');
+        Route::post('/tickets/{ticket}/status', [\App\Modules\Tickets\Controllers\SuperAdminTicketController::class, 'updateStatus'])->name('tickets.status.update');
     });

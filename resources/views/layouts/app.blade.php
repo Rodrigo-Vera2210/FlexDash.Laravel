@@ -608,6 +608,12 @@
                     <span>Firma de Plataforma</span>
                 </a>
 
+                <a href="{{ route('superadmin.tickets.index') }}"
+                    class="nav-item {{ request()->routeIs('superadmin.tickets.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-ticket-simple w-5 text-center text-sky-400"></i>
+                    <span>Buzón de Tickets</span>
+                </a>
+
                 <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest"
                     style="color: rgba(255,255,255,0.30);">Sistema</p>
 
@@ -648,10 +654,16 @@
                     <p class="px-3 pb-2 pt-4 text-xs font-bold uppercase tracking-widest"
                         style="color: rgba(255,255,255,0.30);">Inventario</p>
 
+                    <a href="{{ route('inventory.stock') }}"
+                        class="nav-item {{ request()->routeIs('inventory.stock') || request()->routeIs('inventory.transfers.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-warehouse w-5 text-center text-sky-400"></i>
+                        <span>Inventario por Local</span>
+                    </a>
+
                     <a href="{{ route('inventory.index') }}"
-                        class="nav-item {{ request()->routeIs('inventory.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-warehouse w-5 text-center"></i>
-                        <span>Kardex</span>
+                        class="nav-item {{ request()->routeIs('inventory.index') ? 'active' : '' }}">
+                        <i class="fa-solid fa-list w-5 text-center text-teal-400"></i>
+                        <span>Kardex (Movimientos)</span>
                     </a>
                 @endif
 
@@ -719,14 +731,20 @@
 
                     <a href="{{ route('products.index') }}"
                         class="nav-item {{ request()->routeIs('products.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-boxes-stacked w-5 text-center"></i>
+                        <i class="fa-solid fa-boxes-stacked w-5 text-center text-rose-400"></i>
                         <span>Productos</span>
                     </a>
 
+                    <a href="{{ route('inventory.stock') }}"
+                        class="nav-item {{ request()->routeIs('inventory.stock') || request()->routeIs('inventory.transfers.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-warehouse w-5 text-center text-sky-400"></i>
+                        <span>Inventario por Local</span>
+                    </a>
+
                     <a href="{{ route('inventory.index') }}"
-                        class="nav-item {{ request()->routeIs('inventory.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-warehouse w-5 text-center"></i>
-                        <span>Kardex</span>
+                        class="nav-item {{ request()->routeIs('inventory.index') ? 'active' : '' }}">
+                        <i class="fa-solid fa-list w-5 text-center text-teal-400"></i>
+                        <span>Kardex (Movimientos)</span>
                     </a>
                 @endif
 
@@ -833,6 +851,16 @@
                 @yield('header-actions')
                 <span class="text-xs hidden sm:block font-medium"
                     style="color: var(--text-tertiary);">{{ now()->format('d/m/Y H:i') }}</span>
+
+                {{-- Ticket Access --}}
+                @if (auth()->check())
+                    <a href="{{ auth()->user()->role === 'superadmin' ? route('superadmin.tickets.index') : route('tickets.index') }}" 
+                       class="btn-icon rounded-full flex items-center justify-center no-underline"
+                       style="background-color: var(--bg); border: 1px solid var(--border); min-width: 36px; min-height: 36px;" 
+                       title="Soporte y Tickets">
+                        <i class="fa-solid fa-ticket-simple text-sm" style="color: var(--text-tertiary);"></i>
+                    </a>
+                @endif
 
                 {{-- Theme Toggle --}}
                 <button id="theme-toggle" class="btn-icon rounded-full"

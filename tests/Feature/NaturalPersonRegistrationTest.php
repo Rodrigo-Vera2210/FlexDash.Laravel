@@ -77,5 +77,22 @@ class NaturalPersonRegistrationTest extends TestCase
             'role'   => 'owner',
             'status' => 'pending_verification',
         ]);
+
+        // Verify Matriz branch is created
+        $this->assertDatabaseHas('branches', [
+            'name'               => 'Matriz',
+            'establishment_code' => '001',
+        ]);
+
+        // Verify default categories are created
+        $this->assertDatabaseHas('categories', ['name' => 'Bebidas']);
+        $this->assertDatabaseHas('categories', ['name' => 'Varios']);
+        $this->assertDatabaseHas('categories', ['name' => 'Otros']);
+
+        // Verify Consumidor Final partner is created
+        $this->assertDatabaseHas('partners', [
+            'business_name'   => 'CONSUMIDOR FINAL',
+            'document_number' => '9999999999999',
+        ]);
     }
 }

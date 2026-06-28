@@ -41,9 +41,58 @@ class RegistrationService implements RegistrationServiceInterface
                 $this->buildCompanyData($data)
             );
 
-            $user = $this->userRepository->create(
-                $this->buildUserData($data, $company->id)
-            );
+            // Create Local Matriz (Branch)
+            $branch = \App\Modules\Branch\Models\Branch::create([
+                'company_id'         => $company->id,
+                'name'               => 'Matriz',
+                'address'            => $company->address ?? $company->legal_address ?? 'Dirección Matriz',
+                'phone'              => '999999999',
+                'establishment_code' => '001',
+                'is_active'          => true,
+            ]);
+
+            $userData = $this->buildUserData($data, $company->id);
+            $userData['branch_id'] = $branch->id;
+
+            $user = $this->userRepository->create($userData);
+
+            // Create default categories: Bebidas, Varios, Otros
+            \App\Modules\Product\Models\Category::create([
+                'company_id'  => $company->id,
+                'name'        => 'Bebidas',
+                'description' => 'Categoría de Bebidas',
+                'is_active'   => true,
+            ]);
+
+            \App\Modules\Product\Models\Category::create([
+                'company_id'  => $company->id,
+                'name'        => 'Varios',
+                'description' => 'Categoría de Varios',
+                'is_active'   => true,
+            ]);
+
+            \App\Modules\Product\Models\Category::create([
+                'company_id'  => $company->id,
+                'name'        => 'Otros',
+                'description' => 'Categoría de Otros',
+                'is_active'   => true,
+            ]);
+
+            // Create default partner: Consumidor Final
+            \App\Modules\Partner\Models\Partner::create([
+                'company_id'      => $company->id,
+                'type'            => 'cliente',
+                'business_name'   => 'CONSUMIDOR FINAL',
+                'trade_name'      => 'CONSUMIDOR FINAL',
+                'document_type'   => 'CI',
+                'document_number' => '9999999999999',
+                'phone'           => '999999999',
+                'address'         => 'Matriz',
+                'city'            => $company->city ?? 'Quito',
+                'country'         => 'EC',
+                'credit_limit'    => 0,
+                'is_active'       => true,
+            ]);
 
             // Create subscription payment log
             \App\Models\SubscriptionPayment::create([
