@@ -23,12 +23,17 @@
         {{-- Contraseña --}}
         <div>
             <label for="password" class="form-label">Contraseña</label>
-            <input id="password"
-                   type="password"
-                   name="password"
-                   required autocomplete="current-password"
-                   class="input-solid"
-                   placeholder="••••••••">
+            <div class="relative" x-data="{ show: false }">
+                <input id="password"
+                       :type="show ? 'text' : 'password'"
+                       name="password"
+                       required autocomplete="current-password"
+                       class="input-solid pr-10"
+                       placeholder="••••••••">
+                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 bg-transparent border-0 cursor-pointer">
+                    <i class="fa-solid" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </button>
+            </div>
             <x-input-error :messages="$errors->get('password')" class="mt-1.5 text-xs" />
         </div>
 

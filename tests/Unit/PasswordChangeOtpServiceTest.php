@@ -38,7 +38,7 @@ class PasswordChangeOtpServiceTest extends TestCase
             ->first();
 
         $this->assertNotNull($verification);
-        $this->assertNull($verification->attempts);
+        $this->assertEquals(0, $verification->attempts);
     }
 
     // T024: Test OTP verification
@@ -74,9 +74,10 @@ class PasswordChangeOtpServiceTest extends TestCase
             'attempts' => 0,
         ]);
 
-        $result = $this->otpService->verifyOtp($user, $otp);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('OTP not found or expired. Please request a new one.');
 
-        $this->assertFalse($result);
+        $this->otpService->verifyOtp($user, $otp);
     }
 
     // T026: Test max attempts exceeded
@@ -93,9 +94,10 @@ class PasswordChangeOtpServiceTest extends TestCase
             'attempts' => 3,
         ]);
 
-        $result = $this->otpService->verifyOtp($user, 'wrong');
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Too many failed attempts. Please request a new OTP.');
 
-        $this->assertFalse($result);
+        $this->otpService->verifyOtp($user, 'wrong');
     }
 
     // T027: Test password reset
@@ -105,7 +107,10 @@ class PasswordChangeOtpServiceTest extends TestCase
         $newPassword = 'newpassword123';
 
         // Simulate OTP verification in session
-        session(['password_change_verified_' . $user->id => true]);
+        session([
+            'password_change_otp_verified_' . $user->id => true,
+            'password_change_otp_expires_' . $user->id => now()->addMinutes(5)->timestamp,
+        ]);
 
         EmailVerification::create([
             'user_id' => $user->id,
@@ -130,8 +135,10 @@ class PasswordChangeOtpServiceTest extends TestCase
         $result1 = $this->otpService->requestOtp($user);
         $this->assertEquals(30, $result1['cooldown_seconds']);
 
-        // Immediate second request should have cooldown
-        $result2 = $this->otpService->requestOtp($user);
-        $this->assertGreater(0, $result2['cooldown_seconds']);
+        // Immediate second request should throw exception due to cooldown
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Please wait 30 seconds before requesting a new OTP.');
+
+        $this->otpService->requestOtp($user);
     }
 }

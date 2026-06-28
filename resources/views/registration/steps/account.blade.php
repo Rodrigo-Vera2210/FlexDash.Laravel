@@ -51,10 +51,15 @@
             <label for="password" class="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-1">
                 Contraseña <span class="text-red-500" aria-hidden="true">*</span>
             </label>
-            <input type="password" id="password" name="password" required autocomplete="new-password"
-                class="input-solid outline-none transition
-                       {{ $errors->has('password') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-brand-teal focus:ring-1 focus:ring-brand-teal' }}"
-                aria-describedby="password_hint {{ $errors->has('password') ? 'password_error' : '' }}">
+            <div class="relative" x-data="{ show: false }">
+                <input :type="show ? 'text' : 'password'" id="password" name="password" required autocomplete="new-password"
+                    class="input-solid outline-none transition pr-10
+                           {{ $errors->has('password') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-brand-teal focus:ring-1 focus:ring-brand-teal' }}"
+                    aria-describedby="password_hint {{ $errors->has('password') ? 'password_error' : '' }}">
+                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 bg-transparent border-0 cursor-pointer">
+                    <i class="fa-solid" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </button>
+            </div>
             <p id="password_hint" class="text-gray-400 text-xs mt-1">
                 Mínimo 8 caracteres con mayúscula, minúscula, número y símbolo.
             </p>
@@ -68,10 +73,15 @@
             <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-1">
                 Confirmar Contraseña <span class="text-red-500" aria-hidden="true">*</span>
             </label>
-            <input type="password" id="password_confirmation" name="password_confirmation" required
-                autocomplete="new-password"
-                class="input-solid outline-none transition
-                       {{ $errors->has('password_confirmation') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-brand-teal focus:ring-1 focus:ring-brand-teal' }}">
+            <div class="relative" x-data="{ show: false }">
+                <input :type="show ? 'text' : 'password'" id="password_confirmation" name="password_confirmation" required
+                    autocomplete="new-password"
+                    class="input-solid outline-none transition pr-10
+                           {{ $errors->has('password_confirmation') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-brand-teal focus:ring-1 focus:ring-brand-teal' }}">
+                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 bg-transparent border-0 cursor-pointer">
+                    <i class="fa-solid" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </button>
+            </div>
             @error('password_confirmation')
                 <p class="text-red-600 text-xs mt-1" role="alert">{{ $message }}</p>
             @enderror

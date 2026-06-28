@@ -112,7 +112,7 @@ class PasswordChangeOtpApiTest extends TestCase
 
         // First attempt
         $this->actingAs($user)->postJson('/api/password/verify-otp', [
-            'otp' => 'wrong',
+            'otp' => '000000',
         ]);
 
         $verification->refresh();

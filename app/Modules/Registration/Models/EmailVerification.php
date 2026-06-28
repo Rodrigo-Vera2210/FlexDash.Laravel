@@ -15,6 +15,7 @@ class EmailVerification extends Model
         'verification_code',
         'expires_at',
         'attempts',
+        'purpose',
     ];
 
     protected $casts = [

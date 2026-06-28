@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Modules\Auth\Services\PasswordChangeOtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\JsonResponse;
+use App\Modules\Auth\Requests\VerifyPasswordOtpRequest;
+use App\Modules\Auth\Requests\ResetPasswordRequest;
+use App\Modules\Auth\Requests\RequestPasswordOtpRequest;
 
 class PasswordChangeController extends Controller
 {
@@ -125,8 +129,12 @@ class PasswordChangeController extends Controller
 
         return back()->with('status', 'otp-resent');
     }
-}
 
+    /**
+     * Request OTP via API.
+     * POST /api/password/request-otp
+     */
+    public function requestOtp(RequestPasswordOtpRequest $request): JsonResponse
     {
         try {
             $result = $this->otpService->requestOtp($request->user());

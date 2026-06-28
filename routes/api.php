@@ -7,8 +7,8 @@ use App\Modules\Profile\Controllers\ProfileController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
-// Protected API routes (require authentication with JWT or Sanctum)
-Route::middleware(['auth:sanctum,api'])->group(function () {
+// Protected API routes (require authentication with JWT)
+Route::middleware(['auth.jwt'])->group(function () {
     // Profile endpoints
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -17,6 +17,6 @@ Route::middleware(['auth:sanctum,api'])->group(function () {
     // Password change OTP endpoints
     Route::post('/password/request-otp', [PasswordChangeController::class, 'requestOtp'])->name('password.request-otp');
     Route::post('/password/verify-otp', [PasswordChangeController::class, 'verifyOtp'])->name('password.verify-otp');
-    Route::put('/password/reset', [PasswordChangeController::class, 'reset'])->name('password.reset');
+    Route::put('/password/reset', [PasswordChangeController::class, 'reset'])->name('api.password.reset');
 });
 
