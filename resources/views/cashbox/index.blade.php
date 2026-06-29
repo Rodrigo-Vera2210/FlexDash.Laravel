@@ -199,78 +199,82 @@
             </div>
         </div>
 
-        {{-- Cierre de Caja Modal using AlpineJS --}}
-        <div x-data="{ open: false }" 
-             @open-close-modal.window="open = true"
-             x-show="open" 
-             class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto" 
-             style="display: none;">
-            
-            {{-- Backdrop --}}
-            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="open = false"></div>
-
-            {{-- Modal Box --}}
-            <div class="card-panel w-full max-w-md p-6 space-y-6 z-10 mx-4 relative page-fade">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-base font-bold" style="color: var(--text-main);">Cierre y Reconciliación de Caja</h3>
-                    <button class="btn-icon" @click="open = false">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-
-                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl space-y-2 border" style="border-color: var(--border-light);">
-                    <div class="flex justify-between text-xs">
-                        <span style="color: var(--text-tertiary);">Saldo Inicial:</span>
-                        <span class="font-mono" style="color: var(--text-main);">S/ {{ number_format($openingBalance, 2) }}</span>
-                    </div>
-                    <div class="flex justify-between text-xs">
-                        <span style="color: var(--text-tertiary);">Total Ingresos (+):</span>
-                        <span class="font-mono text-green-600">S/ {{ number_format($inflows, 2) }}</span>
-                    </div>
-                    <div class="flex justify-between text-xs">
-                        <span style="color: var(--text-tertiary);">Total Egresos (-):</span>
-                        <span class="font-mono text-red-600">S/ {{ number_format($outflows, 2) }}</span>
-                    </div>
-                    <hr style="border-color: var(--border-light);">
-                    <div class="flex justify-between text-sm font-bold">
-                        <span style="color: var(--text-main);">Saldo Esperado en Caja:</span>
-                        <span class="font-mono text-sky-600">S/ {{ number_format($expectedBalance, 2) }}</span>
-                    </div>
-                </div>
-
-                <form method="POST" action="{{ route('cashbox.close') }}" class="space-y-4">
-                    @csrf
-                    <div>
-                        <label for="actual_closing_balance" class="form-label">Efectivo Real Contado</label>
-                        <div class="input-icon-wrapper" x-data="{ counted: '' }">
-                            <i class="fa-solid fa-cash-register"></i>
-                            <input type="number" step="0.01" name="actual_closing_balance" id="actual_closing_balance" 
-                                class="input-solid" placeholder="0.00" min="0" required x-model="counted">
-                            
-                            {{-- Dynamic difference indicator --}}
-                            <template x-if="counted !== ''">
-                                <div class="mt-2 text-xs font-semibold flex justify-between">
-                                    <span style="color: var(--text-tertiary);">Diferencia calculada:</span>
-                                    <span :class="parseFloat(counted) - {{ $expectedBalance }} >= 0 ? 'text-green-600' : 'text-red-600'">
-                                        S/ <span x-text="(parseFloat(counted) - {{ $expectedBalance }}).toFixed(2)"></span>
-                                    </span>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="close_notes" class="form-label">Notas de Cierre</label>
-                        <textarea name="notes" id="close_notes" class="input-solid h-20 resize-none" placeholder="Indique alguna observación sobre el cuadre de caja..."></textarea>
-                    </div>
-
-                    <div class="flex gap-3 justify-end pt-2">
-                        <button type="button" class="btn-secondary" @click="open = false">Cancelar</button>
-                        <button type="submit" class="btn-danger">Cerrar Caja</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    @endif
+        @endif
+    </div>
 </div>
+
+@if ($activeBox)
+    {{-- Cierre de Caja Modal using AlpineJS --}}
+    <div x-data="{ open: false }" 
+         @open-close-modal.window="open = true"
+         x-show="open" 
+         class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto" 
+         style="display: none;">
+        
+        {{-- Backdrop --}}
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="open = false"></div>
+
+        {{-- Modal Box --}}
+        <div class="card-panel w-full max-w-md p-6 space-y-6 z-10 mx-4 relative page-fade">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold" style="color: var(--text-main);">Cierre y Reconciliación de Caja</h3>
+                <button class="btn-icon" @click="open = false">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl space-y-2 border" style="border-color: var(--border-light);">
+                <div class="flex justify-between text-xs">
+                    <span style="color: var(--text-tertiary);">Saldo Inicial:</span>
+                    <span class="font-mono" style="color: var(--text-main);">S/ {{ number_format($openingBalance, 2) }}</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span style="color: var(--text-tertiary);">Total Ingresos (+):</span>
+                    <span class="font-mono text-green-600">S/ {{ number_format($inflows, 2) }}</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span style="color: var(--text-tertiary);">Total Egresos (-):</span>
+                    <span class="font-mono text-red-600">S/ {{ number_format($outflows, 2) }}</span>
+                </div>
+                <hr style="border-color: var(--border-light);">
+                <div class="flex justify-between text-sm font-bold">
+                    <span style="color: var(--text-main);">Saldo Esperado en Caja:</span>
+                    <span class="font-mono text-sky-600">S/ {{ number_format($expectedBalance, 2) }}</span>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('cashbox.close') }}" class="space-y-4">
+                @csrf
+                <div>
+                    <label for="actual_closing_balance" class="form-label">Efectivo Real Contado</label>
+                    <div class="input-icon-wrapper" x-data="{ counted: '' }">
+                        <i class="fa-solid fa-cash-register"></i>
+                        <input type="number" step="0.01" name="actual_closing_balance" id="actual_closing_balance" 
+                            class="input-solid" placeholder="0.00" min="0" required x-model="counted">
+                        
+                        {{-- Dynamic difference indicator --}}
+                        <template x-if="counted !== ''">
+                            <div class="mt-2 text-xs font-semibold flex justify-between">
+                                <span style="color: var(--text-tertiary);">Diferencia calculada:</span>
+                                <span :class="parseFloat(counted) - {{ $expectedBalance }} >= 0 ? 'text-green-600' : 'text-red-600'">
+                                    S/ <span x-text="(parseFloat(counted) - {{ $expectedBalance }}).toFixed(2)"></span>
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="close_notes" class="form-label">Notas de Cierre</label>
+                    <textarea name="notes" id="close_notes" class="input-solid h-20 resize-none" placeholder="Indique alguna observación sobre el cuadre de caja..."></textarea>
+                </div>
+
+                <div class="flex gap-3 justify-end pt-2">
+                    <button type="button" class="btn-secondary" @click="open = false">Cancelar</button>
+                    <button type="submit" class="btn-danger">Cerrar Caja</button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endif
 @endsection

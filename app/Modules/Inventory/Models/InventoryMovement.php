@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Modules\Product\Models\Product;
 use App\Models\User;
 use App\Traits\BelongsToCompany;
+use App\Traits\BelongsToBranch;
 
 class InventoryMovement extends Model
 {
-    use BelongsToCompany;
+    use BelongsToCompany, BelongsToBranch;
 
     protected $fillable = [
         'product_id', 'user_id', 'branch_id', 'type', 'quantity',

@@ -15,13 +15,32 @@ use Illuminate\Support\Facades\DB;
 class DashboardService
 {
     /**
+     * Retrieve the active branch ID from session/user profile context.
+     */
+    private function getActiveBranchId(): ?int
+    {
+        if (auth()->check()) {
+            $user = auth()->user();
+            if ($user->role !== 'superadmin') {
+                return (int)(session('active_branch_id') ?? $user->branch_id);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Devuelve un resumen de KPIs para el período especificado.
      */
     public function getKpiSummary(int $month, int $year): array
     {
+        $activeBranchId = $this->getActiveBranchId();
+
         $salesQuery = Sale::whereMonth('issue_date', $month)
             ->whereYear('issue_date', $year)
-            ->whereNotIn('status', [Sale::STATUS_CANCELLED]);
+            ->whereNotIn('status', [Sale::STATUS_CANCELLED])
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('branch_id', $activeBranchId);
+            });
 
         $totalRevenue     = (clone $salesQuery)->sum('total');
         $transactionCount = (clone $salesQuery)->count();
@@ -30,14 +49,23 @@ class DashboardService
         $totalPurchases = Purchase::whereMonth('issue_date', $month)
             ->whereYear('issue_date', $year)
             ->whereNotIn('status', [Purchase::STATUS_CANCELLED])
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('branch_id', $activeBranchId);
+            })
             ->sum('total');
 
         $accountsReceivable = Sale::where('status', Sale::STATUS_APPROVED)
             ->where('pending_balance', '>', 0)
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('branch_id', $activeBranchId);
+            })
             ->sum('pending_balance');
 
         $accountsPayable = Purchase::where('status', Purchase::STATUS_APPROVED)
             ->where('pending_balance', '>', 0)
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('branch_id', $activeBranchId);
+            })
             ->sum('pending_balance');
 
         $estimatedProfit = DB::table('sale_details as sd')
@@ -45,6 +73,9 @@ class DashboardService
             ->whereMonth('s.issue_date', $month)
             ->whereYear('s.issue_date', $year)
             ->whereNotIn('s.status', [Sale::STATUS_CANCELLED])
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('s.branch_id', $activeBranchId);
+            })
             ->select(DB::raw('SUM((sd.unit_price - sd.cost_price) * sd.quantity) as profit'))
             ->value('profit') ?? 0;
 
@@ -64,9 +95,14 @@ class DashboardService
      */
     public function getRevenueByDay(int $month, int $year): Collection
     {
+        $activeBranchId = $this->getActiveBranchId();
+
         return Sale::whereMonth('issue_date', $month)
             ->whereYear('issue_date', $year)
             ->whereNotIn('status', [Sale::STATUS_CANCELLED])
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('branch_id', $activeBranchId);
+            })
             ->select(
                 DB::raw('date(issue_date) as fecha'),
                 DB::raw('SUM(total) as total')
@@ -81,9 +117,14 @@ class DashboardService
      */
     public function getRevenueByWeek(int $month, int $year): Collection
     {
+        $activeBranchId = $this->getActiveBranchId();
+
         return Sale::whereMonth('issue_date', $month)
             ->whereYear('issue_date', $year)
             ->whereNotIn('status', [Sale::STATUS_CANCELLED])
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('branch_id', $activeBranchId);
+            })
             ->select(
                 DB::raw("strftime('%W', issue_date) as semana"),
                 DB::raw('SUM(total) as total')
@@ -98,8 +139,13 @@ class DashboardService
      */
     public function getRevenueByMonth(int $year): Collection
     {
+        $activeBranchId = $this->getActiveBranchId();
+
         return Sale::whereYear('issue_date', $year)
             ->whereNotIn('status', [Sale::STATUS_CANCELLED])
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('branch_id', $activeBranchId);
+            })
             ->select(
                 DB::raw("CAST(strftime('%m', issue_date) AS INTEGER) as mes"),
                 DB::raw('SUM(total) as total')
@@ -114,6 +160,8 @@ class DashboardService
      */
     public function getTopSoldProductsByQuantity(int $month, int $year, int $limit = 10): Collection
     {
+        $activeBranchId = $this->getActiveBranchId();
+
         return DB::table('sale_details as sd')
             ->join('sales as s', 's.id', '=', 'sd.sale_id')
             ->join('products as p', 'p.id', '=', 'sd.product_id')
@@ -121,6 +169,9 @@ class DashboardService
             ->whereYear('s.issue_date', $year)
             ->whereNotIn('s.status', [Sale::STATUS_CANCELLED])
             ->whereNull('s.deleted_at')
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('s.branch_id', $activeBranchId);
+            })
             ->select(
                 'p.id',
                 'p.name',
@@ -139,6 +190,8 @@ class DashboardService
      */
     public function getTopSoldProductsByRevenue(int $month, int $year, int $limit = 10): Collection
     {
+        $activeBranchId = $this->getActiveBranchId();
+
         return DB::table('sale_details as sd')
             ->join('sales as s', 's.id', '=', 'sd.sale_id')
             ->join('products as p', 'p.id', '=', 'sd.product_id')
@@ -146,6 +199,9 @@ class DashboardService
             ->whereYear('s.issue_date', $year)
             ->whereNotIn('s.status', [Sale::STATUS_CANCELLED])
             ->whereNull('s.deleted_at')
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('s.branch_id', $activeBranchId);
+            })
             ->select(
                 'p.id',
                 'p.name',
@@ -164,6 +220,8 @@ class DashboardService
      */
     public function getTopPurchasedProducts(int $month, int $year, int $limit = 10): Collection
     {
+        $activeBranchId = $this->getActiveBranchId();
+
         return DB::table('purchase_details as pd')
             ->join('purchases as pu', 'pu.id', '=', 'pd.purchase_id')
             ->join('products as p', 'p.id', '=', 'pd.product_id')
@@ -171,6 +229,9 @@ class DashboardService
             ->whereYear('pu.issue_date', $year)
             ->whereNotIn('pu.status', [Purchase::STATUS_CANCELLED])
             ->whereNull('pu.deleted_at')
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('pu.branch_id', $activeBranchId);
+            })
             ->select(
                 'p.id',
                 'p.name',
@@ -189,6 +250,8 @@ class DashboardService
      */
     public function getTopSellingCategories(int $month, int $year): Collection
     {
+        $activeBranchId = $this->getActiveBranchId();
+
         $results = DB::table('sale_details as sd')
             ->join('sales as s', 's.id', '=', 'sd.sale_id')
             ->join('products as p', 'p.id', '=', 'sd.product_id')
@@ -197,6 +260,9 @@ class DashboardService
             ->whereYear('s.issue_date', $year)
             ->whereNotIn('s.status', [Sale::STATUS_CANCELLED])
             ->whereNull('s.deleted_at')
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('s.branch_id', $activeBranchId);
+            })
             ->select(
                 'c.id',
                 'c.name',
@@ -221,6 +287,8 @@ class DashboardService
      */
     public function getTopFrequentCustomers(int $month, int $year, int $limit = 10): Collection
     {
+        $activeBranchId = $this->getActiveBranchId();
+
         return DB::table('sales as s')
             ->join('partners as pa', 'pa.id', '=', 's.partner_id')
             ->whereMonth('s.issue_date', $month)
@@ -228,6 +296,9 @@ class DashboardService
             ->whereNotIn('s.status', [Sale::STATUS_CANCELLED])
             ->whereNull('s.deleted_at')
             ->whereIn('pa.type', ['cliente', 'ambos'])
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('s.branch_id', $activeBranchId);
+            })
             ->select(
                 'pa.id',
                 DB::raw("COALESCE(pa.trade_name, pa.business_name) as display_name"),
@@ -245,6 +316,8 @@ class DashboardService
      */
     public function getAmountsByClient(int $month, int $year, int $limit = 10): Collection
     {
+        $activeBranchId = $this->getActiveBranchId();
+
         return DB::table('sales as s')
             ->join('partners as pa', 'pa.id', '=', 's.partner_id')
             ->whereMonth('s.issue_date', $month)
@@ -252,6 +325,9 @@ class DashboardService
             ->whereNotIn('s.status', [Sale::STATUS_CANCELLED])
             ->whereNull('s.deleted_at')
             ->whereIn('pa.type', ['cliente', 'ambos'])
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('s.branch_id', $activeBranchId);
+            })
             ->select(
                 'pa.id',
                 DB::raw("COALESCE(pa.trade_name, pa.business_name) as display_name"),
@@ -270,6 +346,8 @@ class DashboardService
      */
     public function getAmountsBySupplier(int $month, int $year, int $limit = 10): Collection
     {
+        $activeBranchId = $this->getActiveBranchId();
+
         return DB::table('purchases as pu')
             ->join('partners as pa', 'pa.id', '=', 'pu.partner_id')
             ->whereMonth('pu.issue_date', $month)
@@ -277,6 +355,9 @@ class DashboardService
             ->whereNotIn('pu.status', [Purchase::STATUS_CANCELLED])
             ->whereNull('pu.deleted_at')
             ->whereIn('pa.type', ['proveedor', 'ambos'])
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('pu.branch_id', $activeBranchId);
+            })
             ->select(
                 'pa.id',
                 DB::raw("COALESCE(pa.trade_name, pa.business_name) as display_name"),
@@ -295,7 +376,12 @@ class DashboardService
      */
     public function getRecentSales(int $limit = 10): Collection
     {
+        $activeBranchId = $this->getActiveBranchId();
+
         return Sale::with(['partner', 'details'])
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where('branch_id', $activeBranchId);
+            })
             ->latest('created_at')
             ->limit($limit)
             ->get();

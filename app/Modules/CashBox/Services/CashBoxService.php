@@ -31,7 +31,7 @@ class CashBoxService
 
             $box = CashBox::create([
                 'user_id'                  => auth()->id() ?? 1,
-                'branch_id'                => auth()->user()?->branch_id,
+                'branch_id'                => session('active_branch_id') ?? auth()->user()?->branch_id,
                 'status'                   => 'OPEN',
                 'opening_balance'          => $openingBalance,
                 'expected_closing_balance' => 0,

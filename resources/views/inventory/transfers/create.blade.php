@@ -71,13 +71,36 @@
                         <tbody>
                             <template x-for="(item, index) in items" :key="index">
                                 <tr class="border-b border-[color:var(--border-light)]/50">
-                                    <td class="py-2 pr-4">
-                                        <select :name="'items['+index+'][product_id]'" x-model="item.product_id" class="input-solid text-sm" required>
-                                            <option value="">Seleccione un producto...</option>
-                                            @foreach ($products as $product)
-                                                <option value="{{ $product->id }}">{{ $product->name }} (SKU: {{ $product->sku ?? 'N/A' }})</option>
-                                            @endforeach
-                                        </select>
+                                    <td class="py-2 pr-4 relative">
+                                        <input type="hidden" :name="'items['+index+'][product_id]'" x-model="item.product_id" required />
+                                        <div class="relative">
+                                            <input type="text" 
+                                                   x-model="item.search"
+                                                   @input="fetchItemResults(item)"
+                                                   @focus="item.showDropdown = true"
+                                                   @click.away="item.showDropdown = false"
+                                                   placeholder="Buscar producto..."
+                                                   class="input-solid text-sm"
+                                                   autocomplete="off" />
+                                            <button type="button" 
+                                                    x-show="item.product_id" 
+                                                    @click="clearItemSelection(item)" 
+                                                    class="absolute right-3 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 bg-transparent border-0 cursor-pointer">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </div>
+
+                                        <div x-show="item.showDropdown && item.results.length > 0"
+                                             class="absolute z-50 left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-lg shadow-lg"
+                                             style="display: none;">
+                                            <template x-for="p in item.results" :key="p.id">
+                                                <div @click="selectItem(item, p)"
+                                                     class="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-sm text-slate-700 dark:text-slate-300 flex justify-between">
+                                                    <span x-text="p.name"></span>
+                                                    <span class="text-xs font-mono text-slate-400" x-text="'Stock: ' + p.stock"></span>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </td>
                                     <td class="py-2 pr-4">
                                         <input type="number" :name="'items['+index+'][quantity]'" x-model="item.quantity" min="1" class="input-solid text-sm" required />
@@ -114,15 +137,40 @@
                 originBranch: '',
                 destinationBranch: '',
                 items: [
-                    { product_id: '', quantity: 1 }
+                    { product_id: '', quantity: 1, search: '', results: [], showDropdown: false, debounceTimer: null }
                 ],
                 addItem() {
-                    this.items.push({ product_id: '', quantity: 1 });
+                    this.items.push({ product_id: '', quantity: 1, search: '', results: [], showDropdown: false, debounceTimer: null });
                 },
                 removeItem(index) {
                     if (this.items.length > 1) {
                         this.items.splice(index, 1);
                     }
+                },
+                fetchItemResults(item) {
+                    if (item.search.length < 2) {
+                        item.results = [];
+                        return;
+                    }
+                    clearTimeout(item.debounceTimer);
+                    item.debounceTimer = setTimeout(() => {
+                        fetch(`/api/search/products?q=${encodeURIComponent(item.search)}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                item.results = data;
+                            });
+                    }, 300);
+                },
+                selectItem(item, p) {
+                    item.product_id = p.id;
+                    item.search = p.code + ' - ' + p.name;
+                    item.results = [];
+                    item.showDropdown = false;
+                },
+                clearItemSelection(item) {
+                    item.product_id = '';
+                    item.search = '';
+                    item.results = [];
                 }
             }
         }

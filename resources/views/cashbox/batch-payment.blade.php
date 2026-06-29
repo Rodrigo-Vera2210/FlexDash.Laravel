@@ -18,7 +18,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label class="form-label">Tipo de Proceso</label>
-                    <select name="partner_type" x-model="partnerType" @change="onPartnerChange()" class="input-solid" required>
+                    <select name="partner_type" x-model="partnerType" @change="clearSelection()" class="input-solid" required>
                         <option value="cliente">Cobro a Cliente (Ventas)</option>
                         <option value="proveedor">Pago a Proveedor (Compras)</option>
                     </select>
@@ -26,19 +26,42 @@
 
                 <div>
                     <label class="form-label">Cliente / Proveedor</label>
-                    <select name="partner_id" x-model="partnerId" @change="onPartnerChange()" class="input-solid" required>
-                        <option value="">-- Seleccione un Partner --</option>
-                        @foreach ($partners as $p)
-                            {{-- Show client option if partnerType is cliente or both --}}
-                            <template x-if="partnerType === 'cliente' && ('{{ $p->type }}' === 'cliente' || '{{ $p->type }}' === 'ambos')">
-                                <option value="{{ $p->id }}">{{ $p->business_name }} ({{ $p->document_number }})</option>
+                    <div class="relative">
+                        <input type="hidden" name="partner_id" :value="partnerId" required>
+                        <div class="relative">
+                            <input type="text" 
+                                   x-model="search"
+                                   @input="showDropdown = true; fetchResults()"
+                                   @focus="showDropdown = true"
+                                   @click.away="showDropdown = false"
+                                   placeholder="Escriba nombre o RUC/CI..."
+                                   class="input-solid w-full pr-10"
+                                   autocomplete="off">
+                            <button type="button" 
+                                    x-show="partnerId" 
+                                    @click="clearSelection()" 
+                                    class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        <div x-show="showDropdown && (results.length > 0 || loading)"
+                             class="absolute z-50 left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-lg shadow-lg"
+                             style="display: none;">
+                            <template x-if="loading">
+                                <div class="px-4 py-3 text-xs text-slate-400">Buscando...</div>
                             </template>
-                            {{-- Show provider option if partnerType is proveedor or both --}}
-                            <template x-if="partnerType === 'proveedor' && ('{{ $p->type }}' === 'proveedor' || '{{ $p->type }}' === 'ambos')">
-                                <option value="{{ $p->id }}">{{ $p->business_name }} ({{ $p->document_number }})</option>
+                            <template x-if="!loading && results.length > 0">
+                                <template x-for="partner in results" :key="partner.id">
+                                    <div @click="selectPartner(partner)"
+                                         class="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-sm text-slate-700 dark:text-slate-300 flex justify-between">
+                                        <span x-text="partner.business_name"></span>
+                                        <span class="text-xs font-mono text-slate-400" x-text="partner.document_number"></span>
+                                    </div>
+                                </template>
                             </template>
-                        @endforeach
-                    </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -177,10 +200,47 @@
         return {
             partnerType: 'cliente',
             partnerId: '',
+            search: '',
+            results: [],
+            showDropdown: false,
+            debounceTimer: null,
             loading: false,
             amount: '',
             documents: [],
             selectedIds: [],
+
+            fetchResults() {
+                if (this.search.length < 2) {
+                    this.results = [];
+                    return;
+                }
+                this.loading = true;
+                clearTimeout(this.debounceTimer);
+                this.debounceTimer = setTimeout(() => {
+                    fetch(`/api/search/partners?type=${this.partnerType}&q=${encodeURIComponent(this.search)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            this.results = data;
+                            this.loading = false;
+                        })
+                        .catch(() => { this.loading = false; });
+                }, 300);
+            },
+
+            selectPartner(partner) {
+                this.partnerId = partner.id;
+                this.search = partner.business_name + ' (' + partner.document_number + ')';
+                this.showDropdown = false;
+                this.results = [];
+                this.onPartnerChange();
+            },
+
+            clearSelection() {
+                this.partnerId = '';
+                this.search = '';
+                this.results = [];
+                this.onPartnerChange();
+            },
 
             onPartnerChange() {
                 this.documents = [];

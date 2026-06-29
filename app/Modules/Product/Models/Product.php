@@ -109,4 +109,17 @@ class Product extends Model
 
         return (float) $this->stock;
     }
+
+    /**
+     * Get stock for a specific branch.
+     */
+    public function stockInBranch($branchId): float
+    {
+        $pivot = \Illuminate\Support\Facades\DB::table('branch_product')
+            ->where('product_id', $this->id)
+            ->where('branch_id', $branchId)
+            ->first();
+
+        return $pivot ? (float) $pivot->stock : 0.0;
+    }
 }

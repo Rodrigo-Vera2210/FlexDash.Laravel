@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 use App\Traits\BelongsToCompany;
+use App\Traits\BelongsToBranch;
 
 class CashBox extends Model
 {
-    use BelongsToCompany;
+    use BelongsToCompany, BelongsToBranch;
 
     protected $table = 'cash_boxes';
 

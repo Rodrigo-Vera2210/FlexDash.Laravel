@@ -69,6 +69,7 @@
                                 <th class="table-header">Fecha Apertura</th>
                                 <th class="table-header">Fecha Cierre</th>
                                 <th class="table-header">Responsable</th>
+                                <th class="table-header">Local</th>
                                 <th class="table-header text-right">Saldo Inicial</th>
                                 <th class="table-header text-right">Saldo Esperado</th>
                                 <th class="table-header text-right">Saldo Real</th>
@@ -87,6 +88,9 @@
                                     </td>
                                     <td class="table-cell text-sm">
                                         {{ $session->user->name ?? 'Sistema' }}
+                                    </td>
+                                    <td class="table-cell text-sm text-[color:var(--text-secondary)] font-medium">
+                                        {{ $session->branch->name ?? 'N/A' }}
                                     </td>
                                     <td class="table-cell text-right font-mono text-xs font-semibold">
                                         S/ {{ number_format($session->opening_balance, 2) }}

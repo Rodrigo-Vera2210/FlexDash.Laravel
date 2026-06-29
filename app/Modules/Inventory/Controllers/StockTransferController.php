@@ -21,7 +21,15 @@ class StockTransferController extends Controller
     {
         $companyId = Auth::user()->company_id;
 
+        $activeBranchId = session('active_branch_id') ?? Auth::user()->branch_id;
+
         $transfers = StockTransfer::where('company_id', $companyId)
+            ->when($activeBranchId, function ($q) use ($activeBranchId) {
+                $q->where(function ($sub) use ($activeBranchId) {
+                    $sub->where('origin_branch_id', $activeBranchId)
+                        ->orWhere('destination_branch_id', $activeBranchId);
+                });
+            })
             ->with(['originBranch', 'destinationBranch', 'user'])
             ->orderBy('created_at', 'desc')
             ->get();

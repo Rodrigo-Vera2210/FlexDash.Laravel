@@ -25,7 +25,7 @@ require __DIR__.'/registration.php';
 Route::get('/', fn() => redirect()->route('dashboard'));
 
 // ── Rutas autenticadas ────────────────────────────────────────────────
-Route::middleware(['auth.jwt', 'auth.admin_only'])->group(function () {
+Route::middleware(['auth.jwt', 'auth.admin_only', 'initialize.branch'])->group(function () {
 
     // Subscription suspended warning
     Route::get('/subscription-suspended', function () {
@@ -36,6 +36,9 @@ Route::middleware(['auth.jwt', 'auth.admin_only'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Selector de Sucursal Activa
+    Route::post('/active-branch', [\App\Http\Controllers\BranchSessionController::class, 'setActiveBranch'])->name('active-branch.set');
 
     // Perfil (Breeze)
     Route::get('/profile',    [ProfileController::class, 'edit'])->name('profile.edit');

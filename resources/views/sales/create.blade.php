@@ -30,16 +30,80 @@
 
                 <div>
                     <label for="partner_id" class="form-label">Cliente <span class="text-red-500">*</span></label>
-                    <div class="input-icon-wrapper">
-                        <i class="fa-solid fa-user"></i>
-                        <select name="partner_id" id="partner_id" class="input-solid" required>
-                            <option value="">Seleccionar Cliente...</option>
-                            @foreach($partners as $partner)
-                                <option value="{{ $partner->id }}" {{ old('partner_id') == $partner->id ? 'selected' : '' }}>
-                                    {{ $partner->business_name }} ({{ $partner->document_number }})
-                                </option>
-                            @endforeach
-                        </select>
+                    @php
+                        $selectedPartner = old('partner_id') ? $partners->firstWhere('id', old('partner_id')) : null;
+                        $selectedPartnerName = $selectedPartner ? "{$selectedPartner->business_name} ({$selectedPartner->document_number})" : '';
+                    @endphp
+                    <div x-data="{
+                        search: '{{ $selectedPartnerName }}',
+                        results: [],
+                        selectedId: '{{ old('partner_id') }}',
+                        showDropdown: false,
+                        loading: false,
+                        debounceTimer: null,
+                        fetchResults() {
+                            if (this.search.length < 2) {
+                                this.results = [];
+                                return;
+                            }
+                            this.loading = true;
+                            clearTimeout(this.debounceTimer);
+                            this.debounceTimer = setTimeout(() => {
+                                fetch(`/api/search/partners?type=cliente&q=${encodeURIComponent(this.search)}`)
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        this.results = data;
+                                        this.loading = false;
+                                    })
+                                    .catch(() => { this.loading = false; });
+                            }, 300);
+                        },
+                        selectPartner(partner) {
+                            this.selectedId = partner.id;
+                            this.search = partner.business_name + ' (' + partner.document_number + ')';
+                            this.showDropdown = false;
+                            this.results = [];
+                        },
+                        clearSelection() {
+                            this.selectedId = '';
+                            this.search = '';
+                            this.results = [];
+                        }
+                    }" class="relative">
+                        <input type="hidden" name="partner_id" :value="selectedId" required>
+                        <div class="relative">
+                            <input type="text" 
+                                   x-model="search"
+                                   @input="showDropdown = true; fetchResults()"
+                                   @focus="showDropdown = true"
+                                   @click.away="showDropdown = false"
+                                   placeholder="Escriba nombre o RUC/CI del cliente..."
+                                   class="input-solid w-full pr-10"
+                                   autocomplete="off">
+                            <button type="button" 
+                                    x-show="selectedId" 
+                                    @click="clearSelection()" 
+                                    class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        <div x-show="showDropdown && (results.length > 0 || loading)"
+                             class="absolute z-50 left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-lg shadow-lg"
+                             style="display: none;">
+                            <template x-if="loading">
+                                <div class="px-4 py-3 text-xs text-slate-400">Buscando...</div>
+                            </template>
+                            <template x-if="!loading && results.length > 0">
+                                <template x-for="partner in results" :key="partner.id">
+                                    <div @click="selectPartner(partner)"
+                                         class="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-sm text-slate-700 dark:text-slate-300 flex justify-between">
+                                        <span x-text="partner.business_name"></span>
+                                        <span class="text-xs font-mono text-slate-400" x-text="partner.document_number"></span>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
                     </div>
                 </div>
 
@@ -191,11 +255,10 @@
                     </div>
                 </td>
                 <td class="table-cell">
-                    <div class="input-icon-wrapper">
-                        <i class="fa-solid fa-box"></i>
-                        <select name="items[${rowIndex}][product_id]" class="input-solid item-select" required>
-                            <option value="">Seleccionar artículo...</option>
-                        </select>
+                    <div class="relative autocomplete-wrapper">
+                        <input type="hidden" name="items[${rowIndex}][product_id]" class="item-id-input" required>
+                        <input type="text" class="input-solid item-search-input" placeholder="Buscar..." autocomplete="off" required>
+                        <div class="absolute z-50 left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-lg shadow-lg hidden suggestion-list"></div>
                     </div>
                 </td>
                 <td class="table-cell text-right font-mono font-bold item-stock" style="color: var(--text-tertiary);">0.00</td>
@@ -228,27 +291,18 @@
             itemsBody.appendChild(tr);
 
             const typeSelect = tr.querySelector('.type-select');
-            const itemSelect = tr.querySelector('.item-select');
+            const itemIdInput = tr.querySelector('.item-id-input');
+            const searchInput = tr.querySelector('.item-search-input');
+            const suggestionList = tr.querySelector('.suggestion-list');
             const qtyInput = tr.querySelector('.quantity-input');
             const priceInput = tr.querySelector('.price-input');
             const discInput = tr.querySelector('.discount-input');
             const removeBtn = tr.querySelector('.remove-row-btn');
+            let debounceTimer = null;
 
-            function populateItems() {
-                const type = typeSelect.value;
-                let options = '<option value="">Seleccionar artículo...</option>';
-                if (type === 'product') {
-                    itemSelect.name = `items[${tr.dataset.index}][product_id]`;
-                    products.forEach(p => {
-                        options += `<option value="${p.id}">${p.code} - ${p.name}</option>`;
-                    });
-                } else {
-                    itemSelect.name = `items[${tr.dataset.index}][service_id]`;
-                    services.forEach(s => {
-                        options += `<option value="${s.id}">${s.code} - ${s.name}</option>`;
-                    });
-                }
-                itemSelect.innerHTML = options;
+            function clearSelection() {
+                itemIdInput.value = '';
+                searchInput.value = '';
                 tr.querySelector('.item-stock').textContent = '—';
                 priceInput.value = '0.00';
                 qtyInput.value = '1.00';
@@ -259,44 +313,96 @@
                 calculateRowSubtotal(tr);
             }
 
-            typeSelect.addEventListener('change', populateItems);
-            populateItems(); // initial population
+            typeSelect.addEventListener('change', () => {
+                const type = typeSelect.value;
+                if (type === 'product') {
+                    itemIdInput.name = `items[${tr.dataset.index}][product_id]`;
+                } else {
+                    itemIdInput.name = `items[${tr.dataset.index}][service_id]`;
+                }
+                clearSelection();
+            });
 
-            itemSelect.addEventListener('change', function() {
-                const itemId = this.value;
+            // Initial input name setup
+            itemIdInput.name = `items[${tr.dataset.index}][product_id]`;
+
+            searchInput.addEventListener('input', function() {
+                const q = this.value;
                 const type = typeSelect.value;
 
-                if (itemId) {
-                    if (type === 'product') {
-                        const prod = products.find(p => p.id == itemId);
-                        if (prod) {
-                            tr.querySelector('.item-stock').textContent = parseFloat(prod.stock).toFixed(2) + ' ' + (prod.unit || 'und');
-                            priceInput.value = parseFloat(prod.price).toFixed(2);
-                        }
-                    } else {
-                        const serv = services.find(s => s.id == itemId);
-                        if (serv) {
-                            tr.querySelector('.item-stock').textContent = '—';
-                            priceInput.value = parseFloat(serv.price).toFixed(2);
-                        }
-                    }
-                    qtyInput.value = "1.00";
-                    discInput.value = "0.00";
-
-                    qtyInput.disabled = false;
-                    priceInput.disabled = false;
-                    discInput.disabled = false;
-                } else {
-                    tr.querySelector('.item-stock').textContent = '—';
-                    priceInput.value = '0.00';
-                    qtyInput.value = '1.00';
-                    discInput.value = '0.00';
-
-                    qtyInput.disabled = true;
-                    priceInput.disabled = true;
-                    discInput.disabled = true;
+                if (q.length < 2) {
+                    suggestionList.innerHTML = '';
+                    suggestionList.classList.add('hidden');
+                    return;
                 }
-                calculateRowSubtotal(tr);
+
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    fetch(`/api/search/${type === 'product' ? 'products' : 'services'}?q=${encodeURIComponent(q)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.length === 0) {
+                                suggestionList.innerHTML = `<div class="px-4 py-2 text-xs text-slate-400">No se encontraron resultados</div>`;
+                                suggestionList.classList.remove('hidden');
+                                return;
+                            }
+
+                            let html = '';
+                            data.forEach(item => {
+                                const detailText = type === 'product' ? `Stock: ${item.stock.toFixed(2)}` : '';
+                                html += `
+                                    <div class="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-sm text-slate-700 dark:text-slate-300 flex justify-between item-option" 
+                                         data-id="${item.id}" 
+                                         data-name="${item.name}" 
+                                         data-code="${item.code}" 
+                                         data-price="${item.price}" 
+                                         data-stock="${item.stock || 0}">
+                                        <span>${item.code} - ${item.name}</span>
+                                        <span class="text-xs font-mono text-slate-400">${detailText}</span>
+                                    </div>
+                                `;
+                            });
+                            suggestionList.innerHTML = html;
+                            suggestionList.classList.remove('hidden');
+
+                            // Bind clicks
+                            suggestionList.querySelectorAll('.item-option').forEach(el => {
+                                el.addEventListener('click', function() {
+                                    const id = this.dataset.id;
+                                    const name = this.dataset.name;
+                                    const code = this.dataset.code;
+                                    const price = parseFloat(this.dataset.price);
+                                    const stock = parseFloat(this.dataset.stock);
+
+                                    itemIdInput.value = id;
+                                    searchInput.value = `${code} - ${name}`;
+                                    suggestionList.classList.add('hidden');
+
+                                    if (type === 'product') {
+                                        tr.querySelector('.item-stock').textContent = stock.toFixed(2);
+                                    } else {
+                                        tr.querySelector('.item-stock').textContent = '—';
+                                    }
+
+                                    priceInput.value = price.toFixed(2);
+                                    qtyInput.value = "1.00";
+                                    discInput.value = "0.00";
+
+                                    qtyInput.disabled = false;
+                                    priceInput.disabled = false;
+                                    discInput.disabled = false;
+
+                                    calculateRowSubtotal(tr);
+                                });
+                            });
+                        });
+                }, 300);
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!tr.contains(e.target)) {
+                    suggestionList.classList.add('hidden');
+                }
             });
 
             qtyInput.addEventListener('input', () => calculateRowSubtotal(tr));

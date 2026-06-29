@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.superadmin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'auth.admin_only' => \App\Http\Middleware\RestrictSellerAccess::class,
             'auth.module' => \App\Http\Middleware\EnsureModuleAccess::class,
+            'initialize.branch' => \App\Http\Middleware\InitializeActiveBranch::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

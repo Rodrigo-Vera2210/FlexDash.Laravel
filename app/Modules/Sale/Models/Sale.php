@@ -14,10 +14,11 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 use App\Traits\BelongsToCompany;
+use App\Traits\BelongsToBranch;
 
 class Sale extends Model
 {
-    use SoftDeletes, BelongsToCompany;
+    use SoftDeletes, BelongsToCompany, BelongsToBranch;
 
     const STATUS_DRAFT    = 'BORRADOR';
     const STATUS_APPROVED = 'APROBADO';

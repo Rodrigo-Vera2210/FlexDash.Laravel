@@ -22,7 +22,7 @@ Como usuario con un plan Premium (multibodega), quiero tener un selector de loca
 
 1. **Given** un usuario de plan Premium con 3 locales creados, **When** accede a la aplicación, **Then** ve un selector en la barra superior con el listado de sus locales.
 2. **Given** el selector de local, **When** selecciona un local alternativo, **Then** el sistema actualiza el local activo en la sesión (`session('active_branch_id')`) y recarga la pantalla.
-3. **Given** un usuario de plan básico (límite de 1 local), **When** accede a la aplicación, **Then** el selector de local está oculto y por defecto el local activo se define como su sucursal predeterminada.
+3. **Given** un usuario de plan básico o no premium (límite de 1 local), **When** accede a la aplicación, **Then** el selector de local en el header está oculto y todas las operaciones se registran y consultan bajo su único local por defecto (el local matriz).
 
 ---
 

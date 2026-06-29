@@ -86,7 +86,7 @@ class SaleController extends Controller
 
         $header = $request->only(['partner_id', 'tax_id', 'issue_date', 'due_date', 'notes', 'discount']);
         $header['user_id']   = auth()->id();
-        $header['branch_id'] = auth()->user()->branch_id;
+        $header['branch_id'] = session('active_branch_id') ?? auth()->user()->branch_id;
         $header['number']    = SaleService::nextNumber();
         $header['series']  = 'F001';
 

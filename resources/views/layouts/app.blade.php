@@ -848,6 +848,25 @@
                 <p class="text-xs mt-0.5" style="color: var(--text-tertiary);">@yield('page-subtitle', '')</p>
             </div>
             <div class="flex items-center gap-3">
+                {{-- Selector de Sucursal (Spec 021) --}}
+                @if (auth()->check() && auth()->user()->role !== 'superadmin' && auth()->user()->company?->max_branches > 1)
+                    @php
+                        $activeBranchId = session('active_branch_id') ?? auth()->user()->branch_id;
+                        $companyBranches = \App\Modules\Branch\Models\Branch::where('company_id', auth()->user()->company_id)->get();
+                    @endphp
+                    <form action="{{ route('active-branch.set') }}" method="POST" class="flex items-center gap-1.5 bg-[color:var(--surface)] border border-[color:var(--border)] rounded-xl px-2 py-1">
+                        @csrf
+                        <label for="topbar_active_branch_id" class="text-[10px] font-bold uppercase tracking-wider text-[color:var(--text-tertiary)] hidden md:block">Local:</label>
+                        <select id="topbar_active_branch_id" name="active_branch_id" onchange="this.form.submit()" class="bg-transparent border-0 font-semibold text-xs text-[color:var(--text-main)] focus:ring-0 p-0 cursor-pointer">
+                            @foreach ($companyBranches as $branch)
+                                <option value="{{ $branch->id }}" {{ (string)$activeBranchId === (string)$branch->id ? 'selected' : '' }}>
+                                    {{ $branch->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+                @endif
+
                 @yield('header-actions')
                 <span class="text-xs hidden sm:block font-medium"
                     style="color: var(--text-tertiary);">{{ now()->format('d/m/Y H:i') }}</span>

@@ -112,7 +112,7 @@ class CashBoxController extends Controller
      */
     public function history(Request $request)
     {
-        $query = CashBox::where('status', 'CLOSED')->with('user');
+        $query = CashBox::where('status', 'CLOSED')->with(['user', 'branch']);
 
         if ($request->filled('date_from')) {
             $query->whereDate('opened_at', '>=', $request->date_from);

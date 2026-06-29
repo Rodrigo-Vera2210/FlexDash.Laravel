@@ -180,7 +180,7 @@ class SaleService
      */
     public static function nextNumber(string $series = 'F001'): string
     {
-        $last = Sale::where('series', $series)->max('number');
+        $last = Sale::withoutGlobalScope('branch_scope')->where('series', $series)->max('number');
         if (!$last) return $series . '-00000001';
         $seq  = (int) substr($last, -8);
         return $series . '-' . str_pad($seq + 1, 8, '0', STR_PAD_LEFT);
